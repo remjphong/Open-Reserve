@@ -1,0 +1,18 @@
+postgres (PostgreSQL) 17.6
+$ pg_ctl start (loopback 55432, TCP only)
+waiting for server to start.... done
+server started
+$ sh infra/postgres-init/01-ownership.sh (exact SQL over node-postgres; local psql adapter)
+$ node scripts/test-db-ownership.mjs
+PASS catalog_user owns schema and can write catalog_db (rolled back)
+PASS catalog_user denied CONNECT to chain_db (42501)
+PASS chain_user owns schema and can write chain_db (rolled back)
+PASS chain_user denied CONNECT to catalog_db (42501)
+{"label":"Catalog with own DB","health":200,"ready":200,"body":{"service":"catalog-evidence","ready":true,"dependencies":[{"name":"database","ok":true,"reason":"OK"}]}}
+{"label":"Catalog with other service credentials","health":200,"ready":503,"body":{"service":"catalog-evidence","ready":false,"dependencies":[{"name":"database","ok":false,"reason":"WRONG_DATABASE"}]}}
+{"label":"Indexer with own DB and no RPC","health":200,"ready":503,"body":{"service":"chain-indexer","ready":false,"dependencies":[{"name":"database","ok":true,"reason":"OK"},{"name":"rpc","ok":false,"reason":"NOT_CONFIGURED"},{"name":"sync","ok":false,"reason":"SYNC_NOT_IMPLEMENTED"}]}}
+$ pg_ctl status
+pg_ctl: server is running (PID: 13)
+/tmp/or-postgres/package/native/bin/postgres "-D" "/tmp/or-postgres/data" "-p" "55432" "-h" "127.0.0.1" "-c" "unix_socket_directories="
+waiting for server to shut down.... done
+server stopped

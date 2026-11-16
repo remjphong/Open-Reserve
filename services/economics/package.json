@@ -6,9 +6,11 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "start": "node dist/server.js"
+    "start": "node dist/server.js",
+    "test": "node --test test/*.test.mjs"
   },
   "dependencies": {
-    "fastify": "5.12.8"
+    "fastify": "5.12.8",
+    "@openreserve/api-contracts": "0.0.0"
   }
 }

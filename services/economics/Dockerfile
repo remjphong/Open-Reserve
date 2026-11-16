@@ -7,16 +7,18 @@ COPY packages/contracts-sdk/package.json packages/contracts-sdk/
 COPY services/catalog-evidence/package.json services/catalog-evidence/
 COPY services/chain-indexer/package.json services/chain-indexer/
 COPY services/economics/package.json services/economics/
-RUN npm ci --workspace @openreserve/economics --include-workspace-root
+RUN npm ci --workspace @openreserve/economics --workspace @openreserve/api-contracts --include-workspace-root
+COPY packages/api-contracts/ packages/api-contracts/
 COPY services/economics/ services/economics/
-RUN npm run build --workspace @openreserve/economics
+RUN npm run build --workspace @openreserve/api-contracts && npm run build --workspace @openreserve/economics
 
 FROM node:24.22.1-bookworm-slim
 WORKDIR /app
 ENV NODE_ENV=production HOST=0.0.0.0 PORT=3003
 COPY --from=build /app/node_modules ./node_modules
-COPY --from=build /app/services/economics/package.json ./package.json
-COPY --from=build /app/services/economics/dist ./dist
+COPY --from=build /app/packages/api-contracts ./packages/api-contracts
+COPY --from=build /app/services/economics/package.json ./services/economics/package.json
+COPY --from=build /app/services/economics/dist ./services/economics/dist
 USER node
 EXPOSE 3003
-CMD ["node", "dist/server.js"]
+CMD ["node", "services/economics/dist/server.js"]

@@ -1,0 +1,92 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> openreserve@0.0.0 test
+> npm run test --workspaces --if-present
+
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> @openreserve/catalog-evidence@0.0.0 test
+> node --test test/*.test.mjs
+
+✔ catalog-evidence: liveness and actual unconfigured readiness (59.481253ms)
+✔ catalog-evidence: injected dependency transitions keep liveness independent (4.328693ms)
+✔ catalog-evidence: invalid port fails startup configuration (0.38675ms)
+✔ configured but unreachable database degrades without leaking credentials (9.042763ms)
+✔ business routes never fabricate success (7.914563ms)
+✔ malformed database URL returns 503 without leaking configuration (3.121866ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 272.274027
+
+> @openreserve/chain-indexer@0.0.0 test
+> node --test test/*.test.mjs
+
+✔ chain-indexer: liveness and actual unconfigured readiness (54.934699ms)
+✔ chain-indexer reports degradation with reachable DB/RPC and absent sync (3.571398ms)
+✔ chain-indexer: invalid port fails startup configuration (0.487738ms)
+✔ configured but unreachable database degrades without leaking credentials (9.068291ms)
+✔ business routes never fabricate success (7.51901ms)
+✔ malformed database URL returns 503 without leaking configuration (2.714707ms)
+✔ RPC probe checks actual HTTP chain ID; these are local test responses, not Fuji (32.782895ms)
+✔ RPC timeout is bounded (1002.971392ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1133.53748
+
+> @openreserve/economics@0.0.0 test
+> node --test test/*.test.mjs
+
+✔ economics: liveness and actual unconfigured readiness (53.486716ms)
+✔ economics ignores DB and RPC configuration (3.651366ms)
+✔ economics: invalid port fails startup configuration (0.549089ms)
+✔ business routes never fabricate success (4.539924ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 269.6815
+
+> @openreserve/api-contracts@0.0.0 test
+> node --test test/*.test.mjs
+
+✔ health, ready, error DTOs reject contradictions (3.42308ms)
+✔ IDs, uint256, pagination reject unsafe and invalid values (1.427572ms)
+✔ catalog packages retain demo provenance and two policies (1.67754ms)
+✔ evidence and future signed envelope validate shape without authorizing writes (2.038741ms)
+✔ chain projection/event/sync DTOs carry identity and stale provenance (2.955571ms)
+✔ economics allows losses, requires assumptions and four distinct scenarios (1.376126ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 143.570586
+
+> @openreserve/contracts-sdk@0.0.0 test
+> node --test test/*.test.mjs
+
+✔ read-only surface includes no transaction methods (1.102112ms)
+✔ immutable profiles and approved terms fail closed on mismatch (0.350616ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 2
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 91.051152

@@ -1,0 +1,8 @@
+Docker Compose version v2.39.4
+$ ../d16-tools/docker-compose --env-file .env.example config --quiet
+exit=0
+$ command -v docker
+exit=1
+$ test -S /var/run/docker.sock
+exit=1
+Docker Compose container startup and container isolation: NOT_RUN

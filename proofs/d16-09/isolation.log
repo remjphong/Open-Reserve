@@ -1,0 +1,126 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> openreserve@0.0.0 test:isolation
+> node scripts/service-isolation.mjs
+
+START node services/catalog-evidence/dist/server.js PORT=3001 PID=431
+[catalog-evidence] {"level":30,"time":1794831197914,"pid":431,"hostname":"f996f1664237","msg":"Server listening at http://127.0.0.1:3001"}
+[catalog-evidence] {"level":30,"time":1794831197925,"pid":431,"hostname":"f996f1664237","reqId":"req-1","req":{"method":"GET","url":"/health","host":"127.0.0.1:3001","remoteAddress":"127.0.0.1","remotePort":50608},"msg":"incoming request"}
+{"service":"catalog-evidence","pid":431,"route":"/health","status":200,"body":{"service":"catalog-evidence","status":"alive"}}
+[catalog-evidence] {"level":30,"time":1794831197929,"pid":431,"hostname":"f996f1664237","reqId":"req-1","res":{"statusCode":200},"responseTime":3.677063999999973,"msg":"request completed"}
+[catalog-evidence] {"level":30,"time":1794831197936,"pid":431,"hostname":"f996f1664237","reqId":"req-2","req":{"method":"GET","url":"/ready","host":"127.0.0.1:3001","remoteAddress":"127.0.0.1","remotePort":50624},"msg":"incoming request"}
+{"service":"catalog-evidence","pid":431,"route":"/ready","status":503,"body":{"service":"catalog-evidence","ready":false,"dependencies":[{"name":"database","ok":false,"reason":"NOT_CONFIGURED"}]}}
+[catalog-evidence] {"level":30,"time":1794831197938,"pid":431,"hostname":"f996f1664237","reqId":"req-2","res":{"statusCode":503},"responseTime":1.1796469999999886,"msg":"request completed"}
+STOP catalog-evidence PID=431 exit=0 signal=null
+START node services/chain-indexer/dist/server.js PORT=3002 PID=443
+[chain-indexer] {"level":30,"time":1794831198150,"pid":443,"hostname":"f996f1664237","msg":"Server listening at http://127.0.0.1:3002"}
+[chain-indexer] {"level":30,"time":1794831198160,"pid":443,"hostname":"f996f1664237","reqId":"req-1","req":{"method":"GET","url":"/health","host":"127.0.0.1:3002","remoteAddress":"127.0.0.1","remotePort":38798},"msg":"incoming request"}
+{"service":"chain-indexer","pid":443,"route":"/health","status":200,"body":{"service":"chain-indexer","status":"alive"}}
+{"service":"chain-indexer","pid":443,"route":"/ready","status":503,"body":{"service":"chain-indexer","ready":false,"dependencies":[{"name":"database","ok":false,"reason":"NOT_CONFIGURED"},{"name":"rpc","ok":false,"reason":"NOT_CONFIGURED"},{"name":"sync","ok":false,"reason":"SYNC_NOT_IMPLEMENTED"}]}}
+[chain-indexer] {"level":30,"time":1794831198165,"pid":443,"hostname":"f996f1664237","reqId":"req-1","res":{"statusCode":200},"responseTime":4.383074000000022,"msg":"request completed"}
+[chain-indexer] {"level":30,"time":1794831198166,"pid":443,"hostname":"f996f1664237","reqId":"req-2","req":{"method":"GET","url":"/ready","host":"127.0.0.1:3002","remoteAddress":"127.0.0.1","remotePort":38810},"msg":"incoming request"}
+{"level":30,"time":1794831198167,"pid":443,"hostname":"f996f1664237","reqId":"req-2","res":{"statusCode":503},"responseTime":1.362355999999977,"msg":"request completed"}
+STOP chain-indexer PID=443 exit=0 signal=null
+START node services/economics/dist/server.js PORT=3003 PID=455
+[economics] {"level":30,"time":1794831198368,"pid":455,"hostname":"f996f1664237","msg":"Server listening at http://127.0.0.1:3003"}
+[economics] {"level":30,"time":1794831198389,"pid":455,"hostname":"f996f1664237","reqId":"req-1","req":{"method":"GET","url":"/health","host":"127.0.0.1:3003","remoteAddress":"127.0.0.1","remotePort":34320},"msg":"incoming request"}
+{"service":"economics","pid":455,"route":"/health","status":200,"body":{"service":"economics","status":"alive"}}
+[economics] {"level":30,"time":1794831198394,"pid":455,"hostname":"f996f1664237","reqId":"req-1","res":{"statusCode":200},"responseTime":4.542087000000009,"msg":"request completed"}
+[economics] {"level":30,"time":1794831198396,"pid":455,"hostname":"f996f1664237","reqId":"req-2","req":{"method":"GET","url":"/ready","host":"127.0.0.1:3003","remoteAddress":"127.0.0.1","remotePort":34330},"msg":"incoming request"}
+{"service":"economics","pid":455,"route":"/ready","status":200,"body":{"service":"economics","ready":true,"dependencies":[]}}
+[economics] {"level":30,"time":1794831198397,"pid":455,"hostname":"f996f1664237","reqId":"req-2","res":{"statusCode":200},"responseTime":0.8821790000000078,"msg":"request completed"}
+STOP economics PID=455 exit=0 signal=null
+START node services/catalog-evidence/dist/server.js PORT=3001 PID=467
+[catalog-evidence] {"level":30,"time":1794831198611,"pid":467,"hostname":"f996f1664237","msg":"Server listening at http://127.0.0.1:3001"}
+[catalog-evidence] {"level":30,"time":1794831198666,"pid":467,"hostname":"f996f1664237","reqId":"req-1","req":{"method":"GET","url":"/health","host":"127.0.0.1:3001","remoteAddress":"127.0.0.1","remotePort":50664},"msg":"incoming request"}
+{"service":"catalog-evidence","pid":467,"route":"/health","status":200,"body":{"service":"catalog-evidence","status":"alive"}}
+START node services/chain-indexer/dist/server.js PORT=3002 PID=479
+[catalog-evidence] {"level":30,"time":1794831198670,"pid":467,"hostname":"f996f1664237","reqId":"req-1","res":{"statusCode":200},"responseTime":3.9432559999999626,"msg":"request completed"}
+[chain-indexer] {"level":30,"time":1794831198895,"pid":479,"hostname":"f996f1664237","msg":"Server listening at http://127.0.0.1:3002"}
+[chain-indexer] {"level":30,"time":1794831198932,"pid":479,"hostname":"f996f1664237","reqId":"req-1","req":{"method":"GET","url":"/health","host":"127.0.0.1:3002","remoteAddress":"127.0.0.1","remotePort":49870},"msg":"incoming request"}
+{"service":"chain-indexer","pid":479,"route":"/health","status":200,"body":{"service":"chain-indexer","status":"alive"}}
+START node services/economics/dist/server.js PORT=3003 PID=491
+[chain-indexer] {"level":30,"time":1794831198936,"pid":479,"hostname":"f996f1664237","reqId":"req-1","res":{"statusCode":200},"responseTime":3.6728669999999966,"msg":"request completed"}
+[economics] {"level":30,"time":1794831199194,"pid":491,"hostname":"f996f1664237","msg":"Server listening at http://127.0.0.1:3003"}
+[economics] {"level":30,"time":1794831199204,"pid":491,"hostname":"f996f1664237","reqId":"req-1","req":{"method":"GET","url":"/health","host":"127.0.0.1:3003","remoteAddress":"127.0.0.1","remotePort":60848},"msg":"incoming request"}
+{"service":"economics","pid":491,"route":"/health","status":200,"body":{"service":"economics","status":"alive"}}
+[economics] {"level":30,"time":1794831199207,"pid":491,"hostname":"f996f1664237","reqId":"req-1","res":{"statusCode":200},"responseTime":3.5268129999999474,"msg":"request completed"}
+STOP catalog-evidence PID=467 exit=0 signal=null
+[chain-indexer] {"level":30,"time":1794831199219,"pid":479,"hostname":"f996f1664237","reqId":"req-2","req":{"method":"GET","url":"/health","host":"127.0.0.1:3002","remoteAddress":"127.0.0.1","remotePort":49870},"msg":"incoming request"}
+{"service":"chain-indexer","pid":479,"route":"/health","status":200,"body":{"service":"chain-indexer","status":"alive"}}
+[chain-indexer] {"level":30,"time":1794831199219,"pid":479,"hostname":"f996f1664237","reqId":"req-2","res":{"statusCode":200},"responseTime":0.32467800000006264,"msg":"request completed"}
+[chain-indexer] {"level":30,"time":1794831199221,"pid":479,"hostname":"f996f1664237","reqId":"req-3","req":{"method":"GET","url":"/ready","host":"127.0.0.1:3002","remoteAddress":"127.0.0.1","remotePort":49886},"msg":"incoming request"}
+{"service":"chain-indexer","pid":479,"route":"/ready","status":503,"body":{"service":"chain-indexer","ready":false,"dependencies":[{"name":"database","ok":false,"reason":"NOT_CONFIGURED"},{"name":"rpc","ok":false,"reason":"NOT_CONFIGURED"},{"name":"sync","ok":false,"reason":"SYNC_NOT_IMPLEMENTED"}]}}
+[chain-indexer] {"level":30,"time":1794831199222,"pid":479,"hostname":"f996f1664237","reqId":"req-3","res":{"statusCode":503},"responseTime":1.2934740000000602,"msg":"request completed"}
+[economics] {"level":30,"time":1794831199223,"pid":491,"hostname":"f996f1664237","reqId":"req-2","req":{"method":"GET","url":"/health","host":"127.0.0.1:3003","remoteAddress":"127.0.0.1","remotePort":60848},"msg":"incoming request"}
+{"service":"economics","pid":491,"route":"/health","status":200,"body":{"service":"economics","status":"alive"}}
+[economics] {"level":30,"time":1794831199223,"pid":491,"hostname":"f996f1664237","reqId":"req-2","res":{"statusCode":200},"responseTime":0.21534699999995155,"msg":"request completed"}
+[economics] {"level":30,"time":1794831199224,"pid":491,"hostname":"f996f1664237","reqId":"req-3","req":{"method":"GET","url":"/ready","host":"127.0.0.1:3003","remoteAddress":"127.0.0.1","remotePort":60862},"msg":"incoming request"}
+{"service":"economics","pid":491,"route":"/ready","status":200,"body":{"service":"economics","ready":true,"dependencies":[]}}
+START node services/catalog-evidence/dist/server.js PORT=3001 PID=503
+[economics] {"level":30,"time":1794831199225,"pid":491,"hostname":"f996f1664237","reqId":"req-3","res":{"statusCode":200},"responseTime":0.7793879999999831,"msg":"request completed"}
+[catalog-evidence] {"level":30,"time":1794831199428,"pid":503,"hostname":"f996f1664237","msg":"Server listening at http://127.0.0.1:3001"}
+[catalog-evidence] {"level":30,"time":1794831199436,"pid":503,"hostname":"f996f1664237","reqId":"req-1","req":{"method":"GET","url":"/health","host":"127.0.0.1:3001","remoteAddress":"127.0.0.1","remotePort":46736},"msg":"incoming request"}
+{"service":"catalog-evidence","pid":503,"route":"/health","status":200,"body":{"service":"catalog-evidence","status":"alive"}}
+[catalog-evidence] {"level":30,"time":1794831199440,"pid":503,"hostname":"f996f1664237","reqId":"req-1","res":{"statusCode":200},"responseTime":3.9828640000000064,"msg":"request completed"}
+[chain-indexer] {"level":30,"time":1794831199442,"pid":479,"hostname":"f996f1664237","reqId":"req-4","req":{"method":"GET","url":"/health","host":"127.0.0.1:3002","remoteAddress":"127.0.0.1","remotePort":49870},"msg":"incoming request"}
+{"service":"chain-indexer","pid":479,"route":"/health","status":200,"body":{"service":"chain-indexer","status":"alive"}}
+[chain-indexer] {"level":30,"time":1794831199443,"pid":479,"hostname":"f996f1664237","reqId":"req-4","res":{"statusCode":200},"responseTime":0.40594799999996667,"msg":"request completed"}
+{"service":"economics","pid":491,"route":"/health","status":200,"body":{"service":"economics","status":"alive"}}
+PASS stop/restart catalog-evidence: peer PIDs unchanged 479,491
+[economics] {"level":30,"time":1794831199444,"pid":491,"hostname":"f996f1664237","reqId":"req-4","req":{"method":"GET","url":"/health","host":"127.0.0.1:3003","remoteAddress":"127.0.0.1","remotePort":60848},"msg":"incoming request"}
+{"level":30,"time":1794831199445,"pid":491,"hostname":"f996f1664237","reqId":"req-4","res":{"statusCode":200},"responseTime":0.37407000000001744,"msg":"request completed"}
+STOP chain-indexer PID=479 exit=0 signal=null
+[catalog-evidence] {"level":30,"time":1794831199456,"pid":503,"hostname":"f996f1664237","reqId":"req-2","req":{"method":"GET","url":"/health","host":"127.0.0.1:3001","remoteAddress":"127.0.0.1","remotePort":46736},"msg":"incoming request"}
+{"service":"catalog-evidence","pid":503,"route":"/health","status":200,"body":{"service":"catalog-evidence","status":"alive"}}
+[catalog-evidence] {"level":30,"time":1794831199457,"pid":503,"hostname":"f996f1664237","reqId":"req-2","res":{"statusCode":200},"responseTime":0.28746300000000247,"msg":"request completed"}
+[catalog-evidence] {"level":30,"time":1794831199458,"pid":503,"hostname":"f996f1664237","reqId":"req-3","req":{"method":"GET","url":"/ready","host":"127.0.0.1:3001","remoteAddress":"127.0.0.1","remotePort":46748},"msg":"incoming request"}
+{"service":"catalog-evidence","pid":503,"route":"/ready","status":503,"body":{"service":"catalog-evidence","ready":false,"dependencies":[{"name":"database","ok":false,"reason":"NOT_CONFIGURED"}]}}
+[catalog-evidence] {"level":30,"time":1794831199460,"pid":503,"hostname":"f996f1664237","reqId":"req-3","res":{"statusCode":503},"responseTime":1.4895530000000008,"msg":"request completed"}
+[economics] {"level":30,"time":1794831199461,"pid":491,"hostname":"f996f1664237","reqId":"req-5","req":{"method":"GET","url":"/health","host":"127.0.0.1:3003","remoteAddress":"127.0.0.1","remotePort":60848},"msg":"incoming request"}
+{"service":"economics","pid":491,"route":"/health","status":200,"body":{"service":"economics","status":"alive"}}
+[economics] {"level":30,"time":1794831199462,"pid":491,"hostname":"f996f1664237","reqId":"req-5","res":{"statusCode":200},"responseTime":0.38021900000001096,"msg":"request completed"}
+[economics] {"level":30,"time":1794831199463,"pid":491,"hostname":"f996f1664237","reqId":"req-6","req":{"method":"GET","url":"/ready","host":"127.0.0.1:3003","remoteAddress":"127.0.0.1","remotePort":60862},"msg":"incoming request"}
+{"service":"economics","pid":491,"route":"/ready","status":200,"body":{"service":"economics","ready":true,"dependencies":[]}}
+START node services/chain-indexer/dist/server.js PORT=3002 PID=515
+[economics] {"level":30,"time":1794831199463,"pid":491,"hostname":"f996f1664237","reqId":"req-6","res":{"statusCode":200},"responseTime":0.2539840000000595,"msg":"request completed"}
+[chain-indexer] {"level":30,"time":1794831199672,"pid":515,"hostname":"f996f1664237","msg":"Server listening at http://127.0.0.1:3002"}
+[chain-indexer] {"level":30,"time":1794831199676,"pid":515,"hostname":"f996f1664237","reqId":"req-1","req":{"method":"GET","url":"/health","host":"127.0.0.1:3002","remoteAddress":"127.0.0.1","remotePort":49946},"msg":"incoming request"}
+{"service":"chain-indexer","pid":515,"route":"/health","status":200,"body":{"service":"chain-indexer","status":"alive"}}
+[chain-indexer] {"level":30,"time":1794831199681,"pid":515,"hostname":"f996f1664237","reqId":"req-1","res":{"statusCode":200},"responseTime":4.5429989999999805,"msg":"request completed"}
+[catalog-evidence] {"level":30,"time":1794831199682,"pid":503,"hostname":"f996f1664237","reqId":"req-4","req":{"method":"GET","url":"/health","host":"127.0.0.1:3001","remoteAddress":"127.0.0.1","remotePort":46736},"msg":"incoming request"}
+{"service":"catalog-evidence","pid":503,"route":"/health","status":200,"body":{"service":"catalog-evidence","status":"alive"}}
+[catalog-evidence] {"level":30,"time":1794831199683,"pid":503,"hostname":"f996f1664237","reqId":"req-4","res":{"statusCode":200},"responseTime":0.5241819999999962,"msg":"request completed"}
+[economics] {"level":30,"time":1794831199684,"pid":491,"hostname":"f996f1664237","reqId":"req-7","req":{"method":"GET","url":"/health","host":"127.0.0.1:3003","remoteAddress":"127.0.0.1","remotePort":60848},"msg":"incoming request"}
+{"service":"economics","pid":491,"route":"/health","status":200,"body":{"service":"economics","status":"alive"}}
+PASS stop/restart chain-indexer: peer PIDs unchanged 503,491
+[economics] {"level":30,"time":1794831199684,"pid":491,"hostname":"f996f1664237","reqId":"req-7","res":{"statusCode":200},"responseTime":0.45381799999995565,"msg":"request completed"}
+STOP economics PID=491 exit=0 signal=null
+[catalog-evidence] {"level":30,"time":1794831199695,"pid":503,"hostname":"f996f1664237","reqId":"req-5","req":{"method":"GET","url":"/health","host":"127.0.0.1:3001","remoteAddress":"127.0.0.1","remotePort":46736},"msg":"incoming request"}
+{"service":"catalog-evidence","pid":503,"route":"/health","status":200,"body":{"service":"catalog-evidence","status":"alive"}}
+[catalog-evidence] {"level":30,"time":1794831199695,"pid":503,"hostname":"f996f1664237","reqId":"req-5","res":{"statusCode":200},"responseTime":0.34225400000002537,"msg":"request completed"}
+[catalog-evidence] {"level":30,"time":1794831199696,"pid":503,"hostname":"f996f1664237","reqId":"req-6","req":{"method":"GET","url":"/ready","host":"127.0.0.1:3001","remoteAddress":"127.0.0.1","remotePort":46748},"msg":"incoming request"}
+{"service":"catalog-evidence","pid":503,"route":"/ready","status":503,"body":{"service":"catalog-evidence","ready":false,"dependencies":[{"name":"database","ok":false,"reason":"NOT_CONFIGURED"}]}}
+[catalog-evidence] {"level":30,"time":1794831199696,"pid":503,"hostname":"f996f1664237","reqId":"req-6","res":{"statusCode":503},"responseTime":0.3141130000000203,"msg":"request completed"}
+[chain-indexer] {"level":30,"time":1794831199698,"pid":515,"hostname":"f996f1664237","reqId":"req-2","req":{"method":"GET","url":"/health","host":"127.0.0.1:3002","remoteAddress":"127.0.0.1","remotePort":49946},"msg":"incoming request"}
+{"service":"chain-indexer","pid":515,"route":"/health","status":200,"body":{"service":"chain-indexer","status":"alive"}}
+[chain-indexer] {"level":30,"time":1794831199698,"pid":515,"hostname":"f996f1664237","reqId":"req-2","res":{"statusCode":200},"responseTime":0.26422900000000027,"msg":"request completed"}
+[chain-indexer] {"level":30,"time":1794831199699,"pid":515,"hostname":"f996f1664237","reqId":"req-3","req":{"method":"GET","url":"/ready","host":"127.0.0.1:3002","remoteAddress":"127.0.0.1","remotePort":49962},"msg":"incoming request"}
+{"service":"chain-indexer","pid":515,"route":"/ready","status":503,"body":{"service":"chain-indexer","ready":false,"dependencies":[{"name":"database","ok":false,"reason":"NOT_CONFIGURED"},{"name":"rpc","ok":false,"reason":"NOT_CONFIGURED"},{"name":"sync","ok":false,"reason":"SYNC_NOT_IMPLEMENTED"}]}}
+START node services/economics/dist/server.js PORT=3003 PID=527
+[chain-indexer] {"level":30,"time":1794831199700,"pid":515,"hostname":"f996f1664237","reqId":"req-3","res":{"statusCode":503},"responseTime":1.1375349999999855,"msg":"request completed"}
+[economics] {"level":30,"time":1794831199926,"pid":527,"hostname":"f996f1664237","msg":"Server listening at http://127.0.0.1:3003"}
+[economics] {"level":30,"time":1794831199963,"pid":527,"hostname":"f996f1664237","reqId":"req-1","req":{"method":"GET","url":"/health","host":"127.0.0.1:3003","remoteAddress":"127.0.0.1","remotePort":60928},"msg":"incoming request"}
+{"service":"economics","pid":527,"route":"/health","status":200,"body":{"service":"economics","status":"alive"}}
+[economics] {"level":30,"time":1794831199968,"pid":527,"hostname":"f996f1664237","reqId":"req-1","res":{"statusCode":200},"responseTime":4.300290999999959,"msg":"request completed"}
+[catalog-evidence] {"level":30,"time":1794831199969,"pid":503,"hostname":"f996f1664237","reqId":"req-7","req":{"method":"GET","url":"/health","host":"127.0.0.1:3001","remoteAddress":"127.0.0.1","remotePort":46736},"msg":"incoming request"}
+{"service":"catalog-evidence","pid":503,"route":"/health","status":200,"body":{"service":"catalog-evidence","status":"alive"}}
+[catalog-evidence] {"level":30,"time":1794831199969,"pid":503,"hostname":"f996f1664237","reqId":"req-7","res":{"statusCode":200},"responseTime":0.42522599999995236,"msg":"request completed"}
+[chain-indexer] {"level":30,"time":1794831199970,"pid":515,"hostname":"f996f1664237","reqId":"req-4","req":{"method":"GET","url":"/health","host":"127.0.0.1:3002","remoteAddress":"127.0.0.1","remotePort":49946},"msg":"incoming request"}
+{"service":"chain-indexer","pid":515,"route":"/health","status":200,"body":{"service":"chain-indexer","status":"alive"}}
+PASS stop/restart economics: peer PIDs unchanged 503,515
+PASS 3 standalone startups, 3 stop/restart cycles, HTTP schemas and peer PID isolation; no financial E2E claim
+[chain-indexer] {"level":30,"time":1794831199970,"pid":515,"hostname":"f996f1664237","reqId":"req-4","res":{"statusCode":200},"responseTime":0.3168569999999704,"msg":"request completed"}
+STOP catalog-evidence PID=503 exit=0 signal=null
+STOP chain-indexer PID=515 exit=0 signal=null
+STOP economics PID=527 exit=0 signal=null
