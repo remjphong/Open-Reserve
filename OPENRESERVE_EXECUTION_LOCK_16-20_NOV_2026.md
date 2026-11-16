@@ -146,7 +146,7 @@ Task có 5 trạng thái: `TODO`, `IN_PROGRESS`, `BLOCKED`, `AWAITING_REVIEW`, `
 - [ ] **D16-08 [P0]** Dựng `apps/web/src/portals/*`, 3 URL `/customer`, `/gym`, `/operations`, AppShell/RoleNavigation/WalletIdentity/MoneyFigure/Status. **ACCEPT:** có thể mở cả 3 URL riêng, cùng visual system, không dead navigation trên skeleton; mock UI ghi rõ `DEMO UI — CHƯA KẾT NỐI` nếu chưa nối chain.
 - [ ] **D16-09 [P0]** **SERVICE BOUNDARY FREEZE:** tạo `docs/service-contracts.md` (bảng API OpenAPI/Zod, data ownership, auth rules, stale-state rules); tạo `/health` cho cả 3 service và `packages/contracts-sdk` chia ABI/types read-only. **ACCEPT:** 3 process khởi động riêng, contract tests HTTP health pass, một service stop không kéo hai service còn lại.
 - [x] **D16-03 [P0]** `docs/product-and-terms.md` khóa PER_SESSION, TIME_ACCESS, `termsHash`, 6 kịch bản, chính sách hoàn có điều kiện, testnet demo accelerated. **ACCEPT:** bạn xác nhận quyền và nghĩa vụ không nhầm check-in.
-- [ ] **D16-04 [P0]** `docs/contract-interface.md`: agreement/claim state, actor, input, events, precondition, read APIs đủ phục vụ 3 portal; bất biến I1–I10. **ACCEPT:** frontend không cần đoán ABI.
+- [x] **D16-04 [P0]** `docs/contract-interface.md`: agreement/claim state, actor, input, events, precondition, read APIs đủ phục vụ 3 portal; bất biến I1–I10. **ACCEPT:** frontend không cần đoán ABI.
 - [ ] **D16-05 [P0]** Test skeleton RED: deposit, PT session, time interval, unauthorized, duplicate, refund/conservation. **ACCEPT:** `forge test` thực thi test case tên rõ.
 - [ ] **D16-06 [P0]** Mock token và Vault deposit minimal, kiểm thử thật. **ACCEPT:** tiền test chuyển từ buyer → Vault, `forge test` deposit PASS.
 - [ ] **D16-GATE [P0]** **Cả 2 gate**: 3 portal visual directions đã duyệt + routes chạy; 3 service boot/health pass riêng và contract deposit được test. Nếu chậm, giảm phần trang phụ nhưng KHÔNG được bỏ high-fidelity freeze hoặc một portal.
@@ -317,11 +317,11 @@ Nếu không thể làm trong scope, nêu blocker và mã Plan B, chờ tôi ph�
 
 **Cập nhật lần cuối:** 16/11/2026 — Revision 1.2 Microservices lock (chưa có code/build/deploy được xác minh trong file kế hoạch này)  
 **Current Gate:** `D16-GATE`  
-**Next task:** `D16-04` (owner review)  
-**Accepted task IDs:** `D16-01`, `D16-02`, `D16-03`  
+**Next task:** `D16-05`  
+**Accepted task IDs:** `D16-01`, `D16-02`, `D16-03`, `D16-04`  
 **Blocked task IDs:** *(trống)*  
 **Approved Plan B:** *(trống)*  
-**Current Git commit:** `20d85b0e7d6ed314db07b6203f2c7836d9b8336b`  
+**Current Git commit:** `2eaf4c3a45d7ff246dff698756d854e9d35755e2`  
 **Fuji addresses / TX:** `NOT_VERIFIED`  
 **Actual submission proof:** `NOT_SUBMITTED`
 
@@ -410,6 +410,18 @@ Files: docs/contract-interface.md
 Tests: solcjs 0.8.30 extracted interface --abi PASS, 21 functions, 12 events, 14 errors; GitHub content comparison PASS.
 Notes: specification only, no Vault runtime or invariant tests executed.
 Next: Owner reviews D16-04, then D16-05.
+PlanB: none
+```
+
+```text
+[2026-11-16 16:01 ICT] TASK=D16-04 STATUS=ACCEPTED
+Owner: user-reviewed / AI-implemented
+Git: 2eaf4c3a45d7ff246dff698756d854e9d35755e2 (PR #3 merge into unihack-final)
+Reviewed head: d6c50cd650f1057538b7fd347f91ca63fe67025e
+Files: docs/contract-interface.md, docs/product-and-terms-v1.0.1-proposed.md (approved bytes retained)
+Proof: owner approved ReserveVault ABI v1 and terms v1.0.1, Keccak-256 0x32f8c0afbc8e0cabce1cd940791651b578630150fdef727c3cf53cd27144d0d8. Scaffold CI run 43834774962 passed.
+Notes: specification freeze. Runtime and financial invariants I1–I10 remain unverified pending Foundry implementation and tests.
+Next: D16-05.
 PlanB: none
 ```
 
