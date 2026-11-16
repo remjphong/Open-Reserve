@@ -40,3 +40,4 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: docker compose --env-file .env.example config --quiet
+      - run: docker compose --env-file .env.example config --format json | node scripts/check-compose-indexer.mjs

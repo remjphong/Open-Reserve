@@ -11,7 +11,17 @@ async function http(name, port, route) {
   const body = await response.json()
   console.log(JSON.stringify({ service: name, pid: children.get(name)?.pid, route, status: response.status, body }))
   if (route === '/health') { assert.equal(response.status, 200); healthSchema.parse(body); assert.equal(body.service, name) }
-  else { readySchema.parse(body); assert.equal(response.status, name === 'economics' ? 200 : 503) }
+  else {
+    const readiness = readySchema.parse(body)
+    assert.equal(readiness.service, name)
+    assert.equal(response.status, name === 'economics' ? 200 : 503)
+    if (name === 'chain-indexer') {
+      assert.equal(readiness.ready, false)
+      assert.deepEqual(readiness.dependencies.find(dependency => dependency.name === 'sync'), {
+        name: 'sync', ok: false, reason: 'SYNC_NOT_IMPLEMENTED',
+      })
+    }
+  }
 }
 async function start([name, port]) {
   // Explicitly unset dependencies to make the test reproducible on developer machines.

@@ -53,7 +53,9 @@ docker compose ps
 docker compose up -d --no-deps --build economics
 ```
 
-Healthcheck của container ứng dụng gọi `/ready`, vì vậy Indexer hiển thị
-unhealthy trong checkpoint này dù `/health` tự báo liveness 200.
+Healthcheck của container Chain Indexer gọi `/health` để kiểm tra tiến trình
+Fastify còn sống. Container có thể healthy trong khi `/ready` trả HTTP 503
+với `SYNC_NOT_IMPLEMENTED`. Dùng `/ready` để kiểm tra khả năng đồng bộ,
+và không coi trạng thái healthy của container là bằng chứng đã đồng bộ.
 Mở UI tĩnh bằng `npm run dev --workspace @openreserve/web` hoặc cổng 4173
 khi dùng Compose. API nghiệp vụ, proxy tích hợp và đồng bộ Fuji để ở các task sau.

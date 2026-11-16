@@ -1,0 +1,22 @@
+$ bash -eo pipefail -c
+  compose=$1
+  "$compose" version
+  printf "\$ %s --env-file .env.example config --quiet\n" "$compose"
+  "$compose" --env-file .env.example config --quiet
+  printf "\$ %s --env-file .env.example config --format json | node scripts/check-compose-indexer.mjs\n" "$compose"
+  "$compose" --env-file .env.example config --format json | node scripts/check-compose-indexer.mjs
+  if command -v docker >/dev/null; then
+    docker info --format "{{.ServerVersion}}"
+  else
+    printf "Docker CLI unavailable. "
+    if ! test -S /var/run/docker.sock; then printf "Docker daemon socket unavailable. "; fi
+    printf "Container runtime tests: NOT_RUN\n"
+  fi
+ -- ../d16-tools/docker-compose
+Docker Compose version v2.39.4
+$ ../d16-tools/docker-compose --env-file .env.example config --quiet
+$ ../d16-tools/docker-compose --env-file .env.example config --format json | node scripts/check-compose-indexer.mjs
+PASS Chain Indexer Compose healthcheck targets http://127.0.0.1:3002/health
+Docker CLI unavailable. Docker daemon socket unavailable. Container runtime tests: NOT_RUN
+
+exit=0

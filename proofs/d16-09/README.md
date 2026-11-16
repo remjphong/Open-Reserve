@@ -15,6 +15,26 @@ Node.js 24.22.1, npm 11.9.0, Foundry 1.5.0, standalone Docker Compose CLI 2.39.4
 | `(cd contracts && forge build)`, `npm run sdk:check` | PASS, 54 ABI entries from frozen interface, exact generated file match | [foundry-sdk.log](foundry-sdk.log) |
 | `(cd contracts && forge test)` | 10 PASS, 24 expected RED, 0 skipped, exit 1. Existing settlement test baseline preserved | [foundry-baseline.log](foundry-baseline.log) |
 
+## PR #8 healthcheck revision
+
+The Chain Indexer container probes `/health` for process liveness. The HTTP
+isolation test verifies that the running Indexer still returns 503 and
+`SYNC_NOT_IMPLEMENTED` at `/ready`. The Compose regression inspects the
+resolved configuration without requiring a container runtime.
+
+| Re-run | Result | Raw output |
+| --- | --- | --- |
+| `npm test` | 26 PASS, 0 failures or skips | [tests.log](healthcheck-review/tests.log) |
+| `npm run test:isolation` | 3 standalone startups and 3 stop/restart cycles PASS. Indexer liveness 200 and sync readiness 503 verified over HTTP. | [isolation.log](healthcheck-review/isolation.log) |
+| `npm run typecheck` | PASS | [typecheck.log](healthcheck-review/typecheck.log) |
+| `npm run build` | PASS | [build.log](healthcheck-review/build.log) |
+| `npm run sdk:check` | PASS, all 54 ABI entries match | [sdk.log](healthcheck-review/sdk.log) |
+| `docker compose --env-file .env.example config --quiet` and resolved healthcheck regression | PASS using standalone Compose 2.39.4. Docker runtime **NOT_RUN**. | [compose.log](healthcheck-review/compose.log) |
+
+```bash
+docker compose --env-file .env.example config --format json | node scripts/check-compose-indexer.mjs
+```
+
 ## Reproduce
 
 Run the repository commands in [README](../../README.md) after checking out the PR.

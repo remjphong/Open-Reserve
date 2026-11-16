@@ -498,7 +498,8 @@ Owner: AI-implemented / pending user review
 Git: review branch ai/d16-service-boundary
 Files: docs/service-contracts.md, services/*, packages/*, infra/postgres-init/, compose.yaml, scripts/, proofs/d16-09/
 Proof: proofs/d16-09/README.md and raw command logs.
-Notes: independent local processes and database ownership verified. Business routes return 501. Indexer sync remains degraded. Docker runtime NOT_RUN locally.
+Notes: independent local processes and database ownership verified. Business routes return 501. PR #8 review revision uses /health for Indexer container liveness and keeps /ready at 503 (SYNC_NOT_IMPLEMENTED). Docker runtime NOT_RUN locally.
+Review proof: proofs/d16-09/healthcheck-review/
 Next: Owner reviews D16-09.
 PlanB: none
 ```

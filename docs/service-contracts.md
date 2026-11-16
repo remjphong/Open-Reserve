@@ -22,6 +22,11 @@ Both routes are local operational reads without a request body. They require no 
 
 Each dependency entry includes `name`, `ok` and a machine-readable `reason`. Reasons are `OK`, `NOT_CONFIGURED`, `UNAVAILABLE`, `WRONG_DATABASE`, `WRONG_CHAIN` or `SYNC_NOT_IMPLEMENTED`. Probe failures omit credentials and upstream errors. RPC and each DB connection/query use a one-second timeout. RPC identity confirms network reachability. Sync, contract deployment and chain freshness are tracked separately.
 
+Docker Compose probes the Chain Indexer at `/health`. A healthy container
+indicates process liveness. Clients and operators check `/ready` for
+synchronization readiness. In D16-09 the sync check always reports
+`SYNC_NOT_IMPLEMENTED`, so `/ready` remains HTTP 503 even with a healthy container.
+
 ## v1 routes
 
 All of the following routes return HTTP 501 in D16-09. The body follows `errorSchema` with code `NOT_IMPLEMENTED` or `WRITE_DISABLED`. The table specifies the future successful and expected error responses for each endpoint. Future v1 errors use the same `errorSchema`. HTTP 500 represents an unexpected server error. IDs, cursors and bodies failing their request schemas return 400 `INVALID_REQUEST` once their business handler exists.

@@ -1,0 +1,9 @@
+$ npm run sdk:check
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> openreserve@0.0.0 sdk:check
+> node scripts/generate-sdk.mjs --check
+
+SDK ABI check PASS: 54 entries; frozen interface matches
+
+exit=0
