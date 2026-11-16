@@ -147,7 +147,7 @@ Task có 5 trạng thái: `TODO`, `IN_PROGRESS`, `BLOCKED`, `AWAITING_REVIEW`, `
 - [ ] **D16-09 [P0]** **SERVICE BOUNDARY FREEZE:** tạo `docs/service-contracts.md` (bảng API OpenAPI/Zod, data ownership, auth rules, stale-state rules); tạo `/health` cho cả 3 service và `packages/contracts-sdk` chia ABI/types read-only. **ACCEPT:** 3 process khởi động riêng, contract tests HTTP health pass, một service stop không kéo hai service còn lại.
 - [x] **D16-03 [P0]** `docs/product-and-terms.md` khóa PER_SESSION, TIME_ACCESS, `termsHash`, 6 kịch bản, chính sách hoàn có điều kiện, testnet demo accelerated. **ACCEPT:** bạn xác nhận quyền và nghĩa vụ không nhầm check-in.
 - [x] **D16-04 [P0]** `docs/contract-interface.md`: agreement/claim state, actor, input, events, precondition, read APIs đủ phục vụ 3 portal; bất biến I1–I10. **ACCEPT:** frontend không cần đoán ABI.
-- [ ] **D16-05 [P0]** Test skeleton RED: deposit, PT session, time interval, unauthorized, duplicate, refund/conservation. **ACCEPT:** `forge test` thực thi test case tên rõ.
+- [x] **D16-05 [P0]** Test skeleton RED: deposit, PT session, time interval, unauthorized, duplicate, refund/conservation. **ACCEPT:** `forge test` thực thi test case tên rõ.
 - [ ] **D16-06 [P0]** Mock token và Vault deposit minimal, kiểm thử thật. **ACCEPT:** tiền test chuyển từ buyer → Vault, `forge test` deposit PASS.
 - [ ] **D16-GATE [P0]** **Cả 2 gate**: 3 portal visual directions đã duyệt + routes chạy; 3 service boot/health pass riêng và contract deposit được test. Nếu chậm, giảm phần trang phụ nhưng KHÔNG được bỏ high-fidelity freeze hoặc một portal.
 
@@ -317,11 +317,11 @@ Nếu không thể làm trong scope, nêu blocker và mã Plan B, chờ tôi ph�
 
 **Cập nhật lần cuối:** 16/11/2026 — Revision 1.2 Microservices lock (chưa có code/build/deploy được xác minh trong file kế hoạch này)  
 **Current Gate:** `D16-GATE`  
-**Next task:** `D16-05`  
-**Accepted task IDs:** `D16-01`, `D16-02`, `D16-03`, `D16-04`  
+**Next task:** `D16-06`  
+**Accepted task IDs:** `D16-01`, `D16-02`, `D16-03`, `D16-04`, `D16-05`  
 **Blocked task IDs:** *(trống)*  
 **Approved Plan B:** *(trống)*  
-**Current Git commit:** `2eaf4c3a45d7ff246dff698756d854e9d35755e2`  
+**Current Git commit:** `12996a7c2b1bec50d6e8e765084c97207e9bbe12`  
 **Fuji addresses / TX:** `NOT_VERIFIED`  
 **Actual submission proof:** `NOT_SUBMITTED`
 
@@ -422,6 +422,16 @@ Files: docs/contract-interface.md, docs/product-and-terms-v1.0.1-proposed.md (ap
 Proof: owner approved ReserveVault ABI v1 and terms v1.0.1, Keccak-256 0x32f8c0afbc8e0cabce1cd940791651b578630150fdef727c3cf53cd27144d0d8. Scaffold CI run 43834774962 passed.
 Notes: specification freeze. Runtime and financial invariants I1–I10 remain unverified pending Foundry implementation and tests.
 Next: D16-05.
+PlanB: none
+```
+
+```text
+[2026-11-16 16:15 ICT] TASK=D16-05 STATUS=ACCEPTED
+Owner: user-reviewed / AI-implemented
+Git: 12996a7c2b1bec50d6e8e765084c97207e9bbe12 (PR #4 merge)
+Proof: reviewed d3128b3f9191a19f1907ef2eac3ad3ec260e3d07, Scaffold CI 43837116163 passed. Foundry executed 29 expected RED cases, zero skips or passes.
+Notes: accepted RED baseline only. Financial runtime invariants remain unverified.
+Next: D16-06.
 PlanB: none
 ```
 
