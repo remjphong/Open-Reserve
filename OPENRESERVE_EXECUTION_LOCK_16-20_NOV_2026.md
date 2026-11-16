@@ -145,7 +145,7 @@ Task có 5 trạng thái: `TODO`, `IN_PROGRESS`, `BLOCKED`, `AWAITING_REVIEW`, `
 - [ ] **D16-07 [P0]** **VISUAL FREEZE**: 3 reference frames high-fidelity (Customer package/pass, Gym agreement/action, Operations ledger/dispute), design tokens, thành phần chung, microcopy tiếng Việt; review theo UX annex. **ACCEPT:** 3 ảnh chụp hoặc 3 URL preview, bạn APPROVE; không chấp nhận wireframe chữ như hoàn thành.
 - [ ] **D16-08 [P0]** Dựng `apps/web/src/portals/*`, 3 URL `/customer`, `/gym`, `/operations`, AppShell/RoleNavigation/WalletIdentity/MoneyFigure/Status. **ACCEPT:** có thể mở cả 3 URL riêng, cùng visual system, không dead navigation trên skeleton; mock UI ghi rõ `DEMO UI — CHƯA KẾT NỐI` nếu chưa nối chain.
 - [ ] **D16-09 [P0]** **SERVICE BOUNDARY FREEZE:** tạo `docs/service-contracts.md` (bảng API OpenAPI/Zod, data ownership, auth rules, stale-state rules); tạo `/health` cho cả 3 service và `packages/contracts-sdk` chia ABI/types read-only. **ACCEPT:** 3 process khởi động riêng, contract tests HTTP health pass, một service stop không kéo hai service còn lại.
-- [ ] **D16-03 [P0]** `docs/product-and-terms.md` khóa PER_SESSION, TIME_ACCESS, `termsHash`, 6 kịch bản, chính sách hoàn có điều kiện, testnet demo accelerated. **ACCEPT:** bạn xác nhận quyền và nghĩa vụ không nhầm check-in.
+- [x] **D16-03 [P0]** `docs/product-and-terms.md` khóa PER_SESSION, TIME_ACCESS, `termsHash`, 6 kịch bản, chính sách hoàn có điều kiện, testnet demo accelerated. **ACCEPT:** bạn xác nhận quyền và nghĩa vụ không nhầm check-in.
 - [ ] **D16-04 [P0]** `docs/contract-interface.md`: agreement/claim state, actor, input, events, precondition, read APIs đủ phục vụ 3 portal; bất biến I1–I10. **ACCEPT:** frontend không cần đoán ABI.
 - [ ] **D16-05 [P0]** Test skeleton RED: deposit, PT session, time interval, unauthorized, duplicate, refund/conservation. **ACCEPT:** `forge test` thực thi test case tên rõ.
 - [ ] **D16-06 [P0]** Mock token và Vault deposit minimal, kiểm thử thật. **ACCEPT:** tiền test chuyển từ buyer → Vault, `forge test` deposit PASS.
@@ -317,11 +317,11 @@ Nếu không thể làm trong scope, nêu blocker và mã Plan B, chờ tôi ph�
 
 **Cập nhật lần cuối:** 16/11/2026 — Revision 1.2 Microservices lock (chưa có code/build/deploy được xác minh trong file kế hoạch này)  
 **Current Gate:** `D16-GATE`  
-**Next task:** `D16-03` (owner review)  
-**Accepted task IDs:** `D16-01`, `D16-02`  
+**Next task:** `D16-04` (owner review)  
+**Accepted task IDs:** `D16-01`, `D16-02`, `D16-03`  
 **Blocked task IDs:** *(trống)*  
 **Approved Plan B:** *(trống)*  
-**Current Git commit:** `010a7852130a84358dc37f793bd109308ef727cf`  
+**Current Git commit:** `20d85b0e7d6ed314db07b6203f2c7836d9b8336b`  
 **Fuji addresses / TX:** `NOT_VERIFIED`  
 **Actual submission proof:** `NOT_SUBMITTED`
 
@@ -390,6 +390,26 @@ Tests: checks of canonical bytes, PT rounding, interval additivity, 30/90 equiva
 Proof: termsVersion 1.0.0 / Keccak-256 0xbcb7bf6578cd0ed96b1a90d80b63ef778c9d38eb55b4e8f17ee36bde7c52201c
 Notes: proposed challenge windows are 24h for the model and 60s for Fuji, with 270s Fuji access. No contract or Fuji execution at this step.
 Next: Owner reviews D16-03, then D16-04.
+PlanB: none
+```
+
+```text
+[2026-11-16 15:11 ICT] TASK=D16-03 STATUS=ACCEPTED
+Owner: user-reviewed / AI-implemented
+Git: 010a7852130a84358dc37f793bd109308ef727cf
+Proof: user confirmed ACCEPT D16-03 in chat.
+Next: D16-04.
+PlanB: none
+```
+
+```text
+[2026-11-16 15:11 ICT] TASK=D16-04 STATUS=AWAITING_REVIEW
+Owner: AI-implemented / pending user review
+Git: 20d85b0e7d6ed314db07b6203f2c7836d9b8336b
+Files: docs/contract-interface.md
+Tests: solcjs 0.8.30 extracted interface --abi PASS, 21 functions, 12 events, 14 errors; GitHub content comparison PASS.
+Notes: specification only, no Vault runtime or invariant tests executed.
+Next: Owner reviews D16-04, then D16-05.
 PlanB: none
 ```
 
