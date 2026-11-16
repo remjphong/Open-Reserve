@@ -4,3 +4,4 @@ out = "out"
 test = "test"
 solc = "0.8.30"
 remappings = ["@openzeppelin/contracts/=../node_modules/@openzeppelin/contracts/"]
+allow_paths = ["../node_modules/@openzeppelin/contracts"]
