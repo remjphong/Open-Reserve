@@ -1,0 +1,126 @@
+import type { ReactNode } from 'react'
+import { iconPaths } from './icons'
+
+const roles = {
+  customer: { label: 'Khách hàng', wallet: 'Ví khách' },
+  gym: { label: 'Phòng gym', wallet: 'Ví chủ gym' },
+  operations: { label: 'Vận hành', wallet: 'Ví phân xử' },
+}
+export type Role = keyof typeof roles
+export type NavItem = { href: string; label: string; icon: keyof typeof iconPaths }
+
+export function Icon({ name }: { name: keyof typeof iconPaths }) {
+  return <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+    strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"
+    dangerouslySetInnerHTML={{ __html: iconPaths[name] }} />
+}
+
+export function MoneyFigure({ value, variant = '' }: { value: number; variant?: string }) {
+  return <span className={`money ${variant}`}>{value.toLocaleString('vi-VN')} <small>MRES</small></span>
+}
+
+export function StatusPill({ children, warning = false }: { children: ReactNode; warning?: boolean }) {
+  return <span className={`status ${warning ? 'status-warn' : ''}`}>
+    <Icon name={warning ? 'circle-alert' : 'check'} />{children}
+  </span>
+}
+
+export function WalletIdentity({ role }: { role: Role }) {
+  return <span className="wallet"><Icon name="wallet" />
+    <span><span className="wallet-label">{roles[role].wallet} · </span>Chưa kết nối</span>
+  </span>
+}
+
+export function RoleNavigation({ items, path, label, style }: {
+  items: NavItem[]; path: string; label: string; style: string
+}) {
+  const active = [...items].sort((a, b) => b.href.length - a.href.length)
+    .find(item => path === item.href || path.startsWith(item.href + '/') || (item.href.split('/').length > 3 && item.href.split('/').slice(0, -1).join('/') === path))
+  return <nav className={style} aria-label={`Điều hướng ${label}`}>
+    {items.map(item => <a key={item.href} href={item.href} aria-current={active === item ? 'page' : undefined}>
+      {style === 'sidebar-nav' && <Icon name={item.icon} />}{item.label}
+    </a>)}
+  </nav>
+}
+
+function Brand({ home, mobile = false }: { home: string; mobile?: boolean }) {
+  return <a className={`brand ${mobile ? 'mobile-brand' : ''}`} href={home}>
+    <span className="brand-mark"><Icon name="shield-check" /></span>OpenReserve
+  </a>
+}
+
+export function AppShell({ role, path, items, children }: {
+  role: Role; path: string; items: NavItem[]; children: ReactNode
+}) {
+  const { label } = roles[role]
+  const home = '/' + role
+  const nav = (style: string) => <RoleNavigation items={items} path={path} label={label} style={style} />
+  const content = <>
+    <header className="header">
+      <Brand home={home} mobile={role !== 'customer'} />
+      {role === 'customer' ? nav('top-nav') : <strong className="role-name">{label}</strong>}
+      <WalletIdentity role={role} />
+    </header>
+    {nav('mobile-nav')}
+    <main id="main" className="container" tabIndex={-1}>
+      <div className="notice"><Icon name="info" /><span><strong>DEMO UI — CHƯA KẾT NỐI</strong><br />
+        Dữ liệu minh họa. Chưa đọc Fuji hoặc ký giao dịch.</span></div>
+      {children}
+    </main>
+  </>
+  return <>
+    <a className="skip" href="#main">Đi tới nội dung</a>
+    {role === 'customer' ? content : <div className="workspace"><aside className="sidebar">
+      <Brand home={home} /><div><p className="sidebar-title">{label}</p>{nav('sidebar-nav')}</div>
+      <p className="sidebar-footer caption">Môi trường thử nghiệm · Avalanche Fuji</p>
+    </aside><div>{content}</div></div>}
+  </>
+}
+
+export function MoneyBreakdown({ rows }: { rows: readonly (readonly [string, number])[] }) {
+  return <dl className="money-list">{rows.map(([label, value]) =>
+    <div key={label}><dt>{label}</dt><dd><MoneyFigure value={value} /></dd></div>,
+  )}</dl>
+}
+
+export function DisabledAction({ children, id, reason }: { children: ReactNode; id: string; reason: string }) {
+  return <><button type="button" disabled aria-describedby={id} className="button button-primary button-wide">{children}</button>
+    <p className="caption disabled-copy" id={id}>{reason}</p></>
+}
+
+export function EmptyState({ title, children }: { title: string; children: ReactNode }) {
+  return <section className="state-example"><h3>{title}</h3><p>{children}</p></section>
+}
+export function LoadingSkeleton() {
+  return <section className="state-example"><h3>Đang tải dữ liệu…</h3><div className="skeleton" aria-hidden="true" /></section>
+}
+export function ErrorState({ children }: { children: ReactNode }) {
+  return <section className="state-example error"><h3>Chưa tải được dữ liệu</h3><p>{children}</p></section>
+}
+
+export function SampleStates() {
+  return <details className="states card"><summary>Xem mẫu trạng thái</summary><div className="states-grid">
+    <EmptyState title="Chưa có dữ liệu">Chưa có bản ghi phù hợp với ví.</EmptyState>
+    <LoadingSkeleton />
+    <ErrorState>Kiểm tra kết nối trước khi thử tải lại.</ErrorState>
+  </div></details>
+}
+
+export function PortalPage({ breadcrumb, title, children }: {
+  breadcrumb: string; title: string; children: ReactNode
+}) {
+  return <>
+    <div className="section-title"><div className="breadcrumb">{breadcrumb}</div><h1>{title}</h1></div>
+    {children}
+  </>
+}
+
+export function OverviewCard({ title, children, href, link }: {
+  title: string; children: ReactNode; href: string; link: string
+}) {
+  return <section className="card card-pad">
+    <div className="card-head"><h2>{title}</h2></div>
+    {children}
+    <a className="inline-link" href={href}>{link} <Icon name="arrow-right" /></a>
+  </section>
+}

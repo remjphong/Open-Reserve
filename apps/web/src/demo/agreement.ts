@@ -1,0 +1,15 @@
+export const agreement = {
+  id: 'OR-024',
+  claim: 'PT-04',
+  packageName: 'PT 10 buổi',
+  deposited: 1000,
+  locked: 800,
+  settled: 300,
+  withdrawn: 200,
+  withdrawable: 100,
+  refundable: 0,
+  disputed: 100,
+  sessions: 3,
+  totalSessions: 10,
+  terms: 'v1.0.1',
+} as const
