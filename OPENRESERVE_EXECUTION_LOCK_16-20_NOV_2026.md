@@ -140,7 +140,7 @@ Task có 5 trạng thái: `TODO`, `IN_PROGRESS`, `BLOCKED`, `AWAITING_REVIEW`, `
 
 ### 📅 16/11 — KHÓA THIẾT KẾ SẢN PHẨM, VISUAL VÀ KHUNG CONTRACT (Gate: cuối ngày)
 
-- [ ] **D16-01 [P0]** Repo/nhánh `unihack-final`, đưa `EXECUTION_LOCK` (rev 1.2) + UX + Architecture annexes vào root; commit và ghi SHA. **ACCEPT:** link 3 file trên GitHub + `git status` sạch.
+- [x] **D16-01 [P0]** Repo/nhánh `unihack-final`, đưa `EXECUTION_LOCK` (rev 1.2) + UX + Architecture annexes vào root; commit và ghi SHA. **ACCEPT:** link 3 file trên GitHub + `git status` sạch.
 - [ ] **D16-02 [P0]** Khởi tạo npm workspaces `apps/web`, `services/catalog-evidence`, `services/chain-indexer`, `services/economics`, `packages/contracts-sdk`, `contracts/` Foundry/OpenZeppelin; `.env.example`, `.gitignore`, Docker Compose/CI stub. **ACCEPT:** `forge build`, npm workspace build/typecheck, `docker compose config` (nếu cài Docker) hoạt động; không commit secrets.
 - [ ] **D16-07 [P0]** **VISUAL FREEZE**: 3 reference frames high-fidelity (Customer package/pass, Gym agreement/action, Operations ledger/dispute), design tokens, thành phần chung, microcopy tiếng Việt; review theo UX annex. **ACCEPT:** 3 ảnh chụp hoặc 3 URL preview, bạn APPROVE; không chấp nhận wireframe chữ như hoàn thành.
 - [ ] **D16-08 [P0]** Dựng `apps/web/src/portals/*`, 3 URL `/customer`, `/gym`, `/operations`, AppShell/RoleNavigation/WalletIdentity/MoneyFigure/Status. **ACCEPT:** có thể mở cả 3 URL riêng, cùng visual system, không dead navigation trên skeleton; mock UI ghi rõ `DEMO UI — CHƯA KẾT NỐI` nếu chưa nối chain.
@@ -317,11 +317,11 @@ Nếu không thể làm trong scope, nêu blocker và mã Plan B, chờ tôi ph�
 
 **Cập nhật lần cuối:** 16/11/2026 — Revision 1.2 Microservices lock (chưa có code/build/deploy được xác minh trong file kế hoạch này)  
 **Current Gate:** `D16-GATE`  
-**Next task:** `D16-01`  
-**Accepted task IDs:** *(trống)*  
+**Next task:** `D16-02`  
+**Accepted task IDs:** `D16-01`  
 **Blocked task IDs:** *(trống)*  
 **Approved Plan B:** *(trống)*  
-**Current Git commit:** `NOT_VERIFIED`  
+**Current Git commit:** `5dc785a5ed35af2ab9de92eb83d416e1d154ab6f`  
 **Fuji addresses / TX:** `NOT_VERIFIED`  
 **Actual submission proof:** `NOT_SUBMITTED`
 
@@ -348,6 +348,15 @@ Tests: anonymous HTTPS reads of all 3 documents at the proof commit PASS, byte c
 Proof: https://github.com/remjphong/Open-Reserve/commit/c1fdd3085930912aa26158177dbe7822ecedb4d8
 Notes: Public branch unihack-final. D16-GATE remains partial pending the remaining tasks.
 Next: Owner reviews D16-01, then D16-02.
+PlanB: none
+```
+
+```text
+[2026-11-16 14:10 ICT] TASK=D16-01 STATUS=ACCEPTED
+Owner: user-reviewed / AI-implemented
+Git: 5dc785a5ed35af2ab9de92eb83d416e1d154ab6f
+Proof: owner confirmed ACCEPT D16-01 in chat after anonymous verification.
+Next: D16-02.
 PlanB: none
 ```
 
