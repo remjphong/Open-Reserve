@@ -6,7 +6,7 @@
 **Internal submission deadline:** **20/11/2026 20:00 ICT** (đã nộp và chụp bằng chứng); tuyệt đối không dồn sang 21/11.  
 **Owner / final reviewer:** Người sáng lập OpenReserve (người dùng).  
 **Working mode:** *Human-in-the-loop*: AI chỉ thực hiện **một task ID được chọn**, người dùng kiểm tra và phê duyệt xong mới giao task kế tiếp.  
-**Status:** TÀI LIỆU KẾ HOẠCH, chưa phải bằng chứng code/deployment hoặc giải thưởng.
+**Status:** D16-GATE đã được owner nghiệm thu kỹ thuật. Xem State Log và các log kiểm thử được dẫn chiếu. Production deployment chưa được phê duyệt.
 **Normative UX annex:** `OPENRESERVE_THREE_PORTAL_UX_SPEC_2026-11-16.md` — BẮT BUỘC ĐỌC.
 **Normative architecture annex:** `OPENRESERVE_MICROSERVICES_ARCHITECTURE_2026-11-16.md` — BẮT BUỘC ĐỌC; định nghĩa microservices tối thiểu.
 **Changelog 1.2 / CR-ARCH-001:** Người dùng yêu cầu microservices. Chốt một monorepo, một frontend gồm ba portal, **ba backend service chạy trong process/container độc lập**, hai kho dữ liệu thuộc chủ sở hữu khác nhau, một Vault Fuji làm nguồn tài chính duy nhất. Thêm API contract, service contract tests, Docker Compose, healthchecks và failure tests; giữ nguyên mô hình sản phẩm, 02 contract deploy, 03 portal, các bất biến tài sản, deadline 20/11. Thay thế Rev 1.1.
@@ -143,13 +143,13 @@ Task có 5 trạng thái: `TODO`, `IN_PROGRESS`, `BLOCKED`, `AWAITING_REVIEW`, `
 - [x] **D16-01 [P0]** Repo/nhánh `unihack-final`, đưa `EXECUTION_LOCK` (rev 1.2) + UX + Architecture annexes vào root; commit và ghi SHA. **ACCEPT:** link 3 file trên GitHub + `git status` sạch.
 - [x] **D16-02 [P0]** Khởi tạo npm workspaces `apps/web`, `services/catalog-evidence`, `services/chain-indexer`, `services/economics`, `packages/contracts-sdk`, `contracts/` Foundry/OpenZeppelin; `.env.example`, `.gitignore`, Docker Compose/CI stub. **ACCEPT:** `forge build`, npm workspace build/typecheck, `docker compose config` (nếu cài Docker) hoạt động; không commit secrets.
 - [x] **D16-07 [P0]** **VISUAL FREEZE**: 3 reference frames high-fidelity (Customer package/pass, Gym agreement/action, Operations ledger/dispute), design tokens, thành phần chung, microcopy tiếng Việt; review theo UX annex. **ACCEPT:** 3 ảnh chụp hoặc 3 URL preview, bạn APPROVE; không chấp nhận wireframe chữ như hoàn thành.
-- [ ] **D16-08 [P0]** Dựng `apps/web/src/portals/*`, 3 URL `/customer`, `/gym`, `/operations`, AppShell/RoleNavigation/WalletIdentity/MoneyFigure/Status. **ACCEPT:** có thể mở cả 3 URL riêng, cùng visual system, không dead navigation trên skeleton; mock UI ghi rõ `DEMO UI — CHƯA KẾT NỐI` nếu chưa nối chain.
-- [ ] **D16-09 [P0]** **SERVICE BOUNDARY FREEZE:** tạo `docs/service-contracts.md` (bảng API OpenAPI/Zod, data ownership, auth rules, stale-state rules); tạo `/health` cho cả 3 service và `packages/contracts-sdk` chia ABI/types read-only. **ACCEPT:** 3 process khởi động riêng, contract tests HTTP health pass, một service stop không kéo hai service còn lại.
+- [x] **D16-08 [P0]** Dựng `apps/web/src/portals/*`, 3 URL `/customer`, `/gym`, `/operations`, AppShell/RoleNavigation/WalletIdentity/MoneyFigure/Status. **ACCEPT:** có thể mở cả 3 URL riêng, cùng visual system, không dead navigation trên skeleton; mock UI ghi rõ `DEMO UI — CHƯA KẾT NỐI` nếu chưa nối chain.
+- [x] **D16-09 [P0]** **SERVICE BOUNDARY FREEZE:** tạo `docs/service-contracts.md` (bảng API OpenAPI/Zod, data ownership, auth rules, stale-state rules); tạo `/health` cho cả 3 service và `packages/contracts-sdk` chia ABI/types read-only. **ACCEPT:** 3 process khởi động riêng, contract tests HTTP health pass, một service stop không kéo hai service còn lại.
 - [x] **D16-03 [P0]** `docs/product-and-terms.md` khóa PER_SESSION, TIME_ACCESS, `termsHash`, 6 kịch bản, chính sách hoàn có điều kiện, testnet demo accelerated. **ACCEPT:** bạn xác nhận quyền và nghĩa vụ không nhầm check-in.
 - [x] **D16-04 [P0]** `docs/contract-interface.md`: agreement/claim state, actor, input, events, precondition, read APIs đủ phục vụ 3 portal; bất biến I1–I10. **ACCEPT:** frontend không cần đoán ABI.
 - [x] **D16-05 [P0]** Test skeleton RED: deposit, PT session, time interval, unauthorized, duplicate, refund/conservation. **ACCEPT:** `forge test` thực thi test case tên rõ.
 - [x] **D16-06 [P0]** Mock token và Vault deposit minimal, kiểm thử thật. **ACCEPT:** tiền test chuyển từ buyer → Vault, `forge test` deposit PASS.
-- [ ] **D16-GATE [P0]** **Cả 2 gate**: 3 portal visual directions đã duyệt + routes chạy; 3 service boot/health pass riêng và contract deposit được test. Nếu chậm, giảm phần trang phụ nhưng KHÔNG được bỏ high-fidelity freeze hoặc một portal.
+- [x] **D16-GATE [P0]** **Cả 2 gate**: 3 portal visual directions đã duyệt + routes chạy; 3 service boot/health pass riêng và contract deposit được test. Nếu chậm, giảm phần trang phụ nhưng KHÔNG được bỏ high-fidelity freeze hoặc một portal.
 
 ### 📅 17/11 — COMPLETE FINANCIAL CORE + CUSTOMER JOURNEY (Gate: cuối ngày)
 
@@ -315,13 +315,13 @@ Nếu không thể làm trong scope, nêu blocker và mã Plan B, chờ tôi ph�
 
 ## H. STATE LOG — CẬP NHẬT SAU TỪNG TASK, KHÔNG SỬA SCOPE KHÓA
 
-**Cập nhật lần cuối:** 16/11/2026 — Revision 1.2 Microservices lock (chưa có code/build/deploy được xác minh trong file kế hoạch này)  
+**Cập nhật lần cuối:** 16/11/2026 — Revision 1.2 Microservices lock · owner đã nghiệm thu code và bằng chứng kiểm thử trong phạm vi D16
 **Current Gate:** `D16-GATE`  
-**Next task:** `D16-09` (owner review)
-**Accepted task IDs:** `D16-01`, `D16-02`, `D16-03`, `D16-04`, `D16-05`, `D16-06`, `D16-07`, `D16-08`
+**Next task:** `D17-01` (sau khi owner merge PR #9)
+**Accepted task IDs:** `D16-01`, `D16-02`, `D16-03`, `D16-04`, `D16-05`, `D16-06`, `D16-07`, `D16-08`, `D16-09`, `D16-GATE`
 **Blocked task IDs:** *(trống)*  
 **Approved Plan B:** *(trống)*  
-**Current Git commit:** `5b144518fe19693e71900f16c8464f595ad5e017` (base; D16-09 evidence on review branch)
+**Current Git commit:** `ba136e7861f3b1d54fe43847b6a94ff1315c096c` (verified base on unihack-final)
 **Fuji addresses / TX:** `NOT_VERIFIED`  
 **Actual submission proof:** `NOT_SUBMITTED`
 
@@ -501,6 +501,41 @@ Proof: proofs/d16-09/README.md and raw command logs.
 Notes: independent local processes and database ownership verified. Business routes return 501. PR #8 review revision uses /health for Indexer container liveness and keeps /ready at 503 (SYNC_NOT_IMPLEMENTED). Docker runtime NOT_RUN locally.
 Review proof: proofs/d16-09/healthcheck-review/
 Next: Owner reviews D16-09.
+PlanB: none
+```
+
+
+```text
+[2026-11-16 19:41 ICT] TASK=D16-09 STATUS=ACCEPTED
+Owner: user-reviewed and merged PR #8
+Git: ba136e7861f3b1d54fe43847b6a94ff1315c096c (owner merge)
+Reviewed head: 99699f19c120d2028c21a4766bdba3f46d35e57e
+Proof: proofs/d16-09/README.md and proofs/d16-09/healthcheck-review/. Scaffold CI run 43867538923 passed.
+Notes: Docker runtime NOT_RUN. Fuji indexing, business APIs and production integration remain unimplemented.
+Next: D16-GATE.
+PlanB: none
+```
+
+```text
+[2026-11-16 19:41 ICT] TASK=D16-GATE STATUS=AWAITING_REVIEW
+Owner: AI evaluated evidence; awaiting owner decision
+Git: ba136e7861f3b1d54fe43847b6a94ff1315c096c (evaluated unihack-final)
+Tests: reviewed existing accepted evidence; no new runtime tests run for this documentation task.
+Proof: D16-07 visual acceptance and D16-08 proofs/ui/d16-08/browser-route-review.log; D16-09 proofs/d16-09/healthcheck-review/isolation.log; D16-06 proofs/d16-06-vault-deposit.log.
+Result: all three portal visual directions and routes accepted. Three service processes start independently and return HTTP 200 at /health. Vault deposit has passing Foundry coverage.
+Notes: scope is the D16 checkpoint. Docker runtime NOT_RUN; Fuji sync unimplemented; 24 expected Vault RED cases remain outside the deposit scope.
+Next: Owner reviews D16-GATE before D17.
+PlanB: none
+```
+
+
+```text
+[2026-11-16 19:46 ICT] TASK=D16-GATE STATUS=ACCEPTED
+Owner: user-reviewed and technically accepted D16-GATE in the PR #9 final review
+Git: 95c98ad7dfa1a34a8e1a4a46d4e301e70a9d36d5 (reviewed PR #9 head); ba136e7861f3b1d54fe43847b6a94ff1315c096c (verified unihack-final checkpoint)
+Proof: PR #9; D16-07 visual acceptance; proofs/ui/d16-08/browser-route-review.log (13 routes at both viewports); proofs/d16-09/healthcheck-review/isolation.log (three independent services and HTTP liveness); proofs/d16-06-vault-deposit.log (deposit coverage).
+Notes: Docker runtime NOT_RUN. Foundry full suite: 10 PASS, 24 expected RED. Fuji sync is not implemented. Production deployment is not approved.
+Next: D17-01 after owner merges PR #9, as a separately reviewed task.
 PlanB: none
 ```
 
