@@ -317,11 +317,11 @@ Nếu không thể làm trong scope, nêu blocker và mã Plan B, chờ tôi ph�
 
 **Cập nhật lần cuối:** 16/11/2026 — Revision 1.2 Microservices lock (chưa có code/build/deploy được xác minh trong file kế hoạch này)  
 **Current Gate:** `D16-GATE`  
-**Next task:** `D16-09` (owner review)
-**Accepted task IDs:** `D16-01`, `D16-02`, `D16-03`, `D16-04`, `D16-05`, `D16-06`, `D16-07`, `D16-08`
+**Next task:** `D16-GATE` (owner review)
+**Accepted task IDs:** `D16-01`, `D16-02`, `D16-03`, `D16-04`, `D16-05`, `D16-06`, `D16-07`, `D16-08`, `D16-09`
 **Blocked task IDs:** *(trống)*  
 **Approved Plan B:** *(trống)*  
-**Current Git commit:** `5b144518fe19693e71900f16c8464f595ad5e017` (base; D16-09 evidence on review branch)
+**Current Git commit:** `ba136e7861f3b1d54fe43847b6a94ff1315c096c` (verified base on unihack-final)
 **Fuji addresses / TX:** `NOT_VERIFIED`  
 **Actual submission proof:** `NOT_SUBMITTED`
 
@@ -501,6 +501,30 @@ Proof: proofs/d16-09/README.md and raw command logs.
 Notes: independent local processes and database ownership verified. Business routes return 501. PR #8 review revision uses /health for Indexer container liveness and keeps /ready at 503 (SYNC_NOT_IMPLEMENTED). Docker runtime NOT_RUN locally.
 Review proof: proofs/d16-09/healthcheck-review/
 Next: Owner reviews D16-09.
+PlanB: none
+```
+
+
+```text
+[2026-11-16 19:41 ICT] TASK=D16-09 STATUS=ACCEPTED
+Owner: user-reviewed and merged PR #8
+Git: ba136e7861f3b1d54fe43847b6a94ff1315c096c (owner merge)
+Reviewed head: 99699f19c120d2028c21a4766bdba3f46d35e57e
+Proof: proofs/d16-09/README.md and proofs/d16-09/healthcheck-review/. Scaffold CI run 43867538923 passed.
+Notes: Docker runtime NOT_RUN. Fuji indexing, business APIs and production integration remain unimplemented.
+Next: D16-GATE.
+PlanB: none
+```
+
+```text
+[2026-11-16 19:41 ICT] TASK=D16-GATE STATUS=AWAITING_REVIEW
+Owner: AI evaluated evidence; awaiting owner decision
+Git: ba136e7861f3b1d54fe43847b6a94ff1315c096c (evaluated unihack-final)
+Tests: reviewed existing accepted evidence; no new runtime tests run for this documentation task.
+Proof: D16-07 visual acceptance and D16-08 proofs/ui/d16-08/browser-route-review.log; D16-09 proofs/d16-09/healthcheck-review/isolation.log; D16-06 proofs/d16-06-vault-deposit.log.
+Result: all three portal visual directions and routes accepted. Three service processes start independently and return HTTP 200 at /health. Vault deposit has passing Foundry coverage.
+Notes: scope is the D16 checkpoint. Docker runtime NOT_RUN; Fuji sync unimplemented; 24 expected Vault RED cases remain outside the deposit scope.
+Next: Owner reviews D16-GATE before D17.
 PlanB: none
 ```
 
