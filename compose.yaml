@@ -1,23 +1,69 @@
 name: openreserve
 services:
+  postgres:
+    image: postgres:17.6-bookworm
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}
+      CATALOG_DB_PASSWORD: ${CATALOG_DB_PASSWORD:?Set CATALOG_DB_PASSWORD}
+      CHAIN_DB_PASSWORD: ${CHAIN_DB_PASSWORD:?Set CHAIN_DB_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./infra/postgres-init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U postgres -d postgres"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
   catalog-evidence:
     build:
       context: .
       dockerfile: services/catalog-evidence/Dockerfile
+    environment:
+      DATABASE_URL: postgresql://catalog_user:${CATALOG_DB_PASSWORD:?Set CATALOG_DB_PASSWORD}@postgres:5432/catalog_db
+    depends_on:
+      postgres:
+        condition: service_healthy
     ports:
       - "127.0.0.1:${CATALOG_PORT:-3001}:3001"
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3001/ready').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
   chain-indexer:
     build:
       context: .
       dockerfile: services/chain-indexer/Dockerfile
+    environment:
+      DATABASE_URL: postgresql://chain_user:${CHAIN_DB_PASSWORD:?Set CHAIN_DB_PASSWORD}@postgres:5432/chain_db
+      RPC_URL: ${FUJI_RPC_URL:-}
+      CHAIN_ID: '43113'
+    depends_on:
+      postgres:
+        condition: service_healthy
     ports:
       - "127.0.0.1:${CHAIN_PORT:-3002}:3002"
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3002/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
   economics:
     build:
       context: .
       dockerfile: services/economics/Dockerfile
     ports:
       - "127.0.0.1:${ECONOMICS_PORT:-3003}:3003"
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3003/ready').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
   web:
     image: node:24.22.1-bookworm-slim
     working_dir: /app
@@ -29,3 +75,4 @@ services:
       - "127.0.0.1:${WEB_PORT:-4173}:4173"
 volumes:
   web_dependencies:
+  postgres_data:

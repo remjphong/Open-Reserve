@@ -1,0 +1,51 @@
+$ npm run typecheck
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> openreserve@0.0.0 pretypecheck
+> npm run prebuild
+
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> openreserve@0.0.0 prebuild
+> npm run build --workspace @openreserve/api-contracts --workspace @openreserve/contracts-sdk
+
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> @openreserve/api-contracts@0.0.0 build
+> tsc -p tsconfig.json
+
+
+> @openreserve/contracts-sdk@0.0.0 build
+> tsc -p tsconfig.json
+
+
+> openreserve@0.0.0 typecheck
+> npm run typecheck --workspaces
+
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> @openreserve/web@0.0.0 typecheck
+> tsc -p tsconfig.json --noEmit
+
+
+> @openreserve/catalog-evidence@0.0.0 typecheck
+> tsc -p tsconfig.json --noEmit
+
+
+> @openreserve/chain-indexer@0.0.0 typecheck
+> tsc -p tsconfig.json --noEmit
+
+
+> @openreserve/economics@0.0.0 typecheck
+> tsc -p tsconfig.json --noEmit
+
+
+> @openreserve/api-contracts@0.0.0 typecheck
+> tsc -p tsconfig.json --noEmit
+
+
+> @openreserve/contracts-sdk@0.0.0 typecheck
+> tsc -p tsconfig.json --noEmit
+
+
+exit=0

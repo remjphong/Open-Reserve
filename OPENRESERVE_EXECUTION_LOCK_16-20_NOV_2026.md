@@ -317,11 +317,11 @@ Nếu không thể làm trong scope, nêu blocker và mã Plan B, chờ tôi ph�
 
 **Cập nhật lần cuối:** 16/11/2026 — Revision 1.2 Microservices lock (chưa có code/build/deploy được xác minh trong file kế hoạch này)  
 **Current Gate:** `D16-GATE`  
-**Next task:** `D16-08` (owner review)
-**Accepted task IDs:** `D16-01`, `D16-02`, `D16-03`, `D16-04`, `D16-05`, `D16-06`, `D16-07`
+**Next task:** `D16-09` (owner review)
+**Accepted task IDs:** `D16-01`, `D16-02`, `D16-03`, `D16-04`, `D16-05`, `D16-06`, `D16-07`, `D16-08`
 **Blocked task IDs:** *(trống)*  
 **Approved Plan B:** *(trống)*  
-**Current Git commit:** `cba2594b09128f4960ed0622338b8b3f9c59f72e`  
+**Current Git commit:** `5b144518fe19693e71900f16c8464f595ad5e017` (base; D16-09 evidence on review branch)
 **Fuji addresses / TX:** `NOT_VERIFIED`  
 **Actual submission proof:** `NOT_SUBMITTED`
 
@@ -477,6 +477,30 @@ Tests: web typecheck/build and Chromium direct entry, navigation, reload and res
 Proof: proofs/ui/d16-08/README.md, browser.log and four screenshots.
 Notes: fixture data and UI states only; wallet signatures and chain integrations are pending.
 Next: owner reviews D16-08.
+PlanB: none
+```
+
+
+```text
+[2026-11-16 19:12 ICT] TASK=D16-08 STATUS=ACCEPTED
+Owner: user-reviewed and merged PR #7
+Git: 5b144518fe19693e71900f16c8464f595ad5e017 (owner merge)
+Reviewed head: a9343c80d14d9abfaafcd9ce83001979257fb1e1
+Proof: owner accepted 13 route cases in Chromium at 1440×900 and 390×844, typecheck, build and Scaffold CI.
+Notes: static React shell acceptance only.
+Next: D16-09.
+PlanB: none
+```
+
+```text
+[2026-11-16 19:12 ICT] TASK=D16-09 STATUS=AWAITING_REVIEW
+Owner: AI-implemented / pending user review
+Git: review branch ai/d16-service-boundary
+Files: docs/service-contracts.md, services/*, packages/*, infra/postgres-init/, compose.yaml, scripts/, proofs/d16-09/
+Proof: proofs/d16-09/README.md and raw command logs.
+Notes: independent local processes and database ownership verified. Business routes return 501. PR #8 review revision uses /health for Indexer container liveness and keeps /ready at 503 (SYNC_NOT_IMPLEMENTED). Docker runtime NOT_RUN locally.
+Review proof: proofs/d16-09/healthcheck-review/
+Next: Owner reviews D16-09.
 PlanB: none
 ```
 

@@ -1,0 +1,7 @@
+v24.22.1
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+11.9.0
+$ npm ci
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+added 156 packages in 2s

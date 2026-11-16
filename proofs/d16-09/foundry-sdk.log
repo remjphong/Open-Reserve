@@ -1,0 +1,33 @@
+$ forge --version
+forge Version: 1.5.0-v1.5.0
+Commit SHA: 1c57854462289b2e71ee7654cd6666217ed86ffd
+Build Timestamp: 2025-11-24T06:05:14.965520784Z (1763964314)
+Build Profile: maxperf
+$ cd contracts && forge build
+Compiling 17 files with Solc 0.8.30
+Solc 0.8.30 finished in 256.72ms
+Compiler run successful!
+2026-11-16T12:12:10.338246Z  WARN evm::traces: failed to read cache file path="/home/agent/.foundry/cache/signatures" err=Read { source: Os { code: 2, kind: NotFound, message: "No such file or directory" }, path: "/home/agent/.foundry/cache/signatures" }
+note[screaming-snake-case-immutable]: immutables should use SCREAMING_SNAKE_CASE
+  --> src/ReserveVault.sol:16:30
+   |
+16 |     address public immutable token;
+   |                              ^^^^^ help: consider using: `TOKEN`
+   |
+   = help: https://book.getfoundry.sh/reference/forge/forge-lint#screaming-snake-case-immutable
+
+note[screaming-snake-case-immutable]: immutables should use SCREAMING_SNAKE_CASE
+  --> src/ReserveVault.sol:17:30
+   |
+17 |     address public immutable resolver;
+   |                              ^^^^^^^^ help: consider using: `RESOLVER`
+   |
+   = help: https://book.getfoundry.sh/reference/forge/forge-lint#screaming-snake-case-immutable
+
+$ npm run sdk:check
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> openreserve@0.0.0 sdk:check
+> node scripts/generate-sdk.mjs --check
+
+SDK ABI check PASS: 54 entries; frozen interface matches
