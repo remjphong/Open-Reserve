@@ -148,7 +148,7 @@ Task có 5 trạng thái: `TODO`, `IN_PROGRESS`, `BLOCKED`, `AWAITING_REVIEW`, `
 - [x] **D16-03 [P0]** `docs/product-and-terms.md` khóa PER_SESSION, TIME_ACCESS, `termsHash`, 6 kịch bản, chính sách hoàn có điều kiện, testnet demo accelerated. **ACCEPT:** bạn xác nhận quyền và nghĩa vụ không nhầm check-in.
 - [x] **D16-04 [P0]** `docs/contract-interface.md`: agreement/claim state, actor, input, events, precondition, read APIs đủ phục vụ 3 portal; bất biến I1–I10. **ACCEPT:** frontend không cần đoán ABI.
 - [x] **D16-05 [P0]** Test skeleton RED: deposit, PT session, time interval, unauthorized, duplicate, refund/conservation. **ACCEPT:** `forge test` thực thi test case tên rõ.
-- [ ] **D16-06 [P0]** Mock token và Vault deposit minimal, kiểm thử thật. **ACCEPT:** tiền test chuyển từ buyer → Vault, `forge test` deposit PASS.
+- [x] **D16-06 [P0]** Mock token và Vault deposit minimal, kiểm thử thật. **ACCEPT:** tiền test chuyển từ buyer → Vault, `forge test` deposit PASS.
 - [ ] **D16-GATE [P0]** **Cả 2 gate**: 3 portal visual directions đã duyệt + routes chạy; 3 service boot/health pass riêng và contract deposit được test. Nếu chậm, giảm phần trang phụ nhưng KHÔNG được bỏ high-fidelity freeze hoặc một portal.
 
 ### 📅 17/11 — COMPLETE FINANCIAL CORE + CUSTOMER JOURNEY (Gate: cuối ngày)
@@ -317,11 +317,11 @@ Nếu không thể làm trong scope, nêu blocker và mã Plan B, chờ tôi ph�
 
 **Cập nhật lần cuối:** 16/11/2026 — Revision 1.2 Microservices lock (chưa có code/build/deploy được xác minh trong file kế hoạch này)  
 **Current Gate:** `D16-GATE`  
-**Next task:** `D16-06`  
-**Accepted task IDs:** `D16-01`, `D16-02`, `D16-03`, `D16-04`, `D16-05`  
+**Next task:** `D16-07`  
+**Accepted task IDs:** `D16-01`, `D16-02`, `D16-03`, `D16-04`, `D16-05`, `D16-06`  
 **Blocked task IDs:** *(trống)*  
 **Approved Plan B:** *(trống)*  
-**Current Git commit:** `12996a7c2b1bec50d6e8e765084c97207e9bbe12`  
+**Current Git commit:** `cba2594b09128f4960ed0622338b8b3f9c59f72e`  
 **Fuji addresses / TX:** `NOT_VERIFIED`  
 **Actual submission proof:** `NOT_SUBMITTED`
 
@@ -432,6 +432,17 @@ Git: 12996a7c2b1bec50d6e8e765084c97207e9bbe12 (PR #4 merge)
 Proof: reviewed d3128b3f9191a19f1907ef2eac3ad3ec260e3d07, Scaffold CI 43837116163 passed. Foundry executed 29 expected RED cases, zero skips or passes.
 Notes: accepted RED baseline only. Financial runtime invariants remain unverified.
 Next: D16-06.
+PlanB: none
+```
+
+```text
+[2026-11-16 16:46 ICT] TASK=D16-06 STATUS=ACCEPTED
+Owner: user-reviewed / AI-implemented
+Git: cba2594b09128f4960ed0622338b8b3f9c59f72e (PR #5 merge into unihack-final)
+Reviewed head: 6e59ad21f062551801bb0bcc667b3ac30e3345d8
+Proof: clean Foundry re-run matched 10 targeted PASS and full suite 10 PASS, 24 expected RED, 0 skipped. Scaffold CI run 43838633624 passed.
+Notes: deposit functionality only. PT settlement, TIME_ACCESS claims, disputes, refunds and withdrawals remain unimplemented. No production deployment approval.
+Next: D16-07.
 PlanB: none
 ```
 
