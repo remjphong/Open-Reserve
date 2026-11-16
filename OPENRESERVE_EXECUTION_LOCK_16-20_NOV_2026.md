@@ -141,7 +141,7 @@ Task có 5 trạng thái: `TODO`, `IN_PROGRESS`, `BLOCKED`, `AWAITING_REVIEW`, `
 ### 📅 16/11 — KHÓA THIẾT KẾ SẢN PHẨM, VISUAL VÀ KHUNG CONTRACT (Gate: cuối ngày)
 
 - [x] **D16-01 [P0]** Repo/nhánh `unihack-final`, đưa `EXECUTION_LOCK` (rev 1.2) + UX + Architecture annexes vào root; commit và ghi SHA. **ACCEPT:** link 3 file trên GitHub + `git status` sạch.
-- [ ] **D16-02 [P0]** Khởi tạo npm workspaces `apps/web`, `services/catalog-evidence`, `services/chain-indexer`, `services/economics`, `packages/contracts-sdk`, `contracts/` Foundry/OpenZeppelin; `.env.example`, `.gitignore`, Docker Compose/CI stub. **ACCEPT:** `forge build`, npm workspace build/typecheck, `docker compose config` (nếu cài Docker) hoạt động; không commit secrets.
+- [x] **D16-02 [P0]** Khởi tạo npm workspaces `apps/web`, `services/catalog-evidence`, `services/chain-indexer`, `services/economics`, `packages/contracts-sdk`, `contracts/` Foundry/OpenZeppelin; `.env.example`, `.gitignore`, Docker Compose/CI stub. **ACCEPT:** `forge build`, npm workspace build/typecheck, `docker compose config` (nếu cài Docker) hoạt động; không commit secrets.
 - [ ] **D16-07 [P0]** **VISUAL FREEZE**: 3 reference frames high-fidelity (Customer package/pass, Gym agreement/action, Operations ledger/dispute), design tokens, thành phần chung, microcopy tiếng Việt; review theo UX annex. **ACCEPT:** 3 ảnh chụp hoặc 3 URL preview, bạn APPROVE; không chấp nhận wireframe chữ như hoàn thành.
 - [ ] **D16-08 [P0]** Dựng `apps/web/src/portals/*`, 3 URL `/customer`, `/gym`, `/operations`, AppShell/RoleNavigation/WalletIdentity/MoneyFigure/Status. **ACCEPT:** có thể mở cả 3 URL riêng, cùng visual system, không dead navigation trên skeleton; mock UI ghi rõ `DEMO UI — CHƯA KẾT NỐI` nếu chưa nối chain.
 - [ ] **D16-09 [P0]** **SERVICE BOUNDARY FREEZE:** tạo `docs/service-contracts.md` (bảng API OpenAPI/Zod, data ownership, auth rules, stale-state rules); tạo `/health` cho cả 3 service và `packages/contracts-sdk` chia ABI/types read-only. **ACCEPT:** 3 process khởi động riêng, contract tests HTTP health pass, một service stop không kéo hai service còn lại.
@@ -317,11 +317,11 @@ Nếu không thể làm trong scope, nêu blocker và mã Plan B, chờ tôi ph�
 
 **Cập nhật lần cuối:** 16/11/2026 — Revision 1.2 Microservices lock (chưa có code/build/deploy được xác minh trong file kế hoạch này)  
 **Current Gate:** `D16-GATE`  
-**Next task:** `D16-02`  
-**Accepted task IDs:** `D16-01`  
+**Next task:** `D16-03` (owner review)  
+**Accepted task IDs:** `D16-01`, `D16-02`  
 **Blocked task IDs:** *(trống)*  
 **Approved Plan B:** *(trống)*  
-**Current Git commit:** `5dc785a5ed35af2ab9de92eb83d416e1d154ab6f`  
+**Current Git commit:** `010a7852130a84358dc37f793bd109308ef727cf`  
 **Fuji addresses / TX:** `NOT_VERIFIED`  
 **Actual submission proof:** `NOT_SUBMITTED`
 
@@ -369,6 +369,27 @@ Tests: npm ci, npm run typecheck, npm run build, forge build and OpenZeppelin im
 Proof: proofs/d16-02-workspaces.log, proofs/d16-02-foundry.log, proofs/d16-02-compose.log, proofs/d16-02-tree.txt
 Notes: Compose configuration checked with Docker Compose v2.39.4. Containers were not run. Routes, health, and Vault logic are later tasks.
 Next: Owner reviews D16-02.
+PlanB: none
+```
+
+```text
+[2026-11-16 14:19 ICT] TASK=D16-02 STATUS=ACCEPTED
+Owner: user-reviewed / AI-implemented
+Git: 300e70dca912f0718245917c890962c459698958
+Proof: owner confirmed ACCEPT D16-02 in chat. PR #1 merged into unihack-final. GitHub Actions run 43822363951 passed.
+Next: D16-03.
+PlanB: none
+```
+
+```text
+[2026-11-16 14:19 ICT] TASK=D16-03 STATUS=AWAITING_REVIEW
+Owner: AI-implemented / pending user review
+Git: 010a7852130a84358dc37f793bd109308ef727cf
+Files: docs/product-and-terms.md
+Tests: checks of canonical bytes, PT rounding, interval additivity, 30/90 equivalence and refund conservation passed. GitHub file content matched local bytes.
+Proof: termsVersion 1.0.0 / Keccak-256 0xbcb7bf6578cd0ed96b1a90d80b63ef778c9d38eb55b4e8f17ee36bde7c52201c
+Notes: proposed challenge windows are 24h for the model and 60s for Fuji, with 270s Fuji access. No contract or Fuji execution at this step.
+Next: Owner reviews D16-03, then D16-04.
 PlanB: none
 ```
 
