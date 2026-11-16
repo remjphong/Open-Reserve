@@ -1,0 +1,15 @@
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+*.p12
+*.pfx
+*.keystore
+secrets/
+node_modules/
+dist/
+coverage/
+contracts/cache/
+contracts/out/
+contracts/broadcast/
