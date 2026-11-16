@@ -1,13 +1,38 @@
 import { AgreementReceipt } from '../design-system/receipt'
 import { agreement as a } from '../demo/agreement'
-import { DisabledAction, MoneyBreakdown, MoneyFigure, StatusPill } from '../design-system/portal'
+import { DisabledAction, MoneyBreakdown, MoneyFigure, StatusPill, PortalPage, OverviewCard } from '../design-system/portal'
 
 export function Operations({ path }: { path: string }) {
-  const audit = path.startsWith('/operations/agreements')
+  if (path === '/operations' || path === '/operations/agreements' || path === '/operations/disputes') {
+    const isLedger = path === '/operations/agreements'
+    const isDisputes = path === '/operations/disputes'
+    const sections = isLedger ? 'Sổ cái' : isDisputes ? 'Phản đối' : 'Tổng quan'
+    return <PortalPage breadcrumb={`Vận hành / ${sections}`}
+      title={isLedger ? 'Danh sách sổ cái' : isDisputes ? 'Danh sách phản đối' : 'Tổng quan vận hành'}>
+      <div className="grid">
+        {!isDisputes && <OverviewCard title="Hợp đồng đang theo dõi" href={`/operations/agreements/${a.id}`} link={`Mở sổ cái ${a.id}`}>
+          <p>{a.packageName} · {a.id} · Vault giữ <MoneyFigure value={a.locked} /></p>
+        </OverviewCard>}
+        {!isLedger && <OverviewCard title="Phản đối cần xem xét" href={`/operations/disputes/${a.claim}`} link={`Mở hồ sơ ${a.claim}`}>
+          <p>{a.claim} · Hợp đồng {a.id} · <MoneyFigure value={a.disputed} /></p>
+        </OverviewCard>}
+      </div>
+    </PortalPage>
+  }
+  const audit = path === `/operations/agreements/${a.id}`
+  if (audit) return <PortalPage breadcrumb="Vận hành / Sổ cái" title={`Sổ cái ${a.id}`}>
+    <div className="grid ops-grid">
+      <section className="card card-pad work-detail"><div className="card-head"><h2>Đối chiếu số dư hợp đồng</h2></div>
+        <MoneyBreakdown rows={[[ 'Đã nạp', a.deposited ], [ 'Gym đã rút', a.withdrawn ], [ 'Gym có thể rút', a.withdrawable ], [ 'Vault đang giữ', a.locked ], [ 'Đã được duyệt hoàn', a.refundable ]]} />
+        <a className="inline-link" href={`/operations/disputes/${a.claim}`}>Xem phản đối {a.claim}</a>
+      </section>
+      <AgreementReceipt />
+    </div>
+  </PortalPage>
   return <>
     <div className="section-title section-actions title-row"><div>
-      <div className="breadcrumb">Vận hành / {audit ? 'Sổ cái' : 'Phản đối'}</div>
-      <h1>{audit ? `Sổ cái ${a.id}` : `Hồ sơ ${a.claim}`}</h1>
+      <div className="breadcrumb">Vận hành / Phản đối</div>
+      <h1>{`Hồ sơ ${a.claim}`}</h1>
       <p>Hợp đồng {a.id} · {a.packageName}</p></div><StatusPill warning>Đang xem xét</StatusPill></div>
     <dl className="overview card">
       <div><dt>Vault đang giữ</dt><dd><MoneyFigure value={a.locked} variant="money-large" /></dd><span className="caption">Số dư còn lại của hợp đồng.</span></div>

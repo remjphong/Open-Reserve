@@ -35,7 +35,7 @@ export function RoleNavigation({ items, path, label, style }: {
   items: NavItem[]; path: string; label: string; style: string
 }) {
   const active = [...items].sort((a, b) => b.href.length - a.href.length)
-    .find(item => path === item.href || path.startsWith(item.href + '/'))
+    .find(item => path === item.href || path.startsWith(item.href + '/') || (item.href.split('/').length > 3 && item.href.split('/').slice(0, -1).join('/') === path))
   return <nav className={style} aria-label={`Điều hướng ${label}`}>
     {items.map(item => <a key={item.href} href={item.href} aria-current={active === item ? 'page' : undefined}>
       {style === 'sidebar-nav' && <Icon name={item.icon} />}{item.label}
@@ -104,4 +104,23 @@ export function SampleStates() {
     <LoadingSkeleton />
     <ErrorState>Kiểm tra kết nối trước khi thử tải lại.</ErrorState>
   </div></details>
+}
+
+export function PortalPage({ breadcrumb, title, children }: {
+  breadcrumb: string; title: string; children: ReactNode
+}) {
+  return <>
+    <div className="section-title"><div className="breadcrumb">{breadcrumb}</div><h1>{title}</h1></div>
+    {children}
+  </>
+}
+
+export function OverviewCard({ title, children, href, link }: {
+  title: string; children: ReactNode; href: string; link: string
+}) {
+  return <section className="card card-pad">
+    <div className="card-head"><h2>{title}</h2></div>
+    {children}
+    <a className="inline-link" href={href}>{link} <Icon name="arrow-right" /></a>
+  </section>
 }

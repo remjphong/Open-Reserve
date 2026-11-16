@@ -1,12 +1,21 @@
 import { AgreementReceipt } from '../design-system/receipt'
 import { agreement as a } from '../demo/agreement'
-import { DisabledAction, MoneyBreakdown, StatusPill, Icon } from '../design-system/portal'
+import { DisabledAction, MoneyBreakdown, StatusPill, Icon, PortalPage, OverviewCard } from '../design-system/portal'
 
 const pass = '/customer/passes/OR-024'
 export function Customer({ path }: { path: string }) {
+  if (path === '/customer' || path === '/customer/passes') {
+    const list = path === '/customer/passes'
+    return <PortalPage breadcrumb={list ? 'Khách hàng / Gói của tôi' : 'Khách hàng / Tổng quan'}
+      title={list ? 'Các gói của tôi' : 'Tổng quan khách hàng'}>
+      <OverviewCard title={list ? 'Gói đang sử dụng' : 'Gói tập hiện tại'} href={pass} link="Mở gói PT 10 buổi">
+        <p>{a.packageName} · {a.id} · {a.sessions}/{a.totalSessions} buổi đã chốt</p>
+      </OverviewCard>
+    </PortalPage>
+  }
   const evidence = path === pass + '/evidence'
   return <>
-    <div className="section-title"><div className="breadcrumb">Khách hàng / Gói của tôi</div>
+    <div className="section-title"><div className="breadcrumb">Khách hàng / Gói của tôi{evidence && ' / Bằng chứng'}</div>
       <h1>{evidence ? 'Bằng chứng buổi PT-04' : 'Gói tập của tôi'}</h1>
       <p>{evidence ? 'Đọc hồ sơ trước khi xác nhận.' : 'Theo dõi các buổi tập và khoản token còn trong Vault.'}</p>
     </div>

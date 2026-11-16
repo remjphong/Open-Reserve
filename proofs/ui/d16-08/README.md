@@ -1,6 +1,6 @@
 # D16-08 · Portal shells
 
-**AWAITING_REVIEW.** Screenshots show the built React app served by Vite preview. One fixture (OR-024) is used across all three roles. Wallets, Fuji, backend requests and signatures are outside this checkpoint.
+**AWAITING_REVIEW.** The screenshots below capture the first review commit (bc7795a). The route semantics revision was checked separately with the browser regression script below. One fixture (OR-024) is used across all three roles. Wallets, Fuji, backend requests and signatures are outside this checkpoint.
 
 | Portal | Entry | Screenshot |
 | --- | --- | --- |
@@ -20,3 +20,5 @@ npm run preview --workspace @openreserve/web
 ```
 
 A later production host must serve `index.html` for the portal deep links, as Vite preview does.
+
+Run [verify-routes.cjs](verify-routes.cjs) while Vite preview is listening on port 4173 with Playwright and Chromium available. [Route semantics verification output](browser-route-review.log) covers exact headings, breadcrumbs, content markers, active navigation, deep-link reloads and recovery at both viewport sizes.
