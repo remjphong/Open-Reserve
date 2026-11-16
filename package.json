@@ -1,0 +1,26 @@
+{
+  "name": "openreserve",
+  "version": "0.0.0",
+  "private": true,
+  "workspaces": [
+    "apps/web",
+    "services/catalog-evidence",
+    "services/chain-indexer",
+    "services/economics",
+    "packages/api-contracts",
+    "packages/contracts-sdk"
+  ],
+  "engines": {
+    "node": "^24.0.0"
+  },
+  "packageManager": "npm@11.9.0",
+  "scripts": {
+    "build": "npm run build --workspaces",
+    "typecheck": "npm run typecheck --workspaces"
+  },
+  "devDependencies": {
+    "typescript": "5.9.3",
+    "@types/node": "24.10.1",
+    "@openzeppelin/contracts": "5.4.0"
+  }
+}

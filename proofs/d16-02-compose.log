@@ -1,0 +1,70 @@
+Docker Compose version v2.39.4
+name: openreserve
+services:
+  catalog-evidence:
+    build:
+      context: <repo>
+      dockerfile: services/catalog-evidence/Dockerfile
+    networks:
+      default: null
+    ports:
+      - mode: ingress
+        host_ip: 127.0.0.1
+        target: 3001
+        published: "3001"
+        protocol: tcp
+  chain-indexer:
+    build:
+      context: <repo>
+      dockerfile: services/chain-indexer/Dockerfile
+    networks:
+      default: null
+    ports:
+      - mode: ingress
+        host_ip: 127.0.0.1
+        target: 3002
+        published: "3002"
+        protocol: tcp
+  economics:
+    build:
+      context: <repo>
+      dockerfile: services/economics/Dockerfile
+    networks:
+      default: null
+    ports:
+      - mode: ingress
+        host_ip: 127.0.0.1
+        target: 3003
+        published: "3003"
+        protocol: tcp
+  web:
+    command:
+      - sh
+      - -c
+      - npm ci && npm run build --workspace @openreserve/web && npm run preview --workspace @openreserve/web -- --host 0.0.0.0 --port 4173 --strictPort
+    image: node:24.22.1-bookworm-slim
+    networks:
+      default: null
+    ports:
+      - mode: ingress
+        host_ip: 127.0.0.1
+        target: 4173
+        published: "4173"
+        protocol: tcp
+    volumes:
+      - type: bind
+        source: <repo>
+        target: /app
+        bind:
+          create_host_path: true
+      - type: volume
+        source: web_dependencies
+        target: /app/node_modules
+        volume: {}
+    working_dir: /app
+networks:
+  default:
+    name: openreserve_default
+volumes:
+  web_dependencies:
+    name: openreserve_web_dependencies

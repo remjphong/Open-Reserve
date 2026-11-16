@@ -360,6 +360,18 @@ Next: D16-02.
 PlanB: none
 ```
 
+```text
+[2026-11-16 14:13 ICT] TASK=D16-02 STATUS=AWAITING_REVIEW
+Owner: AI-implemented / pending user review
+Git: D16-02 scaffold commit on review branch d16-02-scaffold
+Files: apps/web, services/*, packages/*, contracts/, compose.yaml, .github/workflows/scaffold.yml, proofs/d16-02-*
+Tests: npm ci, npm run typecheck, npm run build, forge build and OpenZeppelin import compile, Compose config PASS locally.
+Proof: proofs/d16-02-workspaces.log, proofs/d16-02-foundry.log, proofs/d16-02-compose.log, proofs/d16-02-tree.txt
+Notes: Compose configuration checked with Docker Compose v2.39.4. Containers were not run. Routes, health, and Vault logic are later tasks.
+Next: Owner reviews D16-02.
+PlanB: none
+```
+
 ---
 
 ## I. NON-NEGOTIABLE SAFETY / QUALITY
