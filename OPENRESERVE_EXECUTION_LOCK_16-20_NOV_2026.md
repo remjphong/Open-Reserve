@@ -339,6 +339,18 @@ Next: <task ID>
 PlanB: <none or B-CODE; approval reference>
 ```
 
+```text
+[2026-11-16 14:07 ICT] TASK=D16-01 STATUS=AWAITING_REVIEW
+Owner: AI-implemented / pending user review
+Git: c1fdd3085930912aa26158177dbe7822ecedb4d8
+Files: 3 root lock documents, README.md, .gitignore, docs/, proofs/, research/
+Tests: anonymous HTTPS reads of all 3 documents at the proof commit PASS, byte comparison PASS, local git status clean
+Proof: https://github.com/remjphong/Open-Reserve/commit/c1fdd3085930912aa26158177dbe7822ecedb4d8
+Notes: Public branch unihack-final. D16-GATE remains partial pending the remaining tasks.
+Next: Owner reviews D16-01, then D16-02.
+PlanB: none
+```
+
 ---
 
 ## I. NON-NEGOTIABLE SAFETY / QUALITY
