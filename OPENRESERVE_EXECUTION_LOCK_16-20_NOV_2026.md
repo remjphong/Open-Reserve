@@ -142,7 +142,7 @@ Task có 5 trạng thái: `TODO`, `IN_PROGRESS`, `BLOCKED`, `AWAITING_REVIEW`, `
 
 - [x] **D16-01 [P0]** Repo/nhánh `unihack-final`, đưa `EXECUTION_LOCK` (rev 1.2) + UX + Architecture annexes vào root; commit và ghi SHA. **ACCEPT:** link 3 file trên GitHub + `git status` sạch.
 - [x] **D16-02 [P0]** Khởi tạo npm workspaces `apps/web`, `services/catalog-evidence`, `services/chain-indexer`, `services/economics`, `packages/contracts-sdk`, `contracts/` Foundry/OpenZeppelin; `.env.example`, `.gitignore`, Docker Compose/CI stub. **ACCEPT:** `forge build`, npm workspace build/typecheck, `docker compose config` (nếu cài Docker) hoạt động; không commit secrets.
-- [ ] **D16-07 [P0]** **VISUAL FREEZE**: 3 reference frames high-fidelity (Customer package/pass, Gym agreement/action, Operations ledger/dispute), design tokens, thành phần chung, microcopy tiếng Việt; review theo UX annex. **ACCEPT:** 3 ảnh chụp hoặc 3 URL preview, bạn APPROVE; không chấp nhận wireframe chữ như hoàn thành.
+- [x] **D16-07 [P0]** **VISUAL FREEZE**: 3 reference frames high-fidelity (Customer package/pass, Gym agreement/action, Operations ledger/dispute), design tokens, thành phần chung, microcopy tiếng Việt; review theo UX annex. **ACCEPT:** 3 ảnh chụp hoặc 3 URL preview, bạn APPROVE; không chấp nhận wireframe chữ như hoàn thành.
 - [ ] **D16-08 [P0]** Dựng `apps/web/src/portals/*`, 3 URL `/customer`, `/gym`, `/operations`, AppShell/RoleNavigation/WalletIdentity/MoneyFigure/Status. **ACCEPT:** có thể mở cả 3 URL riêng, cùng visual system, không dead navigation trên skeleton; mock UI ghi rõ `DEMO UI — CHƯA KẾT NỐI` nếu chưa nối chain.
 - [ ] **D16-09 [P0]** **SERVICE BOUNDARY FREEZE:** tạo `docs/service-contracts.md` (bảng API OpenAPI/Zod, data ownership, auth rules, stale-state rules); tạo `/health` cho cả 3 service và `packages/contracts-sdk` chia ABI/types read-only. **ACCEPT:** 3 process khởi động riêng, contract tests HTTP health pass, một service stop không kéo hai service còn lại.
 - [x] **D16-03 [P0]** `docs/product-and-terms.md` khóa PER_SESSION, TIME_ACCESS, `termsHash`, 6 kịch bản, chính sách hoàn có điều kiện, testnet demo accelerated. **ACCEPT:** bạn xác nhận quyền và nghĩa vụ không nhầm check-in.
@@ -317,8 +317,8 @@ Nếu không thể làm trong scope, nêu blocker và mã Plan B, chờ tôi ph�
 
 **Cập nhật lần cuối:** 16/11/2026 — Revision 1.2 Microservices lock (chưa có code/build/deploy được xác minh trong file kế hoạch này)  
 **Current Gate:** `D16-GATE`  
-**Next task:** `D16-07`  
-**Accepted task IDs:** `D16-01`, `D16-02`, `D16-03`, `D16-04`, `D16-05`, `D16-06`  
+**Next task:** `D16-08` (owner review)
+**Accepted task IDs:** `D16-01`, `D16-02`, `D16-03`, `D16-04`, `D16-05`, `D16-06`, `D16-07`
 **Blocked task IDs:** *(trống)*  
 **Approved Plan B:** *(trống)*  
 **Current Git commit:** `cba2594b09128f4960ed0622338b8b3f9c59f72e`  
@@ -455,6 +455,28 @@ Tests: Chromium visual/viewport checks PASS for Customer, Gym, Operations at 144
 Proof: proofs/ui/d16-07/review.md, capture.log and six viewport screenshots.
 Notes: static fixture only; no Fuji connection, signing or service integration.
 Next: Owner reviews all three visual references before D16-08.
+PlanB: none
+```
+
+```text
+[2026-11-16 17:27 ICT] TASK=D16-07 STATUS=ACCEPTED
+Owner: user-reviewed and merged PR #6
+Git: a90ac94 (owner merge)
+Proof: approved d5dbb1abf7cfd87865ee8fc77cd82d42ae36108a. Customer 9/10, Gym 9/10, Operations 8/10. Scaffold CI 43845974149 passed.
+Notes: visual direction only.
+Next: D16-08.
+PlanB: none
+```
+
+```text
+[2026-11-16 17:27 ICT] TASK=D16-08 STATUS=AWAITING_REVIEW
+Owner: AI-implemented / pending user review
+Git: review branch ai/d16-08-portal-shells
+Files: apps/web/src/, proofs/ui/d16-08/
+Tests: web typecheck/build and Chromium direct entry, navigation, reload and responsive checks passed.
+Proof: proofs/ui/d16-08/README.md, browser.log and four screenshots.
+Notes: fixture data and UI states only; wallet signatures and chain integrations are pending.
+Next: owner reviews D16-08.
 PlanB: none
 ```
 

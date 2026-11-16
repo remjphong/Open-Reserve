@@ -1,1 +1,15 @@
-@import "tailwindcss";
+@import "../../../docs/design/d16-07/assets/fonts.css";
+@import "../../../docs/design/d16-07/reference.css";
+
+.portal-links { display: flex; gap: var(--space-3); flex-wrap: wrap; }
+
+@media (max-width: 820px) {
+  .workspace .mobile-nav {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-1);
+    text-align: center;
+    overflow: visible;
+  }
+  .workspace .mobile-nav a { justify-content: center; }
+}
