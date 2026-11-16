@@ -1,0 +1,9 @@
+forge Version: 1.5.0-v1.5.0
+Commit SHA: 1c57854462289b2e71ee7654cd6666217ed86ffd
+Build Timestamp: 2025-11-24T06:05:14.965520784Z (1763964314)
+Build Profile: maxperf
+Nothing to compile
+Compiling 2 files with Solc 0.8.30
+Solc 0.8.30 finished in 6.81ms
+Compiler run successful!
+2026-11-16T07:13:00.683921Z  WARN evm::traces: failed to read cache file path="/home/agent/.foundry/cache/signatures" err=Read { source: Os { code: 2, kind: NotFound, message: "No such file or directory" }, path: "/home/agent/.foundry/cache/signatures" }

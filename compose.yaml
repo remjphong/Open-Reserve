@@ -1,0 +1,31 @@
+name: openreserve
+services:
+  catalog-evidence:
+    build:
+      context: .
+      dockerfile: services/catalog-evidence/Dockerfile
+    ports:
+      - "127.0.0.1:${CATALOG_PORT:-3001}:3001"
+  chain-indexer:
+    build:
+      context: .
+      dockerfile: services/chain-indexer/Dockerfile
+    ports:
+      - "127.0.0.1:${CHAIN_PORT:-3002}:3002"
+  economics:
+    build:
+      context: .
+      dockerfile: services/economics/Dockerfile
+    ports:
+      - "127.0.0.1:${ECONOMICS_PORT:-3003}:3003"
+  web:
+    image: node:24.22.1-bookworm-slim
+    working_dir: /app
+    volumes:
+      - .:/app
+      - web_dependencies:/app/node_modules
+    command: ["sh", "-c", "npm ci && npm run build --workspace @openreserve/web && npm run preview --workspace @openreserve/web -- --host 0.0.0.0 --port 4173 --strictPort"]
+    ports:
+      - "127.0.0.1:${WEB_PORT:-4173}:4173"
+volumes:
+  web_dependencies:
