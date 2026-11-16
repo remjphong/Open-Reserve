@@ -446,6 +446,18 @@ Next: D16-07.
 PlanB: none
 ```
 
+```text
+[2026-11-16 17:03 ICT] TASK=D16-07 STATUS=AWAITING_REVIEW
+Owner: AI-implemented / pending user review
+Git: review branch ai/d16-07-visual-freeze
+Files: docs/design/d16-07/, proofs/ui/d16-07/
+Tests: Chromium visual/viewport checks PASS for Customer, Gym, Operations at 1440x900 and 390x844.
+Proof: proofs/ui/d16-07/review.md, capture.log and six viewport screenshots.
+Notes: static fixture only; no Fuji connection, signing or service integration.
+Next: Owner reviews all three visual references before D16-08.
+PlanB: none
+```
+
 ---
 
 ## I. NON-NEGOTIABLE SAFETY / QUALITY
