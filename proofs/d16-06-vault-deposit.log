@@ -1,0 +1,110 @@
+Base: 7f633b2ba3a67379d126c4899d0554a899979ad8
+
+$ forge --version
+forge Version: 1.5.0-v1.5.0
+Commit SHA: 1c57854462289b2e71ee7654cd6666217ed86ffd
+Build Timestamp: 2025-11-24T06:05:14.965520784Z (1763964314)
+Build Profile: maxperf
+
+$ forge test -vv --match-test 'test_(Deposit|TimeConfiguration|TimeRejectsShortenedLocal)'
+Compiling 18 files with Solc 0.8.30
+Solc 0.8.30 finished in 258.64ms
+Compiler run successful!
+2026-11-16T09:18:07.724988Z  WARN evm::traces::external: etherscan config not found
+
+Ran 5 tests for test/ReserveVault.t.sol:ReserveVaultTest
+[PASS] test_DepositRejectsUnapprovedTermsBeforeTransfer() (gas: 26366)
+[PASS] test_DepositTransfersExactlyAndOpensAgreement() (gas: 227509)
+[PASS] test_TimeConfigurationFujiRejectsShortenedWindow() (gas: 1480919)
+[PASS] test_TimeConfigurationLocal() (gas: 6743)
+[PASS] test_TimeRejectsShortenedLocalDurationAndWindow() (gas: 29063)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 1.94ms (1.31ms CPU time)
+
+Ran 5 tests for test/ReserveVaultDeposit.t.sol:ReserveVaultDepositTest
+[PASS] test_DepositAcrossTwoAgreementsSeparatesLedgers() (gas: 324106)
+[PASS] test_DepositMockTokenAndEmitAgreementOpened() (gas: 223738)
+[PASS] test_DepositRejectsResolverAsBuyerOrMerchant() (gas: 37179)
+[PASS] test_DepositRequiresCallerAllowanceAndKeepsSequentialIdOnFailure() (gas: 211726)
+[PASS] test_DepositShortReceiptRevertsTokenAndAgreementChanges() (gas: 2178732)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 2.13ms (3.62ms CPU time)
+
+Ran 2 test suites in 5.45ms (4.06ms CPU time): 10 tests passed, 0 failed, 0 skipped (10 total tests)
+
+$ forge test -vv
+No files changed, compilation skipped
+2026-11-16T09:18:07.786093Z  WARN evm::traces::external: etherscan config not found
+
+Ran 5 tests for test/ReserveVaultDeposit.t.sol:ReserveVaultDepositTest
+[PASS] test_DepositAcrossTwoAgreementsSeparatesLedgers() (gas: 324106)
+[PASS] test_DepositMockTokenAndEmitAgreementOpened() (gas: 223738)
+[PASS] test_DepositRejectsResolverAsBuyerOrMerchant() (gas: 37179)
+[PASS] test_DepositRequiresCallerAllowanceAndKeepsSequentialIdOnFailure() (gas: 211726)
+[PASS] test_DepositShortReceiptRevertsTokenAndAgreementChanges() (gas: 2178732)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 2.19ms (1.37ms CPU time)
+
+Ran 29 tests for test/ReserveVault.t.sol:ReserveVaultTest
+[FAIL: VaultBehaviorNotImplemented(0xd0fa2436); counterexample: calldata=0xdc166329000000000000000000000000000000000000000000000000000000000000b74f args=[46927 [4.692e4]]] testFuzz_DepositAndAuthorizedRefundConserve(uint16) (runs: 0, μ: 0, ~: 0)
+[PASS] test_DepositRejectsUnapprovedTermsBeforeTransfer() (gas: 26366)
+[PASS] test_DepositTransfersExactlyAndOpensAgreement() (gas: 227509)
+[FAIL: VaultBehaviorNotImplemented(0x2ceb5bb6)] test_DisputeIsIsolatedAndPayableFundsRemainAvailable() (gas: 290733)
+[FAIL: VaultBehaviorNotImplemented(0xd0fa2436)] test_DisputedTerminationRequiresScopedResolverDecision() (gas: 177369)
+[FAIL: VaultBehaviorNotImplemented(0x2ceb5bb6)] test_PtCancellationReleasesCapacityAndEmitsIndexerEvent() (gas: 177392)
+[FAIL: VaultBehaviorNotImplemented(0x2ceb5bb6)] test_PtLastSlotConfirmationAndResolutionCannotBothSettle() (gas: 177449)
+[FAIL: VaultBehaviorNotImplemented(0x2ceb5bb6)] test_PtRefundDoesNotAdvanceGymRoundingIndex() (gas: 177399)
+[FAIL: VaultBehaviorNotImplemented(0x2ceb5bb6)] test_PtRejectsCancellationAfterConfirmationOrChallenge() (gas: 177352)
+[FAIL: Error != expected error: VaultBehaviorNotImplemented(0x2ceb5bb6) != Unauthorized()] test_PtRejectsNonPartyActionsAndDuplicateSession() (gas: 177870)
+[FAIL: VaultBehaviorNotImplemented(0x2ceb5bb6)] test_PtRejectsRepeatedCancellationAndLateConfirmation() (gas: 177351)
+[FAIL: VaultBehaviorNotImplemented(0x2ceb5bb6)] test_PtRejectsUnauthorizedCancellation() (gas: 177329)
+[FAIL: VaultBehaviorNotImplemented(0x2ceb5bb6)] test_PtRequiresBuyerConfirmation() (gas: 177351)
+[FAIL: VaultBehaviorNotImplemented(0x2ceb5bb6)] test_PtTenSessionsRoundAndWithdrawExactlyOnce() (gas: 177406)
+[FAIL: VaultBehaviorNotImplemented(0x2ceb5bb6)] test_PtTwoEndedRefundsBeforeGymAndSupplementalTermination() (gas: 177354)
+[FAIL: VaultBehaviorNotImplemented(0x2ceb5bb6)] test_PtZeroAwardRetainsCapacityButBurnsSessionId() (gas: 177396)
+[FAIL: VaultBehaviorNotImplemented(0x2ceb5bb6)] test_PtZeroValueHoldStillBlocksOtherAllocations() (gas: 177401)
+[FAIL: VaultBehaviorNotImplemented(0xd0fa2436)] test_RefundRequiresCounterpartyAndCannotBeReplayed() (gas: 177325)
+[FAIL: VaultBehaviorNotImplemented(0xd0fa2436)] test_SupplementalRefundCannotExceedResidual() (gas: 177367)
+[FAIL: VaultBehaviorNotImplemented(0x2ceb5bb6)] test_TerminationRequiresLastLiveClaimToBeCancelled() (gas: 177396)
+[FAIL: VaultBehaviorNotImplemented(0xf51a4c06)] test_TimeChallengeDeadlineEquality() (gas: 199161)
+[PASS] test_TimeConfigurationFujiRejectsShortenedWindow() (gas: 1480919)
+[PASS] test_TimeConfigurationLocal() (gas: 6743)
+[FAIL: VaultBehaviorNotImplemented(0xf51a4c06)] test_TimeDisputeSplitAuthorizationReplayAndConservation() (gas: 199226)
+[FAIL: VaultBehaviorNotImplemented(0xf51a4c06)] test_TimeEvidenceOfZeroOrFifteenVisitsDoesNotAffectEarnings() (gas: 332249)
+[FAIL: VaultBehaviorNotImplemented(0xf51a4c06)] test_TimePastIntervalsAccrueWithoutCheckIns() (gas: 199161)
+[FAIL: Error != expected error: VaultBehaviorNotImplemented(0xf51a4c06) != InvalidInterval()] test_TimeRejectsFutureAndOverlappingIntervals() (gas: 199742)
+[FAIL: Error != expected error: VaultBehaviorNotImplemented(0xf51a4c06) != InvalidInterval()] test_TimeRejectsIntervalsOutsideAgreementAndEmptyIntervals() (gas: 199647)
+[PASS] test_TimeRejectsShortenedLocalDurationAndWindow() (gas: 29063)
+Suite result: FAILED. 5 passed; 24 failed; 0 skipped; finished in 2.27ms (4.67ms CPU time)
+
+Ran 2 test suites in 3.26ms (4.47ms CPU time): 10 tests passed, 24 failed, 0 skipped (34 total tests)
+
+Failing tests:
+Encountered 24 failing tests in test/ReserveVault.t.sol:ReserveVaultTest
+[FAIL: VaultBehaviorNotImplemented(0xd0fa2436); counterexample: calldata=0xdc166329000000000000000000000000000000000000000000000000000000000000b74f args=[46927 [4.692e4]]] testFuzz_DepositAndAuthorizedRefundConserve(uint16) (runs: 0, μ: 0, ~: 0)
+[FAIL: VaultBehaviorNotImplemented(0x2ceb5bb6)] test_DisputeIsIsolatedAndPayableFundsRemainAvailable() (gas: 290733)
+[FAIL: VaultBehaviorNotImplemented(0xd0fa2436)] test_DisputedTerminationRequiresScopedResolverDecision() (gas: 177369)
+[FAIL: VaultBehaviorNotImplemented(0x2ceb5bb6)] test_PtCancellationReleasesCapacityAndEmitsIndexerEvent() (gas: 177392)
+[FAIL: VaultBehaviorNotImplemented(0x2ceb5bb6)] test_PtLastSlotConfirmationAndResolutionCannotBothSettle() (gas: 177449)
+[FAIL: VaultBehaviorNotImplemented(0x2ceb5bb6)] test_PtRefundDoesNotAdvanceGymRoundingIndex() (gas: 177399)
+[FAIL: VaultBehaviorNotImplemented(0x2ceb5bb6)] test_PtRejectsCancellationAfterConfirmationOrChallenge() (gas: 177352)
+[FAIL: Error != expected error: VaultBehaviorNotImplemented(0x2ceb5bb6) != Unauthorized()] test_PtRejectsNonPartyActionsAndDuplicateSession() (gas: 177870)
+[FAIL: VaultBehaviorNotImplemented(0x2ceb5bb6)] test_PtRejectsRepeatedCancellationAndLateConfirmation() (gas: 177351)
+[FAIL: VaultBehaviorNotImplemented(0x2ceb5bb6)] test_PtRejectsUnauthorizedCancellation() (gas: 177329)
+[FAIL: VaultBehaviorNotImplemented(0x2ceb5bb6)] test_PtRequiresBuyerConfirmation() (gas: 177351)
+[FAIL: VaultBehaviorNotImplemented(0x2ceb5bb6)] test_PtTenSessionsRoundAndWithdrawExactlyOnce() (gas: 177406)
+[FAIL: VaultBehaviorNotImplemented(0x2ceb5bb6)] test_PtTwoEndedRefundsBeforeGymAndSupplementalTermination() (gas: 177354)
+[FAIL: VaultBehaviorNotImplemented(0x2ceb5bb6)] test_PtZeroAwardRetainsCapacityButBurnsSessionId() (gas: 177396)
+[FAIL: VaultBehaviorNotImplemented(0x2ceb5bb6)] test_PtZeroValueHoldStillBlocksOtherAllocations() (gas: 177401)
+[FAIL: VaultBehaviorNotImplemented(0xd0fa2436)] test_RefundRequiresCounterpartyAndCannotBeReplayed() (gas: 177325)
+[FAIL: VaultBehaviorNotImplemented(0xd0fa2436)] test_SupplementalRefundCannotExceedResidual() (gas: 177367)
+[FAIL: VaultBehaviorNotImplemented(0x2ceb5bb6)] test_TerminationRequiresLastLiveClaimToBeCancelled() (gas: 177396)
+[FAIL: VaultBehaviorNotImplemented(0xf51a4c06)] test_TimeChallengeDeadlineEquality() (gas: 199161)
+[FAIL: VaultBehaviorNotImplemented(0xf51a4c06)] test_TimeDisputeSplitAuthorizationReplayAndConservation() (gas: 199226)
+[FAIL: VaultBehaviorNotImplemented(0xf51a4c06)] test_TimeEvidenceOfZeroOrFifteenVisitsDoesNotAffectEarnings() (gas: 332249)
+[FAIL: VaultBehaviorNotImplemented(0xf51a4c06)] test_TimePastIntervalsAccrueWithoutCheckIns() (gas: 199161)
+[FAIL: Error != expected error: VaultBehaviorNotImplemented(0xf51a4c06) != InvalidInterval()] test_TimeRejectsFutureAndOverlappingIntervals() (gas: 199742)
+[FAIL: Error != expected error: VaultBehaviorNotImplemented(0xf51a4c06) != InvalidInterval()] test_TimeRejectsIntervalsOutsideAgreementAndEmptyIntervals() (gas: 199647)
+
+Encountered a total of 24 failing tests, 10 tests succeeded
+
+Tip: Run `forge test --rerun` to retry only the 24 failed tests
+
+Full suite exit code: 1
