@@ -1,6 +1,6 @@
 # ReserveVault ABI v1 · D16-04
 
-Bản chờ nghiệm thu. [Điều khoản v1.0.0](product-and-terms.md) vẫn là bản canonical đã duyệt. Quy tắc PT bên dưới nhắm tới [bản đề xuất v1.0.1](product-and-terms-v1.0.1-proposed.md) và chỉ áp dụng sau khi chủ dự án duyệt đúng bản điều khoản và hash. Khối Solidity dưới đây là khai báo chuẩn để sinh ABI. Cả ba portal và chain-indexer phải dùng cùng artifact sau khi triển khai.
+Đặc tả chờ nghiệm thu. Chủ dự án đã duyệt nội dung và hash của [điều khoản v1.0.1](product-and-terms-v1.0.1-proposed.md) cho lần triển khai theo đặc tả này. [Bản v1.0.0](product-and-terms.md) vẫn là nguyên bản cho hash đã duyệt của phiên bản đó. Khối Solidity dưới đây là khai báo chuẩn để sinh ABI. Cả ba portal và chain-indexer phải dùng cùng artifact sau khi triển khai.
 
 ```solidity
 // SPDX-License-Identifier: MIT
@@ -9,7 +9,7 @@ pragma solidity 0.8.30;
 interface IReserveVault {
     enum Policy { PER_SESSION, TIME_ACCESS }
     enum AgreementState { NONE, OPEN, TERMINATED }
-    enum ClaimState { NONE, PROPOSED, CONFIRMED, CHALLENGED, FINALIZED, RESOLVED }
+    enum ClaimState { NONE, PROPOSED, CONFIRMED, CHALLENGED, FINALIZED, RESOLVED, CANCELLED }
     enum TerminationState { NONE, PROPOSED, DISPUTED, ACCEPTED, RESOLVED, CANCELLED }
 
     struct Agreement {
@@ -69,6 +69,10 @@ interface IReserveVault {
         bytes32 evidenceHash, uint64 from, uint64 to,
         uint64 proposedAt, uint64 challengeEndsAt, uint256 amount
     );
+    event SessionProposalCancelled(
+        uint256 indexed agreementId, uint256 indexed claimId, bytes32 indexed sessionId,
+        address cancelledBy
+    );
     event SessionConfirmed(uint256 indexed agreementId, uint256 indexed claimId);
     event ClaimChallenged(uint256 indexed agreementId, uint256 indexed claimId, bytes32 evidenceHash);
     event ClaimFinalized(uint256 indexed agreementId, uint256 indexed claimId, uint256 amount);
@@ -123,6 +127,7 @@ interface IReserveVault {
     function proposeSession(
         uint256 agreementId, bytes32 sessionId, bytes32 evidenceHash
     ) external returns (uint256 claimId);
+    function cancelSessionProposal(uint256 agreementId, uint256 claimId) external;
     function confirmSession(uint256 agreementId, uint256 claimId) external;
     function proposeTime(
         uint256 agreementId, uint64 from, uint64 to, bytes32 evidenceHash
@@ -170,7 +175,7 @@ At deployment, the Vault selects an immutable profile from the deployment chain 
 | Local Foundry/Anvil (31337) | 7,776,000 | 86,400 |
 | Fuji (43113) | 270 | 60 |
 
-Deployment on an unsupported chain ID reverts `InvalidTimeProfile`. Set Foundry's chain ID before deployment when simulating either profile. After deployment the profile remains fixed. The approved v1.0.0 canonical hash remains `0xbcb7bf6578cd0ed96b1a90d80b63ef778c9d38eb55b4e8f17ee36bde7c52201c`. The proposed v1.0.1 hash is `0x32f8c0afbc8e0cabce1cd940791651b578630150fdef727c3cf53cd27144d0d8`. The proposed implementation binds both policies to the latter hash at deployment **only after explicit approval of v1.0.1**. Revert `InvalidTermsHash` on mismatch. Never pair this PT behavior with the v1.0.0 hash. The SDK reads the expected hash and profile before opening an agreement. A new terms version or time profile requires a separately approved deployment.
+Deployment on an unsupported chain ID reverts `InvalidTimeProfile`. Set Foundry's chain ID before deployment when simulating either profile. After deployment the profile remains fixed. The approved v1.0.0 canonical hash remains `0xbcb7bf6578cd0ed96b1a90d80b63ef778c9d38eb55b4e8f17ee36bde7c52201c`. The approved v1.0.1 hash is `0x32f8c0afbc8e0cabce1cd940791651b578630150fdef727c3cf53cd27144d0d8`. This specification binds both policies to the approved v1.0.1 hash at deployment. Revert `InvalidTermsHash` on mismatch. Never pair this PT behavior with the v1.0.0 hash. The SDK reads the expected hash and profile before opening an agreement. A new terms version or time profile requires a separately approved deployment.
 
 For TIME_ACCESS, require `startAt >= block.timestamp`, `endAt > startAt`, `endAt - startAt == duration` and the supplied `challengeWindow` to equal the immutable configuration, before the token transfer. Revert `InvalidTimeProfile` on mismatch. On claim proposal derive the deadline as `block.timestamp + agreement.challengeWindow` using checked arithmetic. Challenge is legal strictly before that deadline, and unchallenged finalization is legal at or after it. PT requires all three time arguments to be zero.
 
@@ -180,6 +185,7 @@ For TIME_ACCESS, require `startAt >= block.timestamp`, `endAt > startAt`, `endAt
 | --- | --- | --- |
 | `openAgreement` | Buyer is caller. Nonzero amount and exact canonical terms hash. Enforce the configured policy and timestamps above before touching balances. Buyer approves the ERC-20 before calling. | Transfer from buyer to Vault via SafeERC20. Require exact receipt. Set OPEN and deposit counters. Emit `AgreementOpened`. |
 | `proposeSession` | Merchant, OPEN PT agreement, nonzero unique session ID and evidence hash. Session already delivered per terms. Check capacity against consumed slots plus live claims. Reserve one unit of capacity, with the monetary slot assigned later. | PROPOSED. Time fields and `amount` are 0 until allocation. Emit `ClaimProposed`. |
+| `cancelSessionProposal` | Buyer or merchant of the OPEN agreement. Require a PER_SESSION claim in PROPOSED with its IDs already registered. A missing record reverts `NotFound`, an unrelated caller `Unauthorized`, and wrong policy or state `InvalidState`. | Mark CANCELLED, decrement `liveClaims` once and emit `SessionProposalCancelled` with the original session ID and caller. Keep session ID used. |
 | `confirmSession` | Buyer, PROPOSED or CHALLENGED PT claim. | For PROPOSED, mark CONFIRMED and emit `SessionConfirmed`. For CHALLENGED, record buyer confirmation and atomically finalize the reserved slot for gym, release its hold and emit `SessionConfirmed` then `ClaimFinalized`. |
 | `proposeTime` | Merchant, OPEN TIME agreement, nonzero evidence hash. Require `startAt <= from < to <= endAt` and `to <= block.timestamp`. Reject overlap with active or previously decided intervals. Adjacent intervals are allowed. | PROPOSED. Store calculated amount and immutable deadline; emit `ClaimProposed`. |
 | `challengeClaim` | Buyer, PROPOSED claim. For TIME, strictly before deadline. Nonzero objection evidence hash. | CHALLENGED. PT permits one active challenge per agreement and snapshots the two alternative slots and their award ceilings. Record the challenged claim ID even when the hold is zero. Emit `ClaimChallenged`. |
@@ -190,7 +196,9 @@ For TIME_ACCESS, require `startAt >= block.timestamp`, `endAt > startAt`, `endAt
 | `acceptTermination` / `resolveTermination` | Non-proposer party accepts exact PROPOSED amount. Resolver decides only a DISPUTED proposal with a nonzero decision hash. Both require no live claims and a valid refund budget. | Set proposal ACCEPTED or RESOLVED, clear the active proposal ID and increase authorized refund by the decided amount. First decision closes the agreement and emits `AgreementTerminated`. Subsequent decisions use `TerminationRefundAuthorized`. Both events use zero decision hash for mutual acceptance. |
 | `claimEarned` / `claimRefund` | Merchant / buyer of the agreement respectively. Allowed in OPEN or TERMINATED, including during a dispute. Available amount must be positive. | Update counters before transfer. Send entire available amount to the fixed party. Emit `EarnedClaimed` / `RefundClaimed`. |
 
-A live claim is PROPOSED, CONFIRMED or CHALLENGED. Increment `liveClaims` at proposal and decrement it exactly once on finalization or resolution. Both claim proposal methods require no active termination proposal. Filter claim and termination events by agreement ID to enumerate history. Challenge evidence and decision hashes remain available from events.
+A live claim is PROPOSED, CONFIRMED or CHALLENGED. Increment `liveClaims` at proposal and decrement it exactly once on finalization, resolution or cancellation. Both claim proposal methods require no active termination proposal. Filter claim and termination events by agreement ID to enumerate history. Challenge evidence and decision hashes remain available from events.
+
+A PT proposal with no buyer response can be cancelled by either agreement party. This ends the outstanding proposal and preserves its evidence and session ID in the indexer. Cancellation creates no transfer, payout, refund, held allocation or consumed slot. It changes only the claim state and live capacity, so an unrelated outstanding challenge keeps its own hold and pointer. It cannot affect CONFIRMED or CHALLENGED claims. If cancellation empties `liveClaims`, either party may enter the existing termination process using its normal proposal and authorization guards.
 
 A claim decision settles the claim once. An unused award budget stays locked and unallocated. A decided TIME interval stays closed for overlap and replay checks, including a zero-award resolution. PT session IDs remain used even after a zero-award decision.
 
@@ -215,6 +223,7 @@ Let `F = sessionsFinalized`, `R = positiveRefundSlots` and `S(n) = floor(P*n/10)
 | PT transition | Slot action | Δ finalized | Δ refund slots | Δ live |
 | --- | --- | ---: | ---: | ---: |
 | Propose | Reserve capacity. Slot and award fields remain zero. | 0 | 0 | +1 |
+| Cancel PROPOSED | Release capacity. Preserve original session ID. No slot or balance changes. | 0 | 0 | −1 |
 | Confirm PROPOSED | Preserve capacity until finalization. | 0 | 0 | 0 |
 | Challenge PROPOSED | Snapshot candidate slots `F+1` and `10-R` and their values. Set `challengedSessionClaimId`. | 0 | 0 | 0 |
 | Finalize ordinary CONFIRMED | Spend head slot `F+1` and store it as `settledSessionSlot`; require no active challenge. | +1 | 0 | −1 |
@@ -258,6 +267,10 @@ TERMINATED closes claim creation. Existing payable balances remain callable. Mon
 | Case | Expected result |
 | --- | --- |
 | Positive partial refund before first gym settlement | Retire tail slot 10, keep original session ID closed, report one less entitlement. The first gym settlement uses head slot 1. |
+| Cancel an unanswered PT proposal | Buyer and merchant can each cancel on separate fixtures. State becomes CANCELLED, event identifies actor and original session ID, and one unit of live capacity returns. All financial counters and consumed slots stay unchanged. A new ID can use the capacity; the cancelled ID cannot replay. |
+| Unauthorized or wrong-state cancellation | Reject unrelated wallet and resolver, TIME claim, CONFIRMED claim and CHALLENGED claim. Cancel an unrelated PROPOSED claim in the same PT agreement without changing the challenge pointer or its hold. |
+| Repeat cancellation | Reject a second cancellation, late confirmation, or challenge of the cancelled claim. Release capacity once. |
+| Termination following cancellation | Reject termination proposal while this is the last live claim. After cancellation allow the termination proposal, and require the normal counterparty acceptance or scoped resolver decision before any refund is authorized. |
 | Zero refund | Release hold and claim capacity, keep session ID used, keep both slot counters unchanged. A different valid session can use the released capacity. |
 | Multiple positive refunds | Consume tail indices 10, 9, … even with partial awards. Gym count and rounding order stay independent. |
 | Zero rounding | With `P = 1`, head slot 1 rounds to 0 and tail slot 10 is 1. Confirming the challenged head still consumes a slot. With `P = 2`, after retiring slot 10, challenge at head 1 / tail 9 holds zero. The pointer still serializes operations and a positive award on tail 9 reverts. |
