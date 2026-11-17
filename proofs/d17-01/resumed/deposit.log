@@ -1,0 +1,11 @@
+No files changed, compilation skipped
+
+Ran 5 tests for test/ReserveVaultDeposit.t.sol:ReserveVaultDepositTest
+[PASS] test_DepositAcrossTwoAgreementsSeparatesLedgers() (gas: 457664)
+[PASS] test_DepositMockTokenAndEmitAgreementOpened() (gas: 335204)
+[PASS] test_DepositRejectsResolverAsBuyerOrMerchant() (gas: 81919)
+[PASS] test_DepositRequiresCallerAllowanceAndKeepsSequentialIdOnFailure() (gas: 329493)
+[PASS] test_DepositShortReceiptRevertsTokenAndAgreementChanges() (gas: 3866531)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 2.40ms (1.90ms CPU time)
+
+Ran 1 test suite in 6.68ms (2.40ms CPU time): 5 tests passed, 0 failed, 0 skipped (5 total tests)

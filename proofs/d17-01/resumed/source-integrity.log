@@ -1,0 +1,3 @@
+VERIFIED: test CRLF sequences before=0, after=0
+VERIFIED: LF bytes identical, SHA256=fb36fcfba4134f4c9e4d64f9776559d5c67869c95e86faa0467410cee0ce7e0a
+VERIFIED: Vault unchanged; Phase C test lines preserved; all three Phase D tests present

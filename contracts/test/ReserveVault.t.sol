@@ -462,6 +462,132 @@ contract ReserveVaultTest {
         require(token.balanceOf(address(vault)) == price - refund, "one agreement backing");
     }
 
+    function test_D17_01_LiveCapacityAndCancellationReplay() public {
+        uint256 id = _pt(900);
+        VM.expectRevert(V.NotFound.selector);
+        vault.getClaim(id, 1);
+
+        for (uint256 n = 1; n <= 10; n++) {
+            require(_session(id, n) == n, "sequential claim IDs");
+        }
+        _confirm(id, 2);
+        require(vault.getAgreement(id).liveClaims == 10, "confirmation keeps reservation");
+        _reject(GYM, V.SessionLimit.selector);
+        vault.proposeSession(id, bytes32(uint256(11)), EVIDENCE);
+
+        _reject(BUYER, V.InvalidState.selector);
+        vault.cancelSessionProposal(id, 2);
+        VM.prank(GYM);
+        vault.cancelSessionProposal(id, 1);
+        _reject(GYM, V.InvalidState.selector);
+        vault.cancelSessionProposal(id, 1);
+        _reject(BUYER, V.InvalidState.selector);
+        vault.confirmSession(id, 1);
+        _reject(GYM, V.DuplicateSession.selector);
+        vault.proposeSession(id, bytes32(uint256(1)), EVIDENCE);
+
+        require(_session(id, 11) == 11, "freed capacity, new claim ID");
+        V.Agreement memory a = vault.getAgreement(id);
+        require(a.sessionsConsumed == 0 && a.liveClaims == 10, "capacity invariant");
+        _ledger(id, 900, 0, 0, 0, 900);
+    }
+
+    function test_D17_01_ZeroValueSlotsStillAdvanceHead() public {
+        uint256 id = _pt(1);
+        for (uint256 n = 1; n <= 10; n++) {
+            uint256 claim = _session(id, n);
+            _confirm(id, claim);
+            _finalize(id, claim);
+            V.Claim memory c = vault.getClaim(id, claim);
+            require(c.state == V.ClaimState.FINALIZED && c.settledSessionSlot == n, "slot settled");
+            require(c.awardedToGym == (n == 10 ? 1 : 0), "exact unit allocation");
+            if (n != 10) {
+                _reject(GYM, V.NothingToClaim.selector);
+                vault.claimEarned(id);
+            }
+        }
+        V.Agreement memory a = vault.getAgreement(id);
+        require(a.sessionsFinalized == 10 && a.sessionsConsumed == 10 && a.liveClaims == 0, "all slots used");
+        _ledger(id, 1, 1, 0, 0, 0);
+    }
+
+    function test_D17_01_EarningsAndWithdrawalsAreAgreementScoped() public {
+        uint256 first = _pt(1003);
+        uint256 second = _pt(900);
+        uint256 claimA = _session(first, 1);
+        uint256 claimB = _session(second, 1);
+        require(claimA == 1 && claimB == 1, "IDs scoped to agreement");
+
+        _ledger(first, 1003, 0, 0, 0, 1003);
+        _confirm(first, claimA);
+        _ledger(first, 1003, 0, 0, 0, 1003);
+        VM.prank(BUYER);
+        vault.finalizeClaim(first, claimA);
+        _reject(GYM, V.InvalidState.selector);
+        vault.finalizeClaim(first, claimA);
+        _ledger(second, 900, 0, 0, 0, 900);
+
+        _confirm(second, claimB);
+        _finalize(second, claimB);
+        require(vault.getClaim(first, claimA).awardedToGym == 100, "A first award");
+        require(vault.getClaim(second, claimB).awardedToGym == 90, "B first award");
+        _ledger(first, 1003, 100, 0, 0, 903);
+        _ledger(second, 900, 90, 0, 0, 810);
+
+        _reject(BUYER, V.Unauthorized.selector);
+        vault.claimEarned(first);
+        VM.prank(GYM);
+        require(vault.claimEarned(first) == 100, "first agreement payout");
+        _ledger(first, 903, 0, 0, 0, 903);
+        _ledger(second, 900, 90, 0, 0, 810);
+        _reject(GYM, V.NothingToClaim.selector);
+        vault.claimEarned(first);
+
+        VM.prank(GYM);
+        require(vault.claimEarned(second) == 90, "second agreement payout");
+        _reject(GYM, V.NothingToClaim.selector);
+        vault.claimEarned(second);
+        _ledger(first, 903, 0, 0, 0, 903);
+        _ledger(second, 810, 0, 0, 0, 810);
+        (uint256 lockedA,,,,) = vault.getBalances(first);
+        (uint256 lockedB,,,,) = vault.getBalances(second);
+        require(token.balanceOf(GYM) == 190, "exact gym receipts");
+        require(token.balanceOf(address(vault)) == lockedA + lockedB, "sum of locked balances");
+    }
+
+    function test_D17_01_RejectsZeroSessionIdAndEvidence() public {
+        uint256 id = _pt(900);
+        bytes32 sessionId = bytes32(uint256(1));
+
+        _reject(GYM, V.InvalidInput.selector);
+        vault.proposeSession(id, bytes32(0), EVIDENCE);
+        _reject(GYM, V.InvalidInput.selector);
+        vault.proposeSession(id, sessionId, bytes32(0));
+
+        require(vault.getAgreement(id).liveClaims == 0, "invalid input keeps capacity");
+        require(_session(id, 1) == 1, "invalid input keeps IDs available");
+    }
+
+    function test_D17_01_RejectsPtProposalOnTimeAccess() public {
+        uint256 id = _time(900);
+        _reject(GYM, V.InvalidState.selector);
+        vault.proposeSession(id, bytes32(uint256(1)), EVIDENCE);
+
+        require(vault.getAgreement(id).liveClaims == 0, "wrong policy keeps capacity");
+        _ledger(id, 900, 0, 0, 0, 900);
+    }
+
+    function test_D17_01_RejectsMissingAgreementAndClaimOnWrites() public {
+        uint256 id = _pt(900);
+        uint256 missingAgreement = id + 1;
+        _reject(GYM, V.NotFound.selector);
+        vault.proposeSession(missingAgreement, bytes32(uint256(1)), EVIDENCE);
+        _reject(BUYER, V.NotFound.selector);
+        vault.confirmSession(id, 1);
+
+        require(vault.getAgreement(id).liveClaims == 0, "missing records keep capacity");
+    }
+
     function _pt(uint256 price) private returns (uint256) {
         VM.prank(BUYER);
         return vault.openAgreement(GYM, V.Policy.PER_SESSION, price, TERMS, 0, 0, 0);
