@@ -1,0 +1,1 @@
+HEAD:.github/workflows/scaffold.yml:32:      - uses: foundry-rs/foundry-toolchain@v1

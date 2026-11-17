@@ -1,0 +1,5 @@
+warning: in the working copy of 'contracts/src/ReserveVault.sol', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'contracts/test/ReserveVault.t.sol', LF will be replaced by CRLF the next time Git touches it
+ contracts/src/ReserveVault.sol    | 106 ++++++++++++++++++++++++++++++++
+ contracts/test/ReserveVault.t.sol | 126 ++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 232 insertions(+)

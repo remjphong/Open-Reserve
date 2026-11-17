@@ -1,0 +1,78 @@
+No files changed, compilation skipped
+
+Ran 5 tests for test/ReserveVaultDeposit.t.sol:ReserveVaultDepositTest
+[PASS] test_DepositAcrossTwoAgreementsSeparatesLedgers() (gas: 457664)
+[PASS] test_DepositMockTokenAndEmitAgreementOpened() (gas: 335204)
+[PASS] test_DepositRejectsResolverAsBuyerOrMerchant() (gas: 81919)
+[PASS] test_DepositRequiresCallerAllowanceAndKeepsSequentialIdOnFailure() (gas: 329493)
+[PASS] test_DepositShortReceiptRevertsTokenAndAgreementChanges() (gas: 3866531)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 8.43ms (1.63ms CPU time)
+
+Ran 35 tests for test/ReserveVault.t.sol:ReserveVaultTest
+[FAIL: VaultBehaviorNotImplemented(0xd0fa2436); counterexample: calldata=0xdc1663290000000000000000000000000000000000000000000000000000000000001a80 args=[6784]] testFuzz_DepositAndAuthorizedRefundConserve(uint16) (runs: 0, μ: 0, ~: 0)
+[PASS] test_D17_01_EarningsAndWithdrawalsAreAgreementScoped() (gas: 2257254)
+[PASS] test_D17_01_LiveCapacityAndCancellationReplay() (gas: 2375883)
+[PASS] test_D17_01_RejectsMissingAgreementAndClaimOnWrites() (gas: 292357)
+[PASS] test_D17_01_RejectsPtProposalOnTimeAccess() (gas: 359007)
+[PASS] test_D17_01_RejectsZeroSessionIdAndEvidence() (gas: 488226)
+[PASS] test_D17_01_ZeroValueSlotsStillAdvanceHead() (gas: 4032276)
+[PASS] test_DepositRejectsUnapprovedTermsBeforeTransfer() (gas: 48746)
+[PASS] test_DepositTransfersExactlyAndOpensAgreement() (gas: 337080)
+[FAIL: VaultBehaviorNotImplemented(0x17fbfb80)] test_DisputeIsIsolatedAndPayableFundsRemainAvailable() (gas: 941418)
+[FAIL: VaultBehaviorNotImplemented(0xd0fa2436)] test_DisputedTerminationRequiresScopedResolverDecision() (gas: 222428)
+[PASS] test_PtCancellationReleasesCapacityAndEmitsIndexerEvent() (gas: 1543134)
+[FAIL: VaultBehaviorNotImplemented(0x17fbfb80)] test_PtLastSlotConfirmationAndResolutionCannotBothSettle() (gas: 3481940)
+[FAIL: VaultBehaviorNotImplemented(0x17fbfb80)] test_PtRefundDoesNotAdvanceGymRoundingIndex() (gas: 413505)
+[FAIL: VaultBehaviorNotImplemented(0x17fbfb80)] test_PtRejectsCancellationAfterConfirmationOrChallenge() (gas: 637532)
+[PASS] test_PtRejectsNonPartyActionsAndDuplicateSession() (gas: 726400)
+[FAIL: Error != expected error: VaultBehaviorNotImplemented(0x17fbfb80) != InvalidState()] test_PtRejectsRepeatedCancellationAndLateConfirmation() (gas: 521328)
+[PASS] test_PtRejectsUnauthorizedCancellation() (gas: 480749)
+[PASS] test_PtRequiresBuyerConfirmation() (gas: 683219)
+[PASS] test_PtTenSessionsRoundAndWithdrawExactlyOnce() (gas: 4215889)
+[FAIL: VaultBehaviorNotImplemented(0x17fbfb80)] test_PtTwoEndedRefundsBeforeGymAndSupplementalTermination() (gas: 413460)
+[FAIL: VaultBehaviorNotImplemented(0x17fbfb80)] test_PtZeroAwardRetainsCapacityButBurnsSessionId() (gas: 413524)
+[FAIL: VaultBehaviorNotImplemented(0x17fbfb80)] test_PtZeroValueHoldStillBlocksOtherAllocations() (gas: 413495)
+[FAIL: VaultBehaviorNotImplemented(0xd0fa2436)] test_RefundRequiresCounterpartyAndCannotBeReplayed() (gas: 222494)
+[FAIL: VaultBehaviorNotImplemented(0xd0fa2436)] test_SupplementalRefundCannotExceedResidual() (gas: 222470)
+[FAIL: Error != expected error: VaultBehaviorNotImplemented(0xd0fa2436) != LiveClaims()] test_TerminationRequiresLastLiveClaimToBeCancelled() (gas: 414052)
+[FAIL: VaultBehaviorNotImplemented(0xf51a4c06)] test_TimeChallengeDeadlineEquality() (gas: 244869)
+[PASS] test_TimeConfigurationFujiRejectsShortenedWindow() (gas: 3018559)
+[PASS] test_TimeConfigurationLocal() (gas: 6743)
+[FAIL: VaultBehaviorNotImplemented(0xf51a4c06)] test_TimeDisputeSplitAuthorizationReplayAndConservation() (gas: 244867)
+[FAIL: VaultBehaviorNotImplemented(0xf51a4c06)] test_TimeEvidenceOfZeroOrFifteenVisitsDoesNotAffectEarnings() (gas: 421310)
+[FAIL: VaultBehaviorNotImplemented(0xf51a4c06)] test_TimePastIntervalsAccrueWithoutCheckIns() (gas: 244802)
+[FAIL: Error != expected error: VaultBehaviorNotImplemented(0xf51a4c06) != InvalidInterval()] test_TimeRejectsFutureAndOverlappingIntervals() (gas: 245383)
+[FAIL: Error != expected error: VaultBehaviorNotImplemented(0xf51a4c06) != InvalidInterval()] test_TimeRejectsIntervalsOutsideAgreementAndEmptyIntervals() (gas: 245288)
+[PASS] test_TimeRejectsShortenedLocalDurationAndWindow() (gas: 74043)
+Suite result: FAILED. 16 passed; 19 failed; 0 skipped; finished in 67.65ms (106.69ms CPU time)
+
+Ran 2 test suites in 75.19ms (76.08ms CPU time): 21 tests passed, 19 failed, 0 skipped (40 total tests)
+
+Failing tests:
+Encountered 19 failing tests in test/ReserveVault.t.sol:ReserveVaultTest
+[FAIL: VaultBehaviorNotImplemented(0xd0fa2436); counterexample: calldata=0xdc1663290000000000000000000000000000000000000000000000000000000000001a80 args=[6784]] testFuzz_DepositAndAuthorizedRefundConserve(uint16) (runs: 0, μ: 0, ~: 0)
+[FAIL: VaultBehaviorNotImplemented(0x17fbfb80)] test_DisputeIsIsolatedAndPayableFundsRemainAvailable() (gas: 941418)
+[FAIL: VaultBehaviorNotImplemented(0xd0fa2436)] test_DisputedTerminationRequiresScopedResolverDecision() (gas: 222428)
+[FAIL: VaultBehaviorNotImplemented(0x17fbfb80)] test_PtLastSlotConfirmationAndResolutionCannotBothSettle() (gas: 3481940)
+[FAIL: VaultBehaviorNotImplemented(0x17fbfb80)] test_PtRefundDoesNotAdvanceGymRoundingIndex() (gas: 413505)
+[FAIL: VaultBehaviorNotImplemented(0x17fbfb80)] test_PtRejectsCancellationAfterConfirmationOrChallenge() (gas: 637532)
+[FAIL: Error != expected error: VaultBehaviorNotImplemented(0x17fbfb80) != InvalidState()] test_PtRejectsRepeatedCancellationAndLateConfirmation() (gas: 521328)
+[FAIL: VaultBehaviorNotImplemented(0x17fbfb80)] test_PtTwoEndedRefundsBeforeGymAndSupplementalTermination() (gas: 413460)
+[FAIL: VaultBehaviorNotImplemented(0x17fbfb80)] test_PtZeroAwardRetainsCapacityButBurnsSessionId() (gas: 413524)
+[FAIL: VaultBehaviorNotImplemented(0x17fbfb80)] test_PtZeroValueHoldStillBlocksOtherAllocations() (gas: 413495)
+[FAIL: VaultBehaviorNotImplemented(0xd0fa2436)] test_RefundRequiresCounterpartyAndCannotBeReplayed() (gas: 222494)
+[FAIL: VaultBehaviorNotImplemented(0xd0fa2436)] test_SupplementalRefundCannotExceedResidual() (gas: 222470)
+[FAIL: Error != expected error: VaultBehaviorNotImplemented(0xd0fa2436) != LiveClaims()] test_TerminationRequiresLastLiveClaimToBeCancelled() (gas: 414052)
+[FAIL: VaultBehaviorNotImplemented(0xf51a4c06)] test_TimeChallengeDeadlineEquality() (gas: 244869)
+[FAIL: VaultBehaviorNotImplemented(0xf51a4c06)] test_TimeDisputeSplitAuthorizationReplayAndConservation() (gas: 244867)
+[FAIL: VaultBehaviorNotImplemented(0xf51a4c06)] test_TimeEvidenceOfZeroOrFifteenVisitsDoesNotAffectEarnings() (gas: 421310)
+[FAIL: VaultBehaviorNotImplemented(0xf51a4c06)] test_TimePastIntervalsAccrueWithoutCheckIns() (gas: 244802)
+[FAIL: Error != expected error: VaultBehaviorNotImplemented(0xf51a4c06) != InvalidInterval()] test_TimeRejectsFutureAndOverlappingIntervals() (gas: 245383)
+[FAIL: Error != expected error: VaultBehaviorNotImplemented(0xf51a4c06) != InvalidInterval()] test_TimeRejectsIntervalsOutsideAgreementAndEmptyIntervals() (gas: 245288)
+
+Encountered a total of 19 failing tests, 21 tests succeeded
+
+Tip: Run `forge test --rerun` to retry only the 19 failed tests
+Tip: Run `forge test --debug --match-test <TEST_NAME>` to inspect one failing test in the debugger
+
+Fuzz seed: 0xd83df4634e86a1d4c9b887a6fba73cbdcab4db13070339d016baa286a66c856 (use `--fuzz-seed` to reproduce)

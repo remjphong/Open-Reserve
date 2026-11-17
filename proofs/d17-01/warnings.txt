@@ -1,0 +1,24 @@
+
+[fmt]
+No warning or lint markers found in this log.
+
+[build]
+4:warning[missing-zero-check]: address parameter is used in a state write or value transfer without a zero-address check
+12:warning[block-timestamp]: usage of `block.timestamp` in a comparison may be manipulated by validators
+20:warning[block-timestamp]: usage of `block.timestamp` in a comparison may be manipulated by validators
+28:warning[unsafe-typecast]: typecast can truncate values
+34:    ├ note: consider disabling this lint if you're certain the cast is safe
+42:warning[reentrancy-events]: event emitted after an external call; reentrancy can reorder or fabricate logs that off-chain consumers rely on
+50:warning[unsafe-typecast]: typecast can truncate values
+56:    ├ note: consider disabling this lint if you're certain the cast is safe
+64:warning[unsafe-typecast]: typecast can truncate values
+70:    ├ note: consider disabling this lint if you're certain the cast is safe
+
+[focused]
+No warning or lint markers found in this log.
+
+[deposit]
+No warning or lint markers found in this log.
+
+[full-suite]
+No warning or lint markers found in this log.

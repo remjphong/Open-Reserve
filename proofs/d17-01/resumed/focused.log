@@ -1,0 +1,17 @@
+No files changed, compilation skipped
+
+Ran 11 tests for test/ReserveVault.t.sol:ReserveVaultTest
+[PASS] test_D17_01_EarningsAndWithdrawalsAreAgreementScoped() (gas: 2257254)
+[PASS] test_D17_01_LiveCapacityAndCancellationReplay() (gas: 2375883)
+[PASS] test_D17_01_RejectsMissingAgreementAndClaimOnWrites() (gas: 292357)
+[PASS] test_D17_01_RejectsPtProposalOnTimeAccess() (gas: 359007)
+[PASS] test_D17_01_RejectsZeroSessionIdAndEvidence() (gas: 488226)
+[PASS] test_D17_01_ZeroValueSlotsStillAdvanceHead() (gas: 4032276)
+[PASS] test_PtCancellationReleasesCapacityAndEmitsIndexerEvent() (gas: 1543134)
+[PASS] test_PtRejectsNonPartyActionsAndDuplicateSession() (gas: 726400)
+[PASS] test_PtRejectsUnauthorizedCancellation() (gas: 480749)
+[PASS] test_PtRequiresBuyerConfirmation() (gas: 683219)
+[PASS] test_PtTenSessionsRoundAndWithdrawExactlyOnce() (gas: 4215889)
+Suite result: ok. 11 passed; 0 failed; 0 skipped; finished in 6.87ms (29.34ms CPU time)
+
+Ran 1 test suite in 13.94ms (6.87ms CPU time): 11 tests passed, 0 failed, 0 skipped (11 total tests)

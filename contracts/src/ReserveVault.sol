@@ -4,6 +4,7 @@ pragma solidity 0.8.30;
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
 import {IReserveVault as V} from "./IReserveVault.sol";
 
 contract ReserveVault is ReentrancyGuard {
@@ -18,7 +19,11 @@ contract ReserveVault is ReentrancyGuard {
     uint64 private immutable ACCESS_DURATION;
     uint64 private immutable DISPUTE_WINDOW;
     uint256 private agreementCount;
+    uint8 private constant PT_SLOTS = 10;
     mapping(uint256 => V.Agreement) private agreements;
+    mapping(uint256 => uint256) private claimCounts;
+    mapping(uint256 => mapping(uint256 => V.Claim)) private claims;
+    mapping(uint256 => mapping(bytes32 => bool)) private usedSessions;
 
     constructor(address token_, address resolver_) {
         if (token_.code.length == 0 || resolver_ == address(0)) revert V.InvalidInput();
@@ -88,6 +93,96 @@ contract ReserveVault is ReentrancyGuard {
         );
     }
 
+    function proposeSession(uint256 agreementId, bytes32 sessionId, bytes32 evidenceHash)
+        external
+        returns (uint256 claimId)
+    {
+        V.Agreement storage a = _agreement(agreementId);
+        if (msg.sender != a.merchant) revert V.Unauthorized();
+        _requireOpenPt(a);
+        if (sessionId == bytes32(0) || evidenceHash == bytes32(0)) revert V.InvalidInput();
+        if (usedSessions[agreementId][sessionId]) revert V.DuplicateSession();
+        if (uint256(a.sessionsConsumed) + a.liveClaims >= PT_SLOTS) revert V.SessionLimit();
+        if (block.timestamp > type(uint64).max) revert V.InvalidInput();
+
+        claimId = ++claimCounts[agreementId];
+        V.Claim storage c = claims[agreementId][claimId];
+        c.state = V.ClaimState.PROPOSED;
+        c.sessionId = sessionId;
+        c.evidenceHash = evidenceHash;
+        c.proposedAt = uint64(block.timestamp);
+        usedSessions[agreementId][sessionId] = true;
+        ++a.liveClaims;
+
+        emit V.ClaimProposed(agreementId, claimId, sessionId, evidenceHash, 0, 0, c.proposedAt, 0, 0);
+    }
+
+    function cancelSessionProposal(uint256 agreementId, uint256 claimId) external {
+        V.Agreement storage a = _agreement(agreementId);
+        if (msg.sender != a.buyer && msg.sender != a.merchant) revert V.Unauthorized();
+        _requireOpenPt(a);
+        V.Claim storage c = _claim(agreementId, claimId);
+        if (c.state != V.ClaimState.PROPOSED) revert V.InvalidState();
+
+        c.state = V.ClaimState.CANCELLED;
+        --a.liveClaims;
+        emit V.SessionProposalCancelled(agreementId, claimId, c.sessionId, msg.sender);
+    }
+
+    function confirmSession(uint256 agreementId, uint256 claimId) external {
+        V.Agreement storage a = _agreement(agreementId);
+        if (msg.sender != a.buyer) revert V.Unauthorized();
+        _requireOpenPt(a);
+        V.Claim storage c = _claim(agreementId, claimId);
+        if (c.state != V.ClaimState.PROPOSED) revert V.InvalidState();
+
+        c.state = V.ClaimState.CONFIRMED;
+        emit V.SessionConfirmed(agreementId, claimId);
+    }
+
+    function finalizeClaim(uint256 agreementId, uint256 claimId) external {
+        V.Agreement storage a = _agreement(agreementId);
+        if (msg.sender != a.buyer && msg.sender != a.merchant) revert V.Unauthorized();
+        _requireOpenPt(a);
+        V.Claim storage c = _claim(agreementId, claimId);
+        if (c.state != V.ClaimState.CONFIRMED) revert V.InvalidState();
+        if (a.challengedSessionClaimId != 0) revert V.SessionAllocationHeld();
+
+        // Only gym finalizations advance the head. Refunds retire tail slots.
+        uint256 nextSlot = uint256(a.sessionsFinalized) + 1;
+        if (nextSlot + a.positiveRefundSlots > PT_SLOTS) revert V.SessionLimit();
+        uint256 award = Math.mulDiv(a.deposited, nextSlot, PT_SLOTS) - Math.mulDiv(a.deposited, nextSlot - 1, PT_SLOTS);
+        uint256 unallocated = a.deposited - a.earnedFinalized - a.refundAuthorized;
+        if (award > unallocated) revert V.InsufficientUnallocated();
+
+        c.state = V.ClaimState.FINALIZED;
+        c.settledSessionSlot = uint8(nextSlot);
+        c.amount = award;
+        c.awardedToGym = award;
+        a.sessionsFinalized = uint8(nextSlot);
+        ++a.sessionsConsumed;
+        --a.liveClaims;
+        a.earnedFinalized += award;
+
+        emit V.ClaimFinalized(agreementId, claimId, award);
+    }
+
+    function claimEarned(uint256 agreementId) external nonReentrant returns (uint256 amount) {
+        V.Agreement storage a = _agreement(agreementId);
+        if (msg.sender != a.merchant) revert V.Unauthorized();
+        amount = a.earnedFinalized - a.gymWithdrawn;
+        if (amount == 0) revert V.NothingToClaim();
+
+        a.gymWithdrawn += amount;
+        IERC20(token).safeTransfer(a.merchant, amount);
+        emit V.EarnedClaimed(agreementId, a.merchant, amount);
+    }
+
+    function getClaim(uint256 agreementId, uint256 claimId) external view returns (V.Claim memory) {
+        _agreement(agreementId);
+        return _claim(agreementId, claimId);
+    }
+
     function getAgreement(uint256 agreementId) external view returns (V.Agreement memory) {
         return _agreement(agreementId);
     }
@@ -116,6 +211,17 @@ contract ReserveVault is ReentrancyGuard {
     function _agreement(uint256 agreementId) private view returns (V.Agreement storage agreement) {
         agreement = agreements[agreementId];
         if (agreement.state == V.AgreementState.NONE) revert V.NotFound();
+    }
+
+    function _claim(uint256 agreementId, uint256 claimId) private view returns (V.Claim storage c) {
+        c = claims[agreementId][claimId];
+        if (c.state == V.ClaimState.NONE) revert V.NotFound();
+    }
+
+    function _requireOpenPt(V.Agreement storage a) private view {
+        if (a.state != V.AgreementState.OPEN || a.policy != V.Policy.PER_SESSION) {
+            revert V.InvalidState();
+        }
     }
 
     // Later tasks replace this path with the remaining frozen interface functions.
