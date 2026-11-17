@@ -55,13 +55,20 @@ The indexer must bind the projection and checkpoint to `chainId` and `contractAd
 
 The [contract SDK](../packages/contracts-sdk/src/index.ts) exports ABI metadata generated from the approved Solidity interface, a view-only subset, chain IDs and immutable configuration profiles. Deployment identity has no built-in address.
 
-## Proposed D17-09 amendment — Economics v2
+## D17-09 amendment — Economics v2
 
-Review status: **AWAITING INDEPENDENT REVIEW**. This proposal changes the D17-09
-acceptance target to a functional `POST /v2/scenarios/compare`. The Execution
-Lock currently requires a functional v1 compare endpoint, so D17-09 and
-D17-GATE still require an explicit acceptance decision. The integration
-baseline's v1 DTO and HTTP 501 `NOT_IMPLEMENTED` behavior are preserved.
+Review status: **INDEPENDENTLY TECHNICALLY ACCEPTED**. The A/B/C/D formulas and
+v2 schema are accepted, and the scope amendment is approved for prototype
+acceptance.
+
+D17-09 prototype acceptance uses a functional `POST /v2/scenarios/compare`.
+This is a scoped exception to the original D17-09 v1 endpoint acceptance
+requirement in the Execution Lock. The existing `/v1/scenarios/compare` DTO
+and behavior remain unchanged. The endpoint returns HTTP 501
+`NOT_IMPLEMENTED`. This amendment does not redefine v1 as implemented.
+
+A/B/C/D are illustrative research scenarios. Production use, legal custody
+and real-money settlement remain unapproved.
 
 The conditional research design uses independent A protection and B referral
 fees, an A fee split and a C advance. The v1 single `platformFeeRate` cannot
@@ -97,14 +104,16 @@ share. The referral fee is `price × referralFeeRate` for B/D and zero otherwise
 
 Calculations use IEEE-754 double precision with no intermediate or API
 rounding. Workbook regression compares values within `1e-8` VND for the
-reference case. Products of large amounts and customer counts can lose
-integer precision. Display clients may round for presentation. This endpoint
-supports illustrative analysis only and remains separate from Vault accounting
-and settlement.
+reference case. Large numeric products, such as package contributions
+multiplied by customer counts, can lose integer precision under JavaScript
+floating-point arithmetic. Display clients may round for presentation. This
+endpoint supports illustrative analysis only and remains separate from Vault
+accounting and settlement.
 
 Source mapping: the original `OpenReserve_MoHinh_KinhTe_V1_2026-11-16.xlsx`
 uses assumptions in `DauVao!B4:B16`, per-model results in
 `KhachMoi_4PA!I5:Q8` and coverage in `DongTien_90Ngay!B5:G9`. The sample yields
 C/D shortfalls of 450,000 VND at day 0, 283,333.33 VND at day 10 and zero at
-day 30 and expiry. A/B maintain Full Reserve in the illustration. The
-proposal introduces no on-chain advance or non-Full-Reserve operation.
+day 30 and expiry. A/B maintain Full Reserve in the illustration. This
+amendment authorizes neither an on-chain advance nor any modification to Full
+Reserve.
