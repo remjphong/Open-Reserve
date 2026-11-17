@@ -367,6 +367,73 @@ contract ReserveVaultTest {
         vault.proposeTime(id, START, START + 30 * DAY, EVIDENCE);
     }
 
+    function test_TimeUnauthorizedActionsAndMissingEvidence() public {
+        uint256 id = _time(900);
+        uint64 end = START + 30 * DAY;
+        VM.warp(end);
+        _reject(BUYER, V.Unauthorized.selector);
+        vault.proposeTime(id, START, end, EVIDENCE);
+        _reject(GYM, V.InvalidInput.selector);
+        vault.proposeTime(id, START, end, bytes32(0));
+        uint256 claim = _interval(id, START, end);
+        _reject(GYM, V.Unauthorized.selector);
+        vault.challengeClaim(id, claim, EVIDENCE);
+        _reject(BUYER, V.InvalidInput.selector);
+        vault.challengeClaim(id, claim, bytes32(0));
+        VM.warp(end + DAY);
+        _reject(OTHER, V.Unauthorized.selector);
+        vault.finalizeClaim(id, claim);
+        VM.prank(BUYER);
+        vault.finalizeClaim(id, claim);
+        _reject(GYM, V.InvalidState.selector);
+        vault.finalizeClaim(id, claim);
+        _ledger(id, 900, 300, 0, 0, 600);
+    }
+
+    function test_TimeChallengePreservesIntervalAndLocksOnlyItsAmount() public {
+        uint256 id = _time(900);
+        uint64 mid = START + 30 * DAY;
+        uint64 end = START + 90 * DAY;
+        VM.warp(end);
+        uint256 second = _interval(id, mid, end);
+        uint256 first = _interval(id, START, mid);
+        VM.warp(end + DAY - 1);
+        VM.expectEmit(true, true, false, true, address(vault));
+        emit V.ClaimChallenged(id, first, EVIDENCE);
+        VM.prank(BUYER);
+        vault.challengeClaim(id, first, EVIDENCE);
+        require(vault.getClaim(id, first).state == V.ClaimState.CHALLENGED, "challenged state");
+        _reject(BUYER, V.InvalidState.selector);
+        vault.challengeClaim(id, first, EVIDENCE);
+        _reject(GYM, V.OverlappingInterval.selector);
+        vault.proposeTime(id, START, end, EVIDENCE);
+        VM.warp(end + DAY);
+        _reject(GYM, V.InvalidState.selector);
+        vault.finalizeClaim(id, first);
+        _finalize(id, second);
+        _ledger(id, 900, 600, 0, 300, 300);
+        require(vault.getAgreement(id).liveClaims == 1, "challenged claim stays live");
+    }
+
+    function test_TimeZeroValueIntervalPreservesCoverageAndCumulativeRounding() public {
+        uint256 id = _time(2);
+        uint64 end = START + 90 * DAY;
+        VM.warp(end);
+        uint256 first = _interval(id, START, START + 30 * DAY);
+        uint256 second = _interval(id, START + 30 * DAY, START + 60 * DAY);
+        uint256 third = _interval(id, START + 60 * DAY, end);
+        require(vault.getClaim(id, first).amount == 0, "round down at 30 days");
+        require(vault.getClaim(id, second).amount == 1, "cumulative carry");
+        require(vault.getClaim(id, third).amount == 1, "remaining award");
+        VM.warp(end + DAY);
+        _finalize(id, first);
+        _reject(GYM, V.OverlappingInterval.selector);
+        vault.proposeTime(id, START, START + 1, EVIDENCE);
+        _finalize(id, second);
+        _finalize(id, third);
+        _ledger(id, 2, 2, 0, 0, 0);
+    }
+
     function test_TimeDisputeSplitAuthorizationReplayAndConservation() public {
         uint256 id = _time(900);
         VM.warp(START + 30 * DAY);

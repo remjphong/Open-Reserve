@@ -20,10 +20,17 @@ contract ReserveVault is ReentrancyGuard {
     uint64 private immutable DISPUTE_WINDOW;
     uint256 private agreementCount;
     uint8 private constant PT_SLOTS = 10;
+    enum IntervalOccupancy {
+        EMPTY,
+        PARTIAL,
+        FULL
+    }
+
     mapping(uint256 => V.Agreement) private agreements;
     mapping(uint256 => uint256) private claimCounts;
     mapping(uint256 => mapping(uint256 => V.Claim)) private claims;
     mapping(uint256 => mapping(bytes32 => bool)) private usedSessions;
+    mapping(uint256 => mapping(uint256 => IntervalOccupancy)) private timeOccupancy;
 
     constructor(address token_, address resolver_) {
         if (token_.code.length == 0 || resolver_ == address(0)) revert V.InvalidInput();
@@ -140,9 +147,60 @@ contract ReserveVault is ReentrancyGuard {
         emit V.SessionConfirmed(agreementId, claimId);
     }
 
+    function proposeTime(uint256 agreementId, uint64 from, uint64 to, bytes32 evidenceHash)
+        external
+        returns (uint256 claimId)
+    {
+        V.Agreement storage a = _agreement(agreementId);
+        if (msg.sender != a.merchant) revert V.Unauthorized();
+        _requireOpenTime(a);
+        if (evidenceHash == bytes32(0)) revert V.InvalidInput();
+        if (from < a.startAt || from >= to || to > a.endAt || to > block.timestamp) revert V.InvalidInterval();
+        if (block.timestamp > type(uint64).max - a.challengeWindow) revert V.InvalidInput();
+
+        uint64 duration = a.endAt - a.startAt;
+        uint64 left = from - a.startAt;
+        uint64 right = to - a.startAt;
+        _reserveTimeInterval(agreementId, 1, 0, duration, left, right);
+
+        claimId = ++claimCounts[agreementId];
+        V.Claim storage c = claims[agreementId][claimId];
+        c.state = V.ClaimState.PROPOSED;
+        c.evidenceHash = evidenceHash;
+        c.from = from;
+        c.to = to;
+        c.proposedAt = uint64(block.timestamp);
+        c.challengeEndsAt = c.proposedAt + a.challengeWindow;
+        c.amount = Math.mulDiv(a.deposited, right, duration) - Math.mulDiv(a.deposited, left, duration);
+        ++a.liveClaims;
+
+        emit V.ClaimProposed(
+            agreementId, claimId, bytes32(0), evidenceHash, from, to, c.proposedAt, c.challengeEndsAt, c.amount
+        );
+    }
+
+    function challengeClaim(uint256 agreementId, uint256 claimId, bytes32 evidenceHash) external {
+        V.Agreement storage a = _agreement(agreementId);
+        if (a.policy == V.Policy.PER_SESSION) revert VaultBehaviorNotImplemented(msg.sig);
+        if (msg.sender != a.buyer) revert V.Unauthorized();
+        _requireOpenTime(a);
+        V.Claim storage c = _claim(agreementId, claimId);
+        if (c.state != V.ClaimState.PROPOSED) revert V.InvalidState();
+        if (evidenceHash == bytes32(0)) revert V.InvalidInput();
+        if (block.timestamp >= c.challengeEndsAt) revert V.ChallengeWindowClosed();
+
+        c.state = V.ClaimState.CHALLENGED;
+        a.disputedLocked += c.amount;
+        emit V.ClaimChallenged(agreementId, claimId, evidenceHash);
+    }
+
     function finalizeClaim(uint256 agreementId, uint256 claimId) external {
         V.Agreement storage a = _agreement(agreementId);
         if (msg.sender != a.buyer && msg.sender != a.merchant) revert V.Unauthorized();
+        if (a.policy == V.Policy.TIME_ACCESS) {
+            _finalizeTime(agreementId, claimId, a);
+            return;
+        }
         _requireOpenPt(a);
         V.Claim storage c = _claim(agreementId, claimId);
         if (c.state != V.ClaimState.CONFIRMED) revert V.InvalidState();
@@ -216,6 +274,44 @@ contract ReserveVault is ReentrancyGuard {
     function _claim(uint256 agreementId, uint256 claimId) private view returns (V.Claim storage c) {
         c = claims[agreementId][claimId];
         if (c.state == V.ClaimState.NONE) revert V.NotFound();
+    }
+
+    function _finalizeTime(uint256 agreementId, uint256 claimId, V.Agreement storage a) private {
+        _requireOpenTime(a);
+        V.Claim storage c = _claim(agreementId, claimId);
+        if (c.state != V.ClaimState.PROPOSED) revert V.InvalidState();
+        if (block.timestamp < c.challengeEndsAt) revert V.ChallengeWindowOpen();
+        uint256 unallocated = a.deposited - a.earnedFinalized - a.refundAuthorized - a.disputedLocked;
+        if (c.amount > unallocated) revert V.InsufficientUnallocated();
+
+        c.state = V.ClaimState.FINALIZED;
+        c.awardedToGym = c.amount;
+        --a.liveClaims;
+        a.earnedFinalized += c.amount;
+        emit V.ClaimFinalized(agreementId, claimId, c.amount);
+    }
+
+    // A sparse interval tree reserves elapsed seconds permanently. Work is bounded by the
+    // depth of the fixed agreement duration, independent of the number of prior claims.
+    function _reserveTimeInterval(uint256 agreementId, uint256 node, uint64 start, uint64 end, uint64 from, uint64 to)
+        private
+    {
+        IntervalOccupancy occupancy = timeOccupancy[agreementId][node];
+        if (occupancy == IntervalOccupancy.FULL) revert V.OverlappingInterval();
+        if (from <= start && end <= to) {
+            if (occupancy != IntervalOccupancy.EMPTY) revert V.OverlappingInterval();
+            timeOccupancy[agreementId][node] = IntervalOccupancy.FULL;
+            return;
+        }
+
+        if (occupancy == IntervalOccupancy.EMPTY) timeOccupancy[agreementId][node] = IntervalOccupancy.PARTIAL;
+        uint64 midpoint = start + (end - start) / 2;
+        if (from < midpoint) _reserveTimeInterval(agreementId, node * 2, start, midpoint, from, to);
+        if (to > midpoint) _reserveTimeInterval(agreementId, node * 2 + 1, midpoint, end, from, to);
+    }
+
+    function _requireOpenTime(V.Agreement storage a) private view {
+        if (a.state != V.AgreementState.OPEN || a.policy != V.Policy.TIME_ACCESS) revert V.InvalidState();
     }
 
     function _requireOpenPt(V.Agreement storage a) private view {
