@@ -65,7 +65,7 @@ contract ReserveVault is ReentrancyGuard {
     ) external nonReentrant returns (uint256 agreementId) {
         if (
             merchant == address(0) || merchant == msg.sender || merchant == resolver || msg.sender == resolver
-                || amount == 0
+                || merchant == address(this) || amount == 0
         ) revert V.InvalidInput();
         if (termsHash != TERMS_HASH) revert V.InvalidTermsHash();
         if (policy == V.Policy.PER_SESSION) {
