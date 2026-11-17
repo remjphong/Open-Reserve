@@ -13,3 +13,21 @@
   }
   .workspace .mobile-nav a { justify-content: center; }
 }
+
+.customer-package-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); }
+.customer-flow-card { min-width: 0; margin-bottom: 1rem; }
+.customer-flow-card p { margin-block: .75rem; }
+.customer-flow-card .inline-link { margin-top: .75rem; }
+.customer-wrap { overflow-wrap: anywhere; }
+.customer-check, .customer-field { display: flex; gap: .75rem; margin-block: 1rem; }
+.customer-check { align-items: baseline; }
+.customer-field { flex-direction: column; }
+.customer-field input { width: 100%; border: 1px solid #617269; border-radius: 8px; padding: .65rem; }
+.customer-claim { border-top: 1px solid #dde5de; margin-top: 1rem; padding-top: .5rem; }
+
+.customer-catalog-note { margin-bottom: .75rem; }
+.customer-package-grid { align-items: stretch; }
+.customer-flow-card .money { overflow-wrap: anywhere; }
+.customer-evidence-review { display: flex; flex-wrap: wrap; align-items: flex-start; gap: .65rem; }
+.customer-evidence-panel { width: 100%; min-width: 0; border: 1px solid #dde5de; border-radius: 8px; padding: 1rem; }
+.customer-evidence-panel h4 { margin: 0; }

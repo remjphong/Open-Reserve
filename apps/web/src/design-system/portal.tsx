@@ -59,12 +59,12 @@ export function AppShell({ role, path, items, children }: {
     <header className="header">
       <Brand home={home} mobile={role !== 'customer'} />
       {role === 'customer' ? nav('top-nav') : <strong className="role-name">{label}</strong>}
-      <WalletIdentity role={role} />
+      {role !== 'customer' && <WalletIdentity role={role} />}
     </header>
     {nav('mobile-nav')}
     <main id="main" className="container" tabIndex={-1}>
-      <div className="notice"><Icon name="info" /><span><strong>DEMO UI — CHƯA KẾT NỐI</strong><br />
-        Dữ liệu minh họa. Chưa đọc Fuji hoặc ký giao dịch.</span></div>
+      {role !== 'customer' && <div className="notice"><Icon name="info" /><span><strong>DEMO UI — CHƯA KẾT NỐI</strong><br />
+        Dữ liệu minh họa. Chưa đọc Fuji hoặc ký giao dịch.</span></div>}
       {children}
     </main>
   </>
