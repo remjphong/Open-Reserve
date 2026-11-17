@@ -10,8 +10,6 @@ import {IReserveVault as V} from "./IReserveVault.sol";
 contract ReserveVault is ReentrancyGuard {
     using SafeERC20 for IERC20;
 
-    error VaultBehaviorNotImplemented(bytes4 selector);
-
     bytes32 private constant TERMS_HASH = 0x32f8c0afbc8e0cabce1cd940791651b578630150fdef727c3cf53cd27144d0d8;
 
     address public immutable token;
@@ -31,6 +29,10 @@ contract ReserveVault is ReentrancyGuard {
     mapping(uint256 => mapping(uint256 => V.Claim)) private claims;
     mapping(uint256 => mapping(bytes32 => bool)) private usedSessions;
     mapping(uint256 => mapping(uint256 => IntervalOccupancy)) private timeOccupancy;
+
+    mapping(uint256 => uint256) private terminationCounts;
+    mapping(uint256 => uint256) private activeTerminationIds;
+    mapping(uint256 => mapping(uint256 => V.Termination)) private terminations;
 
     constructor(address token_, address resolver_) {
         if (token_.code.length == 0 || resolver_ == address(0)) revert V.InvalidInput();
@@ -107,6 +109,7 @@ contract ReserveVault is ReentrancyGuard {
         V.Agreement storage a = _agreement(agreementId);
         if (msg.sender != a.merchant) revert V.Unauthorized();
         _requireOpenPt(a);
+        if (activeTerminationIds[agreementId] != 0) revert V.InvalidState();
         if (sessionId == bytes32(0) || evidenceHash == bytes32(0)) revert V.InvalidInput();
         if (usedSessions[agreementId][sessionId]) revert V.DuplicateSession();
         if (uint256(a.sessionsConsumed) + a.liveClaims >= PT_SLOTS) revert V.SessionLimit();
@@ -141,10 +144,15 @@ contract ReserveVault is ReentrancyGuard {
         if (msg.sender != a.buyer) revert V.Unauthorized();
         _requireOpenPt(a);
         V.Claim storage c = _claim(agreementId, claimId);
-        if (c.state != V.ClaimState.PROPOSED) revert V.InvalidState();
-
-        c.state = V.ClaimState.CONFIRMED;
-        emit V.SessionConfirmed(agreementId, claimId);
+        if (c.state == V.ClaimState.CHALLENGED) {
+            _releaseSessionHold(a, c, claimId);
+            emit V.SessionConfirmed(agreementId, claimId);
+            _finalizeSession(agreementId, claimId, a, c, c.reservedGymSlot, c.reservedGymAmount);
+        } else {
+            if (c.state != V.ClaimState.PROPOSED) revert V.InvalidState();
+            c.state = V.ClaimState.CONFIRMED;
+            emit V.SessionConfirmed(agreementId, claimId);
+        }
     }
 
     function proposeTime(uint256 agreementId, uint64 from, uint64 to, bytes32 evidenceHash)
@@ -154,6 +162,7 @@ contract ReserveVault is ReentrancyGuard {
         V.Agreement storage a = _agreement(agreementId);
         if (msg.sender != a.merchant) revert V.Unauthorized();
         _requireOpenTime(a);
+        if (activeTerminationIds[agreementId] != 0) revert V.InvalidState();
         if (evidenceHash == bytes32(0)) revert V.InvalidInput();
         if (from < a.startAt || from >= to || to > a.endAt || to > block.timestamp) revert V.InvalidInterval();
         if (block.timestamp > type(uint64).max - a.challengeWindow) revert V.InvalidInput();
@@ -181,13 +190,24 @@ contract ReserveVault is ReentrancyGuard {
 
     function challengeClaim(uint256 agreementId, uint256 claimId, bytes32 evidenceHash) external {
         V.Agreement storage a = _agreement(agreementId);
-        if (a.policy == V.Policy.PER_SESSION) revert VaultBehaviorNotImplemented(msg.sig);
         if (msg.sender != a.buyer) revert V.Unauthorized();
-        _requireOpenTime(a);
+        if (a.state != V.AgreementState.OPEN) revert V.InvalidState();
         V.Claim storage c = _claim(agreementId, claimId);
         if (c.state != V.ClaimState.PROPOSED) revert V.InvalidState();
         if (evidenceHash == bytes32(0)) revert V.InvalidInput();
-        if (block.timestamp >= c.challengeEndsAt) revert V.ChallengeWindowClosed();
+
+        if (a.policy == V.Policy.PER_SESSION) {
+            if (a.challengedSessionClaimId != 0) revert V.SessionAllocationHeld();
+            c.reservedGymSlot = a.sessionsFinalized + 1;
+            c.reservedRefundSlot = PT_SLOTS - a.positiveRefundSlots;
+            c.reservedGymAmount = _slotAward(a.deposited, c.reservedGymSlot);
+            c.reservedRefundAmount = _slotAward(a.deposited, c.reservedRefundSlot);
+            c.amount = Math.max(c.reservedGymAmount, c.reservedRefundAmount);
+            if (c.amount > _unallocated(a)) revert V.InsufficientUnallocated();
+            a.challengedSessionClaimId = claimId;
+        } else if (block.timestamp >= c.challengeEndsAt) {
+            revert V.ChallengeWindowClosed();
+        }
 
         c.state = V.ClaimState.CHALLENGED;
         a.disputedLocked += c.amount;
@@ -206,23 +226,120 @@ contract ReserveVault is ReentrancyGuard {
         if (c.state != V.ClaimState.CONFIRMED) revert V.InvalidState();
         if (a.challengedSessionClaimId != 0) revert V.SessionAllocationHeld();
 
-        // Only gym finalizations advance the head. Refunds retire tail slots.
-        uint256 nextSlot = uint256(a.sessionsFinalized) + 1;
-        if (nextSlot + a.positiveRefundSlots > PT_SLOTS) revert V.SessionLimit();
-        uint256 award = Math.mulDiv(a.deposited, nextSlot, PT_SLOTS) - Math.mulDiv(a.deposited, nextSlot - 1, PT_SLOTS);
-        uint256 unallocated = a.deposited - a.earnedFinalized - a.refundAuthorized;
-        if (award > unallocated) revert V.InsufficientUnallocated();
+        uint8 nextSlot = a.sessionsFinalized + 1;
+        _finalizeSession(agreementId, claimId, a, c, nextSlot, _slotAward(a.deposited, nextSlot));
+    }
 
-        c.state = V.ClaimState.FINALIZED;
-        c.settledSessionSlot = uint8(nextSlot);
-        c.amount = award;
-        c.awardedToGym = award;
-        a.sessionsFinalized = uint8(nextSlot);
-        ++a.sessionsConsumed;
+    function resolveClaim(
+        uint256 agreementId,
+        uint256 claimId,
+        uint256 gymAmount,
+        uint256 buyerAmount,
+        bytes32 decisionHash
+    ) external {
+        V.Agreement storage a = _agreement(agreementId);
+        if (msg.sender != resolver) revert V.Unauthorized();
+        if (a.state != V.AgreementState.OPEN) revert V.InvalidState();
+        V.Claim storage c = _claim(agreementId, claimId);
+        if (c.state != V.ClaimState.CHALLENGED) revert V.InvalidState();
+        if (decisionHash == bytes32(0)) revert V.InvalidInput();
+
+        uint8 retiredSlot;
+        if (a.policy == V.Policy.PER_SESSION) {
+            if (gymAmount != 0) revert V.InvalidInput();
+            if (buyerAmount > c.reservedRefundAmount) revert V.InsufficientUnallocated();
+            _releaseSessionHold(a, c, claimId);
+            if (buyerAmount != 0) {
+                retiredSlot = c.reservedRefundSlot;
+                c.settledSessionSlot = retiredSlot;
+                ++a.positiveRefundSlots;
+                ++a.sessionsConsumed;
+            }
+        } else {
+            if (gymAmount > c.amount || buyerAmount > c.amount - gymAmount) {
+                revert V.InsufficientUnallocated();
+            }
+            a.disputedLocked -= c.amount;
+        }
+
+        if (gymAmount + buyerAmount > _unallocated(a) - a.disputedLocked) {
+            revert V.InsufficientUnallocated();
+        }
+        c.state = V.ClaimState.RESOLVED;
+        c.awardedToGym = gymAmount;
+        c.awardedToBuyer = buyerAmount;
         --a.liveClaims;
-        a.earnedFinalized += award;
+        a.earnedFinalized += gymAmount;
+        a.refundAuthorized += buyerAmount;
+        emit V.ClaimResolved(agreementId, claimId, c.sessionId, gymAmount, buyerAmount, retiredSlot, decisionHash);
+    }
 
-        emit V.ClaimFinalized(agreementId, claimId, award);
+    function proposeTermination(uint256 agreementId, uint256 proposedRefund, bytes32 evidenceHash)
+        external
+        returns (uint256 proposalId)
+    {
+        V.Agreement storage a = _agreement(agreementId);
+        _requireParty(a);
+        if (activeTerminationIds[agreementId] != 0) revert V.InvalidState();
+        if (evidenceHash == bytes32(0) || (a.state == V.AgreementState.TERMINATED && proposedRefund == 0)) {
+            revert V.InvalidInput();
+        }
+        _checkTerminationBudget(a, proposedRefund);
+
+        proposalId = ++terminationCounts[agreementId];
+        terminations[agreementId][proposalId] =
+            V.Termination(V.TerminationState.PROPOSED, msg.sender, proposedRefund, evidenceHash);
+        activeTerminationIds[agreementId] = proposalId;
+        emit V.TerminationProposed(agreementId, proposalId, msg.sender, proposedRefund, evidenceHash);
+    }
+
+    function disputeTermination(uint256 agreementId, uint256 proposalId, bytes32 evidenceHash) external {
+        V.Agreement storage a = _agreement(agreementId);
+        _requireParty(a);
+        V.Termination storage t = _termination(agreementId, proposalId);
+        if (msg.sender == t.proposer) revert V.Unauthorized();
+        if (t.state != V.TerminationState.PROPOSED) revert V.InvalidState();
+        if (evidenceHash == bytes32(0)) revert V.InvalidInput();
+
+        t.state = V.TerminationState.DISPUTED;
+        emit V.TerminationDisputed(agreementId, proposalId, evidenceHash);
+    }
+
+    function cancelTermination(uint256 agreementId, uint256 proposalId) external {
+        _agreement(agreementId);
+        V.Termination storage t = _termination(agreementId, proposalId);
+        if (msg.sender != t.proposer) revert V.Unauthorized();
+        if (t.state != V.TerminationState.PROPOSED) revert V.InvalidState();
+
+        t.state = V.TerminationState.CANCELLED;
+        delete activeTerminationIds[agreementId];
+        emit V.TerminationCancelled(agreementId, proposalId);
+    }
+
+    function acceptTermination(uint256 agreementId, uint256 proposalId) external {
+        V.Agreement storage a = _agreement(agreementId);
+        _requireParty(a);
+        V.Termination storage t = _termination(agreementId, proposalId);
+        if (msg.sender == t.proposer) revert V.Unauthorized();
+        if (t.state != V.TerminationState.PROPOSED) revert V.InvalidState();
+
+        _checkTerminationBudget(a, t.proposedRefund);
+        t.state = V.TerminationState.ACCEPTED;
+        _settleTermination(agreementId, proposalId, a, t.proposedRefund, false, bytes32(0));
+    }
+
+    function resolveTermination(uint256 agreementId, uint256 proposalId, uint256 refundAmount, bytes32 decisionHash)
+        external
+    {
+        V.Agreement storage a = _agreement(agreementId);
+        if (msg.sender != resolver) revert V.Unauthorized();
+        V.Termination storage t = _termination(agreementId, proposalId);
+        if (t.state != V.TerminationState.DISPUTED) revert V.InvalidState();
+        if (decisionHash == bytes32(0)) revert V.InvalidInput();
+
+        _checkTerminationBudget(a, refundAmount);
+        t.state = V.TerminationState.RESOLVED;
+        _settleTermination(agreementId, proposalId, a, refundAmount, true, decisionHash);
     }
 
     function claimEarned(uint256 agreementId) external nonReentrant returns (uint256 amount) {
@@ -234,6 +351,27 @@ contract ReserveVault is ReentrancyGuard {
         a.gymWithdrawn += amount;
         IERC20(token).safeTransfer(a.merchant, amount);
         emit V.EarnedClaimed(agreementId, a.merchant, amount);
+    }
+
+    function claimRefund(uint256 agreementId) external nonReentrant returns (uint256 amount) {
+        V.Agreement storage a = _agreement(agreementId);
+        if (msg.sender != a.buyer) revert V.Unauthorized();
+        amount = a.refundAuthorized - a.buyerRefunded;
+        if (amount == 0) revert V.NothingToClaim();
+
+        a.buyerRefunded += amount;
+        IERC20(token).safeTransfer(a.buyer, amount);
+        emit V.RefundClaimed(agreementId, a.buyer, amount);
+    }
+
+    function getTermination(uint256 agreementId, uint256 proposalId) external view returns (V.Termination memory) {
+        _agreement(agreementId);
+        return _termination(agreementId, proposalId);
+    }
+
+    function getActiveTerminationId(uint256 agreementId) external view returns (uint256) {
+        _agreement(agreementId);
+        return activeTerminationIds[agreementId];
     }
 
     function getClaim(uint256 agreementId, uint256 claimId) external view returns (V.Claim memory) {
@@ -274,6 +412,76 @@ contract ReserveVault is ReentrancyGuard {
     function _claim(uint256 agreementId, uint256 claimId) private view returns (V.Claim storage c) {
         c = claims[agreementId][claimId];
         if (c.state == V.ClaimState.NONE) revert V.NotFound();
+    }
+
+    function _termination(uint256 agreementId, uint256 proposalId) private view returns (V.Termination storage t) {
+        t = terminations[agreementId][proposalId];
+        if (t.state == V.TerminationState.NONE) revert V.NotFound();
+    }
+
+    function _requireParty(V.Agreement storage a) private view {
+        if (msg.sender != a.buyer && msg.sender != a.merchant) revert V.Unauthorized();
+    }
+
+    function _checkTerminationBudget(V.Agreement storage a, uint256 refundAmount) private view {
+        if (a.liveClaims != 0) revert V.LiveClaims();
+        if (refundAmount > _unallocated(a)) revert V.InsufficientUnallocated();
+    }
+
+    function _settleTermination(
+        uint256 agreementId,
+        uint256 proposalId,
+        V.Agreement storage a,
+        uint256 refundAmount,
+        bool viaResolver,
+        bytes32 decisionHash
+    ) private {
+        delete activeTerminationIds[agreementId];
+        a.refundAuthorized += refundAmount;
+        if (a.state == V.AgreementState.OPEN) {
+            a.state = V.AgreementState.TERMINATED;
+            emit V.AgreementTerminated(agreementId, proposalId, msg.sender, viaResolver, refundAmount, decisionHash);
+        } else {
+            emit V.TerminationRefundAuthorized(
+                agreementId, proposalId, msg.sender, viaResolver, refundAmount, decisionHash
+            );
+        }
+    }
+
+    function _unallocated(V.Agreement storage a) private view returns (uint256) {
+        return a.deposited - a.earnedFinalized - a.refundAuthorized;
+    }
+
+    function _slotAward(uint256 deposit, uint8 slot) private pure returns (uint256) {
+        return Math.mulDiv(deposit, slot, PT_SLOTS) - Math.mulDiv(deposit, slot - 1, PT_SLOTS);
+    }
+
+    function _releaseSessionHold(V.Agreement storage a, V.Claim storage c, uint256 claimId) private {
+        if (a.challengedSessionClaimId != claimId) revert V.InvalidState();
+        a.challengedSessionClaimId = 0;
+        a.disputedLocked -= c.amount;
+    }
+
+    function _finalizeSession(
+        uint256 agreementId,
+        uint256 claimId,
+        V.Agreement storage a,
+        V.Claim storage c,
+        uint8 slot,
+        uint256 award
+    ) private {
+        if (uint256(slot) + a.positiveRefundSlots > PT_SLOTS) revert V.SessionLimit();
+        if (award > _unallocated(a)) revert V.InsufficientUnallocated();
+
+        c.state = V.ClaimState.FINALIZED;
+        c.settledSessionSlot = slot;
+        c.amount = award;
+        c.awardedToGym = award;
+        a.sessionsFinalized = slot;
+        ++a.sessionsConsumed;
+        --a.liveClaims;
+        a.earnedFinalized += award;
+        emit V.ClaimFinalized(agreementId, claimId, award);
     }
 
     function _finalizeTime(uint256 agreementId, uint256 claimId, V.Agreement storage a) private {
@@ -318,10 +526,5 @@ contract ReserveVault is ReentrancyGuard {
         if (a.state != V.AgreementState.OPEN || a.policy != V.Policy.PER_SESSION) {
             revert V.InvalidState();
         }
-    }
-
-    // Later tasks replace this path with the remaining frozen interface functions.
-    fallback() external {
-        revert VaultBehaviorNotImplemented(msg.sig);
     }
 }

@@ -655,6 +655,149 @@ contract ReserveVaultTest {
         require(vault.getAgreement(id).liveClaims == 0, "missing records keep capacity");
     }
 
+    function test_D17_03_PtChallengeAndConfirmationEvents() public {
+        uint256 id = _pt(1003);
+        uint256 claim = _session(id, 1);
+        uint256 second = _session(id, 2);
+        _reject(GYM, V.Unauthorized.selector);
+        vault.challengeClaim(id, claim, EVIDENCE);
+        _reject(BUYER, V.InvalidInput.selector);
+        vault.challengeClaim(id, claim, bytes32(0));
+        VM.expectEmit(true, true, false, true, address(vault));
+        emit V.ClaimChallenged(id, claim, EVIDENCE);
+        VM.prank(BUYER);
+        vault.challengeClaim(id, claim, EVIDENCE);
+        _reject(BUYER, V.SessionAllocationHeld.selector);
+        vault.challengeClaim(id, second, EVIDENCE);
+        _reject(RESOLVER, V.InvalidInput.selector);
+        vault.resolveClaim(id, claim, 1, 0, DECISION);
+        _reject(RESOLVER, V.InvalidInput.selector);
+        vault.resolveClaim(id, claim, 0, 0, bytes32(0));
+
+        VM.expectEmit(true, true, false, true, address(vault));
+        emit V.SessionConfirmed(id, claim);
+        VM.expectEmit(true, true, false, true, address(vault));
+        emit V.ClaimFinalized(id, claim, 100);
+        _confirm(id, claim);
+        V.Agreement memory a = vault.getAgreement(id);
+        require(a.sessionsFinalized == 1 && a.sessionsConsumed == 1 && a.liveClaims == 1, "PT head counters");
+        require(a.challengedSessionClaimId == 0 && a.disputedLocked == 0, "hold released");
+        V.Claim memory c = vault.getClaim(id, claim);
+        require(c.state == V.ClaimState.FINALIZED && c.settledSessionSlot == 1, "reserved head finalized");
+        require(c.reservedGymAmount == 100 && c.reservedRefundAmount == 101, "snapshot retained");
+        VM.prank(BUYER);
+        vault.challengeClaim(id, second, EVIDENCE);
+        VM.expectEmit(true, true, true, true, address(vault));
+        emit V.ClaimResolved(id, second, bytes32(uint256(2)), 0, 40, 10, DECISION);
+        _resolve(id, second, 0, 40);
+        a = vault.getAgreement(id);
+        require(a.sessionsFinalized == 1 && a.positiveRefundSlots == 1, "head and tail counters");
+        require(a.sessionsConsumed == 2 && a.liveClaims == 0, "capacity conserved");
+        require(a.challengedSessionClaimId == 0 && a.disputedLocked == 0, "resolution released hold");
+        _ledger(id, 1003, 100, 40, 0, 863);
+    }
+
+    function test_D17_03_TimeResolutionReleasesOnlyItsOwnHold() public {
+        uint256 id = _time(900);
+        uint256 other = _pt(1003);
+        VM.warp(START + 60 * DAY);
+        uint256 first = _interval(id, START, START + 30 * DAY);
+        uint256 second = _interval(id, START + 30 * DAY, START + 60 * DAY);
+        VM.prank(BUYER);
+        vault.challengeClaim(id, first, EVIDENCE);
+        VM.prank(BUYER);
+        vault.challengeClaim(id, second, EVIDENCE);
+        _ledger(id, 900, 0, 0, 600, 900);
+        _reject(RESOLVER, V.InsufficientUnallocated.selector);
+        vault.resolveClaim(id, first, 300, 1, DECISION);
+        VM.expectEmit(true, true, true, true, address(vault));
+        emit V.ClaimResolved(id, first, bytes32(0), 200, 75, 0, DECISION);
+        _resolve(id, first, 200, 75);
+        _ledger(id, 900, 200, 75, 300, 625);
+        require(vault.getAgreement(id).liveClaims == 1, "second claim remains live");
+
+        uint256 buyerBefore = token.balanceOf(BUYER);
+        VM.expectEmit(true, true, false, true, address(vault));
+        emit V.RefundClaimed(id, BUYER, 75);
+        VM.prank(BUYER);
+        vault.claimRefund(id);
+        require(token.balanceOf(BUYER) == buyerBefore + 75, "buyer receives refund");
+        require(token.balanceOf(RESOLVER) == 0, "resolver receives no tokens");
+        _reject(BUYER, V.NothingToClaim.selector);
+        vault.claimRefund(id);
+        _resolve(id, second, 0, 0);
+        _reject(GYM, V.OverlappingInterval.selector);
+        vault.proposeTime(id, START + 30 * DAY, START + 60 * DAY, EVIDENCE);
+        _ledger(id, 825, 200, 0, 0, 625);
+        _ledger(other, 1003, 0, 0, 0, 1003);
+        require(token.balanceOf(address(vault)) == 1828, "aggregate backing");
+    }
+
+    function test_D17_03_TerminationRolesAndTerminalEvents() public {
+        uint256 id = _pt(900);
+        _reject(OTHER, V.Unauthorized.selector);
+        vault.proposeTermination(id, 0, EVIDENCE);
+        _reject(BUYER, V.InvalidInput.selector);
+        vault.proposeTermination(id, 0, bytes32(0));
+        VM.expectEmit(true, true, true, true, address(vault));
+        emit V.TerminationProposed(id, 1, BUYER, 400, EVIDENCE);
+        uint256 cancelled = _proposeTermination(id, 400);
+        _reject(GYM, V.InvalidState.selector);
+        vault.proposeSession(id, bytes32(uint256(1)), EVIDENCE);
+        _reject(GYM, V.Unauthorized.selector);
+        vault.cancelTermination(id, cancelled);
+        VM.expectEmit(true, true, false, false, address(vault));
+        emit V.TerminationCancelled(id, cancelled);
+        VM.prank(BUYER);
+        vault.cancelTermination(id, cancelled);
+        require(vault.getActiveTerminationId(id) == 0, "cancel cleared active proposal");
+        require(vault.getTermination(id, cancelled).state == V.TerminationState.CANCELLED, "cancelled state");
+
+        uint256 first = _proposeTermination(id, 600);
+        require(first == cancelled + 1, "ids not reused");
+        _reject(BUYER, V.Unauthorized.selector);
+        vault.disputeTermination(id, first, EVIDENCE);
+        _reject(GYM, V.InvalidInput.selector);
+        vault.disputeTermination(id, first, bytes32(0));
+        VM.expectEmit(true, true, false, true, address(vault));
+        emit V.TerminationDisputed(id, first, EVIDENCE);
+        VM.prank(GYM);
+        vault.disputeTermination(id, first, EVIDENCE);
+        _reject(RESOLVER, V.InvalidInput.selector);
+        vault.resolveTermination(id, first, 600, bytes32(0));
+        VM.expectEmit(true, true, true, true, address(vault));
+        emit V.AgreementTerminated(id, first, RESOLVER, true, 650, DECISION);
+        VM.prank(RESOLVER);
+        vault.resolveTermination(id, first, 650, DECISION);
+        _reject(RESOLVER, V.InvalidState.selector);
+        vault.resolveTermination(id, first, 0, DECISION);
+        require(vault.getTermination(id, first).state == V.TerminationState.RESOLVED, "resolved state");
+
+        uint256 second = _proposeTermination(id, 250);
+        VM.expectEmit(true, true, true, true, address(vault));
+        emit V.TerminationRefundAuthorized(id, second, GYM, false, 250, bytes32(0));
+        VM.prank(GYM);
+        vault.acceptTermination(id, second);
+        _reject(GYM, V.InvalidState.selector);
+        vault.acceptTermination(id, second);
+        require(vault.getActiveTerminationId(id) == 0, "no active proposal");
+        require(vault.getAgreement(id).state == V.AgreementState.TERMINATED, "stays closed");
+        _ledger(id, 900, 0, 900, 0, 0);
+    }
+
+    function test_D17_03_ActiveTimeTerminationBlocksNewIntervals() public {
+        uint256 id = _time(900);
+        uint256 proposal = _proposeTermination(id, 0);
+        VM.warp(START + DAY);
+        _reject(GYM, V.InvalidState.selector);
+        vault.proposeTime(id, START, START + DAY, EVIDENCE);
+        VM.prank(BUYER);
+        vault.cancelTermination(id, proposal);
+        _interval(id, START, START + DAY);
+        _reject(BUYER, V.LiveClaims.selector);
+        vault.proposeTermination(id, 0, EVIDENCE);
+    }
+
     function _pt(uint256 price) private returns (uint256) {
         VM.prank(BUYER);
         return vault.openAgreement(GYM, V.Policy.PER_SESSION, price, TERMS, 0, 0, 0);
