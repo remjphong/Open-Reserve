@@ -1,6 +1,6 @@
 # D17-GATE acceptance evidence
 
-Reviewer decision (17 November 2026): **TECHNICALLY_ACCEPTED_WITH_DOCUMENTED_LIMITATIONS** within the local prototype scope. This evidence PR is pending documentation review.
+Reviewer decision (17 November 2026): **TECHNICALLY_ACCEPTED_WITH_DOCUMENTED_LIMITATIONS** within the local prototype scope. Independent documentation review: technically accepted subject to minor corrections to the State Log timestamp and proof references and this review status. These corrections are included in this PR.
 
 - Accepted and tested integration commit: [`2422b8eef9ec04a15e38f6ca301612d890b9402c`](https://github.com/remjphong/Open-Reserve/commit/2422b8eef9ec04a15e38f6ca301612d890b9402c).
 - [PR #19](https://github.com/remjphong/Open-Reserve/pull/19) was merged with ordered parents `46a9bf1d7c7f5cbeb664123d05ff3e0ef1f36214` and `18e043d94ee032bddace870466d4b905bebfc9ec`. D17-01 through D17-09 are in the accepted integration history. `unihack-final` pointed at the accepted commit and `main` pointed at `b85531d3978ca378597df610c3f99f61d0638492` at evidence closure.
