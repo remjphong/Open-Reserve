@@ -54,3 +54,57 @@ Later Catalog tables are `packages`, `terms_versions`, `evidence_records` and `r
 The indexer must bind the projection and checkpoint to `chainId` and `contractAddress`. Expose `lastIndexedBlock`, `indexedAt` and `isStale` per projection, plus deployment block, chain tip, lag, last error and replay status from sync. Use unique `(chainId, txHash, logIndex)` for logs. Transactionally checkpoint confirmed events by block hash and height, resume from an overlap window, deduplicate and handle reorg replay before clearing stale status. No checkpoint or chain event has been recorded by this task. Stopping the Indexer leaves the Vault intact. Direct chain reads and portal fallbacks are integration scope.
 
 The [contract SDK](../packages/contracts-sdk/src/index.ts) exports ABI metadata generated from the approved Solidity interface, a view-only subset, chain IDs and immutable configuration profiles. Deployment identity has no built-in address.
+
+## Proposed D17-09 amendment — Economics v2
+
+Review status: **AWAITING INDEPENDENT REVIEW**. This proposal changes the D17-09
+acceptance target to a functional `POST /v2/scenarios/compare`. The Execution
+Lock currently requires a functional v1 compare endpoint, so D17-09 and
+D17-GATE still require an explicit acceptance decision. The integration
+baseline's v1 DTO and HTTP 501 `NOT_IMPLEMENTED` behavior are preserved.
+
+The conditional research design uses independent A protection and B referral
+fees, an A fee split and a C advance. The v1 single `platformFeeRate` cannot
+express these parameters. The workbook has no `refundRate` input. The v2
+endpoint uses `scenarioRequestV2` → `scenarioResponseV2`. Invalid inputs return
+400 `INVALID_REQUEST`. The response echoes the normalized assumptions and has
+exactly one scenario of each model. Health/readiness behavior is unchanged.
+The endpoint performs no database or RPC operations.
+
+| Fields | Units and behavior |
+| --- | --- |
+| `label`, `currency` | Required literals `MINH HỌA` and `VND` |
+| `price`, `variableGymCost`, `gymProcessingCostPerPackage`, `platformCAC`, `platformVariableCost` | Nonnegative VND per package, bounded by the JavaScript safe integer maximum |
+| `protectionFeeRate`, `protectionFeeGymShareRate`, `referralFeeRate`, `advanceRate`, `annualCostOfFunds` | Independent fractions from 0 to 1 inclusive |
+| `termDays`, `averageSettlementDelayDays`, `coverageEvaluationDay` | Term is 1–3650 whole days. Settlement delay accepts 0–3650 days, including fractional averages. Coverage day is an integer from 0 through expiry. |
+| `incrementalNewCustomers`, optional `incrementalCapacity` | Safe nonnegative integer counts for the same modeled period. Positive counts trigger an attribution warning. Missing or exceeded capacity triggers a separate warning. Warnings do not adjust counts or prove incremental demand. |
+
+For each scenario let `a = advanceRate` for C/D and 0 for A/B. The starting
+Vault fraction is `1 - a`. The protection fee is `price × protectionFeeRate`
+for A/D and zero otherwise. Gym and OpenReserve split this fee using the gym
+share. The referral fee is `price × referralFeeRate` for B/D and zero otherwise.
+
+| Output | Formula and units |
+| --- | --- |
+| `gymFundingCostPerPackage` | `price × initialVaultProtectionFraction × annualCostOfFunds × averageSettlementDelayDays / 365`, VND per package |
+| `gymIncrementalContributionPerPackage` | Price less delivery cost, processing cost, funding cost and referral fee, plus the gym's share of the protection fee, VND per package |
+| `platformUnitMarginPerPackage` | Retained protection fee plus referral fee, less CAC and variable cost, VND per package before fixed costs |
+| `gymUpfrontCashGap` | `price × initialVaultProtectionFraction`, VND per package at day 0, relative to receiving the entire package price upfront. The comparison excludes fee timing, costs and other cash flows. |
+| `initialVaultProtectionFraction` | `1 - a`, unitless fraction |
+| `buyerCoverageShortfallAtDay` | `price × max(0, a - coverageEvaluationDay / termDays)`, VND per package for continuous TIME_ACCESS with no additional guarantee. This models coverage exposure and confers no refund entitlement. |
+| `coverageEvaluationDay` | Elapsed service days used by the coverage result |
+| `gymIncrementalContributionAggregate`, `platformContributionAggregateBeforeFixedCosts` | Respective per-package contribution multiplied by the assumed incremental customer count, VND for that cohort |
+
+Calculations use IEEE-754 double precision with no intermediate or API
+rounding. Workbook regression compares values within `1e-8` VND for the
+reference case. Products of large amounts and customer counts can lose
+integer precision. Display clients may round for presentation. This endpoint
+supports illustrative analysis only and remains separate from Vault accounting
+and settlement.
+
+Source mapping: the original `OpenReserve_MoHinh_KinhTe_V1_2026-11-16.xlsx`
+uses assumptions in `DauVao!B4:B16`, per-model results in
+`KhachMoi_4PA!I5:Q8` and coverage in `DongTien_90Ngay!B5:G9`. The sample yields
+C/D shortfalls of 450,000 VND at day 0, 283,333.33 VND at day 10 and zero at
+day 30 and expiry. A/B maintain Full Reserve in the illustration. The
+proposal introduces no on-chain advance or non-Full-Reserve operation.
