@@ -1,0 +1,72 @@
+{
+  "chain": 43113,
+  "block": 61243324,
+  "block_hash": "0xdd1240a21dc73faf5b79f6abf587c29a605e564ee82a65b925cf59fa2808a94b",
+  "timestamp": 1794931328,
+  "transaction": {
+    "from": "0x111cFcD0F11ca1a11368B1a2Bd1D57c2815F0e23",
+    "to": "0x13562Ac0Ff647Bae830e1179FF1Fc976aBCe66A9",
+    "data": "0xa9059cbb000000000000000000000000124c7de92df945477caebdc6745756c4b29e7b7b000000000000000000000000000000000000000000000000000000000000076f",
+    "value": "0x0"
+  },
+  "calldata_hash": "0x016922cad20d0d851f6f8cd42c1f72c2d427807a7d2c40b38cd9980bfeb00c60",
+  "token_runtime_hash": "0xe6aa6c9b2a82deddad482f6a552ba557d139e81f605e5c7ae9f33dc9e2e26313",
+  "deployer_token": 10000,
+  "buyer_token": 0,
+  "deployer_wei": "549999999048263360",
+  "buyer_wei": "249999999989479000",
+  "nonce_at_block": 2,
+  "nonce_latest": 2,
+  "nonce_pending": 2,
+  "simulation": "0x0000000000000000000000000000000000000000000000000000000000000001",
+  "gas": 52919,
+  "base": 10,
+  "tip": 150,
+  "gas_price": 160,
+  "fee_history": {
+    "oldestBlock": "0x3a67fb8",
+    "reward": [
+      [
+        "0x96"
+      ],
+      [
+        "0x96"
+      ],
+      [
+        "0x96"
+      ],
+      [
+        "0x96"
+      ],
+      [
+        "0x96"
+      ]
+    ],
+    "baseFeePerGas": [
+      "0xa",
+      "0xa",
+      "0xa",
+      "0xa",
+      "0xa",
+      "0xa"
+    ],
+    "gasUsedRatio": [
+      0.001888375,
+      0.00220628125,
+      0.00234246875,
+      0.02999859375,
+      0.01602840625
+    ]
+  },
+  "rpc_gates_pass": true,
+  "source_commit": "cdbaa581f5249459cdc8ede9ab19d8bda8cd0697",
+  "owner_authorization": "GRANTED_CONDITIONAL",
+  "technical_review": "ACCEPTED_WITH_LIMITATIONS",
+  "approved_gas_limit": 68795,
+  "approved_max_fee_per_gas": 170,
+  "approved_max_priority_fee_per_gas": 150,
+  "approved_max_fee_wei": 11695150,
+  "signer": "NOT_AVAILABLE_IN_EXECUTION_ENVIRONMENT",
+  "execution_status": "BLOCKED",
+  "broadcast_attempted": false
+}

@@ -552,6 +552,57 @@ Next: Controlled-merge authorization after the documentation corrections. Fuji r
 PlanB: none
 ```
 
+
+```text
+[2026-11-17 22:06 ICT] TASK=D18-02 STATUS=STAGE_A_AND_B_ACCEPTED
+Owner: reviewer accepted Stage A and Stage B on Avalanche Fuji (43113).
+Git: cdbaa581f5249459cdc8ede9ab19d8bda8cd0697 (approved deployment source).
+Proof: proofs/d18-02-preflight/stage-b-review.md and proofs/d18-02-preflight/stage-c-rpc-snapshot.json.
+[ĐÃ XÁC NHẬN] Stage A: MockReserveToken 0x13562Ac0Ff647Bae830e1179FF1Fc976aBCe66A9, tx 0xa43f194eb5b5ea568726e8e2106e0faa4ff698d9cd73bacfa854577a35d8890e, block 61238655, status 1.
+[ĐÃ XÁC NHẬN] Stage B: ReserveVault 0x20D55E7Fc137a5924f6Bf76608eFaf99002474ad, tx 0x120617c50873b2393289c5f292c065a060d565b99f0fc8707d82071cfb179451, block 61240386, status 1, gas used 5006421, effective gas price 160 wei, cost 801027360 wei.
+Limitations: Acceptance covers approved payloads, receipts and deployed configuration. Comprehensive security audit and production readiness are outside this acceptance. OR-02 through OR-05 remain.
+Next: Stage C preflight evidence for independent review. Owner authorization NOT_GRANTED. Buyer funding NO-GO.
+PlanB: none
+```
+
+
+```text
+[2026-11-17 23:02 ICT] TASK=D18-02-STAGE-C-BUYER-FUNDING STATUS=BLOCKED
+Owner: GRANTED_CONDITIONAL for exactly one reviewed Fuji transfer. Reviewer 2: ACCEPTED_WITH_LIMITATIONS.
+Git: cdbaa581f5249459cdc8ede9ab19d8bda8cd0697.
+Proof: proofs/d18-02-preflight/stage-c-execution-attempt.json and stage-c-review.md.
+[ĐÃ XÁC NHẬN] Read-only snapshot at block 61243324 matched runtime and payload, nonce 2/2, simulation true and gas estimate 52919.
+[CHƯA XÁC NHẬN] Local signer identity. Configured owner signer is unavailable here. No broadcast attempted.
+Next: Repeat fresh gates where the existing owner signer is configured. Stage C funding remains unexecuted.
+PlanB: none
+```
+
+
+```text
+[2026-11-17 23:08 ICT] TASK=D18-02-STAGE-C-BUYER-FUNDING STATUS=BLOCKED
+Owner: GRANTED_CONDITIONAL for the single reviewed Fuji transfer.
+Git: cdbaa581f5249459cdc8ede9ab19d8bda8cd0697.
+Proof: proofs/d18-02-preflight/stage-c-review.md.
+[ĐÃ XÁC NHẬN] Recovery shell is the hosted workspace. The configured local signer is unavailable here.
+[CHƯA XÁC NHẬN] Local signer identity. Fresh Fuji checks not run for this recovery checkpoint. No broadcast attempted.
+Next: Resume in the owner WSL environment and verify the existing account before a fresh preflight.
+PlanB: none
+```
+
+
+```text
+[2026-11-17 23:26 ICT] TASK=D18-02-STAGE-C-EVIDENCE-CLOSURE STATUS=AWAITING_REVIEW
+Owner: executed one approved Fuji transfer. Reviewer 2 technical decision: ACCEPTED.
+Git: cdbaa581f5249459cdc8ede9ab19d8bda8cd0697 (approved deployment source).
+Files: Stage C review, transaction receipt evidence and this State Log entry.
+Tests: Read-only Fuji RPC transaction, receipt, event, adjacent block balances and fee reconciliation PASS.
+Proof: proofs/d18-02-preflight/stage-c-transaction-receipt.json and https://testnet.snowtrace.io/tx/0xc1abbc794cce5f6b82c3c7868b34883dd35b51a312e92ed410f2cf04b276ee69.
+[ĐÃ XÁC NHẬN] Stage C funding COMPLETED on Fuji 43113 at block 61244005. Deployer -1903, Buyer +1903 base units. Actual fee 8340640 wei.
+Notes: This documentation closure is awaiting review. Testnet only. OR-02 through OR-05 remain. No further transaction was sent.
+Next: OWNER_AND_REVIEWER_2_DOCUMENTATION_REVIEW.
+PlanB: none
+```
+
 ---
 
 ## I. NON-NEGOTIABLE SAFETY / QUALITY

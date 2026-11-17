@@ -1,0 +1,242 @@
+{
+  "full_range_result": {
+    "endpoint": "https://avalanche-fuji-c-chain-rpc.publicnode.com",
+    "start_hash": "0xe20eff03009e768589539b746c6d613975c160e0bb7a01839a656d221713e522",
+    "end_hash": "0xb9e50a9d46a7fabd67bf4a1a613e2ad4695800c0f2d9fa6d96801891bfa2db9e",
+    "ranges": [
+      {
+        "start": 61238655,
+        "end": 61241011,
+        "status": "EMPTY",
+        "logs": []
+      }
+    ]
+  },
+  "range_attempts": {
+    "chain": 43113,
+    "end_hash": "0xb9e50a9d46a7fabd67bf4a1a613e2ad4695800c0f2d9fa6d96801891bfa2db9e",
+    "attempts": [
+      {
+        "endpoint": "https://avalanche-fuji-c-chain-rpc.publicnode.com",
+        "start_hash": "0xe20eff03009e768589539b746c6d613975c160e0bb7a01839a656d221713e522",
+        "ranges": [
+          {
+            "start": 61238655,
+            "end": 61238754,
+            "status": "EMPTY",
+            "logs": []
+          },
+          {
+            "start": 61238755,
+            "end": 61238854,
+            "status": "EMPTY",
+            "logs": []
+          },
+          {
+            "start": 61238855,
+            "end": 61238954,
+            "status": "EMPTY",
+            "logs": []
+          },
+          {
+            "start": 61238955,
+            "end": 61239054,
+            "status": "EMPTY",
+            "logs": []
+          },
+          {
+            "start": 61239055,
+            "end": 61239154,
+            "status": "EMPTY",
+            "logs": []
+          },
+          {
+            "start": 61239155,
+            "end": 61239254,
+            "status": "EMPTY",
+            "logs": []
+          },
+          {
+            "start": 61239255,
+            "end": 61239354,
+            "status": "EMPTY",
+            "logs": []
+          },
+          {
+            "start": 61239355,
+            "end": 61239454,
+            "status": "EMPTY",
+            "logs": []
+          },
+          {
+            "start": 61239455,
+            "end": 61239554,
+            "status": "EMPTY",
+            "logs": []
+          },
+          {
+            "start": 61239555,
+            "end": 61239654,
+            "status": "EMPTY",
+            "logs": []
+          },
+          {
+            "start": 61239655,
+            "end": 61239754,
+            "status": "EMPTY",
+            "logs": []
+          },
+          {
+            "start": 61239755,
+            "end": 61239854,
+            "status": "EMPTY",
+            "logs": []
+          },
+          {
+            "start": 61239855,
+            "end": 61239954,
+            "status": "EMPTY",
+            "logs": []
+          },
+          {
+            "start": 61239955,
+            "end": 61240054,
+            "status": "EMPTY",
+            "logs": []
+          },
+          {
+            "start": 61240055,
+            "end": 61240154,
+            "status": "EMPTY",
+            "logs": []
+          },
+          {
+            "start": 61240155,
+            "end": 61240254,
+            "status": "EMPTY",
+            "logs": []
+          },
+          {
+            "start": 61240255,
+            "end": 61240354,
+            "status": "EMPTY",
+            "logs": []
+          },
+          {
+            "start": 61240355,
+            "end": 61240454,
+            "status": "EMPTY",
+            "logs": []
+          },
+          {
+            "start": 61240455,
+            "end": 61240554,
+            "status": "EMPTY",
+            "logs": []
+          },
+          {
+            "start": 61240555,
+            "end": 61240654,
+            "status": "EMPTY",
+            "logs": []
+          },
+          {
+            "start": 61240655,
+            "end": 61240754,
+            "status": "EMPTY",
+            "logs": []
+          },
+          {
+            "start": 61240755,
+            "end": 61240854,
+            "status": "EMPTY",
+            "logs": []
+          },
+          {
+            "start": 61240855,
+            "end": 61240954,
+            "status": "EMPTY",
+            "logs": []
+          },
+          {
+            "start": 61240955,
+            "end": 61241011,
+            "status": "EMPTY",
+            "logs": []
+          }
+        ]
+      }
+    ]
+  },
+  "previous_official_rpc_errors": [
+    "-32602: total block range exceeds 100 blocks per batch",
+    "HTTP 429 during earlier per-range scan"
+  ],
+  "snapshot": {
+    "historical": {
+      "deployer_mres": 10000,
+      "buyer_mres": 0,
+      "deployer_wei": "549999999048263360",
+      "buyer_wei": "249999999989479000",
+      "nonce": 2
+    },
+    "fresh": {
+      "deployer_mres": 10000,
+      "buyer_mres": 0,
+      "deployer_wei": "549999999048263360",
+      "buyer_wei": "249999999989479000",
+      "nonce": 2
+    },
+    "fresh_block": 61242763,
+    "fresh_hash": "0x5ab4e2757788a4f8ba7763531ebd6b5a76b54725259ce14b7ed477b107e26d7a",
+    "timestamp": 1794930542,
+    "chain": 43113,
+    "latest": 2,
+    "pending": 2,
+    "calldata": "0xa9059cbb000000000000000000000000124c7de92df945477caebdc6745756c4b29e7b7b000000000000000000000000000000000000000000000000000000000000076f",
+    "calldata_hash": "0x016922cad20d0d851f6f8cd42c1f72c2d427807a7d2c40b38cd9980bfeb00c60",
+    "simulation": "0x0000000000000000000000000000000000000000000000000000000000000001",
+    "gas": 52919,
+    "limit": 68795,
+    "base": 10,
+    "tip": 150,
+    "gas_price": 160,
+    "fee_history": {
+      "oldestBlock": "0x3a67d87",
+      "reward": [
+        [
+          "0x96"
+        ],
+        [
+          "0x96"
+        ],
+        [
+          "0x96"
+        ],
+        [
+          "0x96"
+        ],
+        [
+          "0x96"
+        ]
+      ],
+      "baseFeePerGas": [
+        "0xa",
+        "0xa",
+        "0xa",
+        "0xa",
+        "0xa",
+        "0xa"
+      ],
+      "gasUsedRatio": [
+        0.00171690625,
+        0.002279875,
+        0.00241134375,
+        0.00377365625,
+        0.006566875
+      ]
+    },
+    "cap": 170,
+    "max_fee": 11695150
+  }
+}
