@@ -28,3 +28,6 @@
 .customer-catalog-note { margin-bottom: .75rem; }
 .customer-package-grid { align-items: stretch; }
 .customer-flow-card .money { overflow-wrap: anywhere; }
+.customer-evidence-review { display: flex; flex-wrap: wrap; align-items: flex-start; gap: .65rem; }
+.customer-evidence-panel { width: 100%; min-width: 0; border: 1px solid #dde5de; border-radius: 8px; padding: 1rem; }
+.customer-evidence-panel h4 { margin: 0; }

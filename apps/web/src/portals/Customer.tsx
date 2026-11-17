@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { zeroHash } from 'viem'
 import { approvedTermsHash } from '@openreserve/contracts-sdk'
+import { ClaimEvidenceReview } from './ClaimEvidenceReview'
 import { CustomerPreview } from './CustomerPreview'
 import { EmptyState, ErrorState, LoadingSkeleton, OverviewCard, PortalPage } from '../design-system/portal'
 import {
@@ -188,7 +189,6 @@ function Pass({ agreementId, dispute }: { agreementId: string; dispute: boolean 
   const state = useWallet(session => readPass(session, id))
   const transaction = useTransaction()
   const [evidence, setEvidence] = useState('')
-  const [reviewedClaim, setReviewedClaim] = useState<bigint>()
   const { session, data } = state.value ?? {}
   const isBuyer = Boolean(session && data && sameAddress(session.account, data.agreement.buyer))
   const evidenceHash = /^0x[0-9a-f]{64}$/i.test(evidence) && evidence.toLowerCase() !== zeroHash
@@ -198,7 +198,6 @@ function Pass({ agreementId, dispute }: { agreementId: string; dispute: boolean 
       const fresh = await walletSession()
       if (!session || !sameAddress(fresh.account, session.account)) throw new Error('Ví đã thay đổi. Hãy đọc lại dữ liệu trước khi ký.')
       const receipt = await runBuyerAction(fresh, intent, progress)
-      setReviewedClaim(undefined)
       await state.refresh()
       return 'Đã xác nhận · ' + receipt.transactionHash
     })
@@ -232,14 +231,10 @@ function Pass({ agreementId, dispute }: { agreementId: string; dispute: boolean 
             <p className="caption customer-wrap">Hash ghi trên Vault · {claim.evidenceHash}</p>
             {dispute && challengeable && <Button disabled={!isBuyer || transaction.busy || !evidenceHash}
               onClick={() => { if (evidenceHash) void act({ type: 'challengeClaim', id, claimId, hash: evidenceHash }) }}>Gửi phản đối</Button>}
-            {!dispute && isBuyer && open && pt && [1, 3].includes(claim.state) && <>
-              <button type="button" className="button" aria-pressed={reviewedClaim === claimId}
-                onClick={() => setReviewedClaim(current => current === claimId ? undefined : claimId)}>
-                {reviewedClaim === claimId ? 'Đã đánh dấu xem bằng chứng' : 'Đánh dấu đã xem bằng chứng'}
-              </button>
-              <Button disabled={transaction.busy || reviewedClaim !== claimId}
-                onClick={() => void act({ type: 'confirmSession', id, claimId })}>Xác nhận buổi PT</Button>
-            </>}
+            {!dispute && isBuyer && open && pt && [1, 3].includes(claim.state) &&
+              <ClaimEvidenceReview key={session.account + ':' + session.vault + ':' + claim.evidenceHash + ':' + claim.state}
+                agreement={agreementId} claim={String(claimId)} hash={claim.evidenceHash} busy={transaction.busy}
+                onConfirm={() => void act({ type: 'confirmSession', id, claimId })} />}
           </article>
         })}
         {!dispute && <a className="inline-link" href={passRoot + '/' + id + '/dispute'}>Xem tùy chọn phản đối</a>}

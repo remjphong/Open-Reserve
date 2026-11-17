@@ -24,3 +24,23 @@ Catalog information is `DEMO_FIXTURE`. The amounts of 1,003 and 900 are base uni
 The web integration accepts public deployment parameters `VITE_VAULT_CHAIN_ID`, `VITE_VAULT_ADDRESS`, `VITE_VAULT_DEPLOYMENT_BLOCK`, and `VITE_MERCHANT_ADDRESS`. Set them only from verified deployment evidence. No addresses are bundled. Local TIME_ACCESS starts 120 seconds after the block used to prepare checkout, with the duration and challenge window taken from the SDK.
 
 Fuji and a physical browser extension were NOT_RUN. Screenshots are ready for human visual review.
+
+## Evidence review follow-up
+
+The PT confirmation panel reads Catalog metadata through the same-origin
+`/api/catalog/v1/agreements/:id/evidence` route. The deployment proxy must
+forward this route to Catalog after applying its DB migration. The browser
+matches the agreement, claim, and Vault hash reference. This comparison does
+not independently validate external content or confirm that the session took
+place. When metadata is missing or unavailable, a buyer can explicitly attest
+to the session after seeing the hash-only state.
+
+`verify-local.mjs` exercises a mismatched hash, HTTP 503, a matching fixture on
+a second page, buyer-only access, disabled confirmation before acknowledgement,
+and a successful confirmation receipt. Catalog replies are controlled browser
+fixtures with the baseline Vault on local Anvil. The two `pass-evidence-*` images
+show full page captures at desktop and mobile viewports. Production proxy/Catalog
+integration and Fuji were not run.
+
+Follow-up verification completed with exit 0 for workspace typecheck, build,
+tests and isolation, both Chromium scripts, and Foundry regression (60/60).

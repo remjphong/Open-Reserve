@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 import { spawn } from 'node:child_process'
 import { once } from 'node:events'
+import { fileURLToPath } from 'node:url'
 import { createPublicClient, createWalletClient, erc20Abi, http, keccak256, toHex } from 'viem'
 import { foundry } from 'viem/chains'
 import { reserveVaultAbi } from '@openreserve/contracts-sdk'
@@ -100,8 +101,56 @@ try {
   assert.equal(await page.getByRole('button', { name: 'Xác nhận buổi PT' }).count(), 0)
   selected = buyer
   await page.reload()
-  await page.getByRole('button', { name: 'Đánh dấu đã xem bằng chứng' }).click()
-  await page.getByRole('button', { name: 'Xác nhận buổi PT' }).click()
+  let evidenceMode = 'mismatch'
+  await page.route('**/api/catalog/v1/agreements/1/evidence?*', route => {
+    if (evidenceMode === 'unavailable') return route.fulfill({ status: 503 })
+    const cursor = new URL(route.request().url()).searchParams.get('cursor')
+    if (evidenceMode === 'matched' && !cursor) {
+      return route.fulfill({ json: { items: [], nextCursor: 'next' } })
+    }
+    return route.fulfill({ json: { items: [{
+      agreementId: '1', claimId: '1',
+      evidenceHash: evidenceMode === 'matched' ? digest : keccak256(toHex('unrelated evidence')),
+      source: 'DEMO_FIXTURE', description: 'Hồ sơ minh họa: bản ghi buổi PT từ phép thử local.',
+      externalUrl: null,
+    }], nextCursor: null } })
+  })
+  const review = page.getByRole('button', { name: 'Kiểm tra bằng chứng' })
+  const confirm = page.getByRole('button', { name: 'Xác nhận buổi PT' })
+  const panel = page.getByRole('region', { name: 'Bằng chứng đề nghị #1', exact: true })
+  await review.waitFor()
+  assert.ok(await confirm.isDisabled())
+  await review.click()
+  await panel.getByText(/Catalog chưa có hồ sơ khớp/).waitFor()
+  assert.equal(await panel.getByText(/bản ghi buổi PT từ phép thử/).count(), 0)
+  assert.equal(await panel.getByText(/Tôi đã xem hồ sơ/).count(), 0)
+  await panel.getByRole('checkbox', { name: /khi chưa có nội dung/ }).check()
+  assert.ok(await confirm.isEnabled())
+
+  evidenceMode = 'unavailable'
+  await page.reload()
+  await review.click()
+  await panel.getByText(/Hiện chưa đọc được hồ sơ/).waitFor()
+  assert.ok(await confirm.isDisabled())
+
+  evidenceMode = 'matched'
+  await page.reload()
+  await review.click()
+  await panel.getByText(/bản ghi buổi PT từ phép thử/).waitFor()
+  await panel.getByText(/Dữ liệu minh họa/).waitFor()
+  await panel.getByText(/buổi tập đã diễn ra chưa được xác minh độc lập/).waitFor()
+  assert.ok(await confirm.isDisabled())
+  await panel.getByRole('checkbox', { name: /Tôi đã xem hồ sơ/ }).check()
+  for (const [width, height] of [[1440, 900], [390, 844]]) {
+    await page.setViewportSize({ width, height })
+    assert.equal(await page.evaluate(() => document.documentElement.scrollWidth), width)
+    await confirm.scrollIntoViewIfNeeded()
+    await page.screenshot({
+      path: fileURLToPath(new URL('./pass-evidence-' + width + 'x' + height + '.jpg', import.meta.url)),
+      fullPage: true,
+    })
+  }
+  await confirm.click()
   await page.getByText(/Đã xác nhận · 0x/).waitFor()
   await page.getByText(/#1 · Đã xác nhận/).waitFor()
 
