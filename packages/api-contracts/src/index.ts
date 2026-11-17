@@ -100,3 +100,57 @@ export type ChainEvent = z.infer<typeof eventSchema>
 export type SyncStatus = z.infer<typeof syncResponse>
 export type ScenarioInput = z.infer<typeof scenarioRequest>
 export type ScenarioComparison = z.infer<typeof scenarioResponse>
+
+// VND amounts use bounded finite numbers. Counts and day indices are integers.
+const scenarioMoneyV2 = nonnegative.max(Number.MAX_SAFE_INTEGER)
+const scenarioCountV2 = nonnegative.int().max(Number.MAX_SAFE_INTEGER)
+export const scenarioRequestV2 = z.strictObject({
+  label: z.literal('MINH HỌA'),
+  currency: z.literal('VND'),
+  price: scenarioMoneyV2,
+  variableGymCost: scenarioMoneyV2,
+  gymProcessingCostPerPackage: scenarioMoneyV2,
+  annualCostOfFunds: fraction,
+  termDays: scenarioCountV2.min(1).max(3650),
+  averageSettlementDelayDays: nonnegative.max(3650),
+  coverageEvaluationDay: scenarioCountV2.max(3650),
+  protectionFeeRate: fraction,
+  protectionFeeGymShareRate: fraction,
+  referralFeeRate: fraction,
+  advanceRate: fraction,
+  platformCAC: scenarioMoneyV2,
+  platformVariableCost: scenarioMoneyV2,
+  incrementalNewCustomers: scenarioCountV2,
+  incrementalCapacity: scenarioCountV2.optional(),
+}).superRefine((input, ctx) => {
+  if (input.coverageEvaluationDay > input.termDays) {
+    ctx.addIssue({ code: 'custom', path: ['coverageEvaluationDay'], message: 'Must be within the service term.' })
+  }
+})
+
+const finiteVnd = z.number().finite()
+const scenarioResultV2 = z.strictObject({
+  model: z.enum(['A', 'B', 'C', 'D']),
+  gymIncrementalContributionPerPackage: finiteVnd,
+  platformUnitMarginPerPackage: finiteVnd,
+  gymFundingCostPerPackage: nonnegative,
+  gymUpfrontCashGap: nonnegative,
+  initialVaultProtectionFraction: fraction,
+  buyerCoverageShortfallAtDay: nonnegative,
+  coverageEvaluationDay: scenarioCountV2.max(3650),
+  gymIncrementalContributionAggregate: finiteVnd,
+  platformContributionAggregateBeforeFixedCosts: finiteVnd,
+})
+export const scenarioResponseV2 = z.strictObject({
+  label: z.literal('MINH HỌA'),
+  currency: z.literal('VND'),
+  assumptions: scenarioRequestV2,
+  warnings: z.array(z.enum(['INCREMENTAL_CUSTOMER_ATTRIBUTION_UNVERIFIED', 'CAPACITY_NOT_PROVIDED', 'CAPACITY_EXCEEDED'])),
+  scenarios: z.array(scenarioResultV2).length(4),
+}).refine(result =>
+  new Set(result.scenarios.map(s => s.model)).size === 4 &&
+  result.scenarios.every(s => s.coverageEvaluationDay === result.assumptions.coverageEvaluationDay),
+)
+
+export type ScenarioInputV2 = z.infer<typeof scenarioRequestV2>
+export type ScenarioComparisonV2 = z.infer<typeof scenarioResponseV2>
