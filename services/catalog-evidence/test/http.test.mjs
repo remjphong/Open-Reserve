@@ -33,12 +33,41 @@ test('configured but unreachable database degrades without leaking credentials',
   assert.equal(result.json().dependencies[0].reason, 'UNAVAILABLE')
   assert.doesNotMatch(result.body, /private_user|private_password/)
 })
-test('business routes never fabricate success', async t => {
-  const app = buildApp(config); t.after(() => app.close())
-  for (const [method, url] of [["GET", "/v1/packages"], ["GET", "/v1/agreements/1/evidence"], ["POST", "/v1/evidence"]]) {
-    const result = await app.inject({ method, url })
-    assert.equal(result.statusCode, 501); errorSchema.parse(result.json())
-    assert.equal(result.json().error.code, url === '/v1/evidence' ? 'WRITE_DISABLED' : 'NOT_IMPLEMENTED')
+test('catalog and evidence fail closed without their own database', async t => {
+  const app = buildApp(config)
+  t.after(() => app.close())
+  for (const url of ['/v1/packages', '/v1/agreements/1/evidence']) {
+    const result = await app.inject(url)
+    assert.equal(result.statusCode, 503)
+    assert.equal(errorSchema.parse(result.json()).error.code, 'DEPENDENCY_UNAVAILABLE')
+  }
+})
+
+test('read routes reject invalid IDs, parameters and cursors before storage access', async t => {
+  const app = buildApp(config)
+  t.after(() => app.close())
+  for (const url of [
+    '/v1/packages?limit=1',
+    '/v1/agreements/0/evidence', '/v1/agreements/01/evidence',
+    '/v1/agreements/example/evidence', '/v1/agreements/' + (2n ** 256n) + '/evidence',
+    '/v1/agreements/1/evidence?limit=0', '/v1/agreements/1/evidence?limit=101',
+    '/v1/agreements/1/evidence?limit=1.5', '/v1/agreements/1/evidence?extra=bad',
+    '/v1/agreements/1/evidence?cursor=', '/v1/agreements/1/evidence?cursor=not-a-cursor',
+    '/v1/agreements/2/evidence?cursor=' + Buffer.from('1:1').toString('base64url'),
+  ]) {
+    const result = await app.inject(url)
+    assert.equal(result.statusCode, 400, url)
+    assert.equal(errorSchema.parse(result.json()).error.code, 'INVALID_REQUEST')
+  }
+})
+
+test('evidence upload stays disabled for arbitrary JSON and request absence', async t => {
+  const app = buildApp(config)
+  t.after(() => app.close())
+  for (const payload of [undefined, {}, { signature: 'example' }]) {
+    const result = await app.inject({ method: 'POST', url: '/v1/evidence', payload })
+    assert.equal(result.statusCode, 501)
+    assert.equal(errorSchema.parse(result.json()).error.code, 'WRITE_DISABLED')
   }
   assert.equal((await app.inject('/not-a-route')).statusCode, 404)
 })
