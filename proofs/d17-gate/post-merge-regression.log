@@ -1,0 +1,603 @@
+Tested HEAD: 2422b8eef9ec04a15e38f6ca301612d890b9402c
+Recovered post-merge command output. Runner hostnames redacted. Environment values omitted.
+
+[npm-ci]
+Command: npm ci
+Tool: Node 24.22.1 / npm 11.9.0
+Exit: 0
+Result: PASS
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+added 169 packages in 6s
+
+[typecheck]
+Command: npm run typecheck
+Tool: Node 24.22.1 / npm 11.9.0
+Exit: 0
+Result: PASS
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> openreserve@0.0.0 pretypecheck
+> npm run prebuild
+
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> openreserve@0.0.0 prebuild
+> npm run build --workspace @openreserve/api-contracts --workspace @openreserve/contracts-sdk
+
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> @openreserve/api-contracts@0.0.0 build
+> tsc -p tsconfig.json
+
+
+> @openreserve/contracts-sdk@0.0.0 build
+> tsc -p tsconfig.json
+
+
+> openreserve@0.0.0 typecheck
+> npm run typecheck --workspaces
+
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> @openreserve/web@0.0.0 typecheck
+> tsc -p tsconfig.json --noEmit
+
+
+> @openreserve/catalog-evidence@0.0.0 typecheck
+> tsc -p tsconfig.json --noEmit
+
+
+> @openreserve/chain-indexer@0.0.0 typecheck
+> tsc -p tsconfig.json --noEmit
+
+
+> @openreserve/economics@0.0.0 typecheck
+> tsc -p tsconfig.json --noEmit
+
+
+> @openreserve/api-contracts@0.0.0 typecheck
+> tsc -p tsconfig.json --noEmit
+
+
+> @openreserve/contracts-sdk@0.0.0 typecheck
+> tsc -p tsconfig.json --noEmit
+
+
+[build]
+Command: npm run build
+Tool: Node 24.22.1 / npm 11.9.0
+Exit: 0
+Result: PASS
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> openreserve@0.0.0 prebuild
+> npm run build --workspace @openreserve/api-contracts --workspace @openreserve/contracts-sdk
+
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> @openreserve/api-contracts@0.0.0 build
+> tsc -p tsconfig.json
+
+
+> @openreserve/contracts-sdk@0.0.0 build
+> tsc -p tsconfig.json
+
+
+> openreserve@0.0.0 build
+> npm run build --workspaces
+
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> @openreserve/web@0.0.0 build
+> vite build
+
+vite v7.3.8 building client environment for production...
+transforming...
+✓ 1310 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                                                    0.39 kB │ gzip:   0.26 kB
+dist/assets/be-vietnam-pro-vietnamese-400-normal-CRcqvyg1.woff2   11.53 kB
+dist/assets/be-vietnam-pro-vietnamese-600-normal-nyU-ZL2p.woff2   12.18 kB
+dist/assets/be-vietnam-pro-vietnamese-700-normal-Csr0PCuG.woff2   12.47 kB
+dist/assets/be-vietnam-pro-latin-400-normal-PpnXBOrz.woff2        21.17 kB
+dist/assets/be-vietnam-pro-latin-600-normal-BZDkUTrt.woff2        22.03 kB
+dist/assets/be-vietnam-pro-latin-700-normal-DlW1Zbsh.woff2        22.15 kB
+dist/assets/index-BDYbpuqj.css                                    14.86 kB │ gzip:   3.80 kB
+dist/assets/ccip-BqDS3cbZ.js                                       4.40 kB │ gzip:   1.97 kB
+dist/assets/index-DrkQPeXP.js                                    556.77 kB │ gzip: 170.36 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 2.60s
+
+> @openreserve/catalog-evidence@0.0.0 build
+> tsc -p tsconfig.json
+
+
+> @openreserve/chain-indexer@0.0.0 build
+> tsc -p tsconfig.json
+
+
+> @openreserve/economics@0.0.0 build
+> tsc -p tsconfig.json
+
+
+> @openreserve/api-contracts@0.0.0 build
+> tsc -p tsconfig.json
+
+
+> @openreserve/contracts-sdk@0.0.0 build
+> tsc -p tsconfig.json
+
+
+[workspace-tests]
+Command: npm test
+Tool: Node 24.22.1 / npm 11.9.0
+Exit: 0
+Result: PASS
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> openreserve@0.0.0 test
+> npm run test --workspaces --if-present
+
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> @openreserve/catalog-evidence@0.0.0 test
+> node --test test/*.test.mjs
+
+✔ catalog-evidence: liveness and actual unconfigured readiness (60.8197ms)
+✔ catalog-evidence: injected dependency transitions keep liveness independent (4.697945ms)
+✔ catalog-evidence: invalid port fails startup configuration (0.444678ms)
+✔ configured but unreachable database degrades without leaking credentials (10.244747ms)
+✔ catalog and evidence fail closed without their own database (7.815835ms)
+✔ read routes reject invalid IDs, parameters and cursors before storage access (7.11472ms)
+✔ evidence upload stays disabled for arbitrary JSON and request absence (4.804136ms)
+✔ malformed database URL returns 503 without leaking configuration (2.33432ms)
+﹣ catalog PostgreSQL: fixtures, scoped evidence, pagination, disabled writes and storage loss (0.661655ms) # Set D17_TEST_CATALOG_DATABASE_URL for a disposable catalog_db
+ℹ tests 9
+ℹ suites 0
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 1
+ℹ todo 0
+ℹ duration_ms 281.081218
+
+> @openreserve/chain-indexer@0.0.0 test
+> node --test test/*.test.mjs
+
+✔ chain-indexer: liveness and actual unconfigured readiness (65.42123ms)
+✔ chain-indexer reports degradation with reachable DB/RPC and absent sync (3.339653ms)
+✔ chain-indexer: invalid port fails startup configuration (0.436046ms)
+✔ configured but unreachable database degrades without leaking credentials (8.838974ms)
+✔ business routes never fabricate success (6.773237ms)
+✔ malformed database URL returns 503 without leaking configuration (2.559679ms)
+✔ RPC probe checks actual HTTP chain ID; these are local test responses, not Fuji (37.351836ms)
+✔ RPC timeout is bounded (1003.073876ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1139.493639
+
+> @openreserve/economics@0.0.0 test
+> node --test test/*.test.mjs
+
+✔ economics: liveness and actual unconfigured readiness (60.608777ms)
+✔ economics ignores DB and RPC configuration (5.209695ms)
+✔ economics: invalid port fails startup configuration (0.65803ms)
+✔ business routes never fabricate success (5.405349ms)
+✔ workbook A/B/C/D references, units, warnings, funding and aggregate math (67.532824ms)
+✔ coverage at day 0, 10, 27, 30 and expiry only advances in C and D (11.610492ms)
+✔ zero case, finite large amounts, full advance, and positive platform margin (4.795873ms)
+✔ capacity and attribution warnings preserve the submitted count (4.051233ms)
+✔ v2 strict validation and v1 preserves its existing schema and behavior (15.092032ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 9
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 288.825178
+
+> @openreserve/api-contracts@0.0.0 test
+> node --test test/*.test.mjs
+
+✔ health, ready, error DTOs reject contradictions (2.803215ms)
+✔ IDs, uint256, pagination reject unsafe and invalid values (1.394778ms)
+✔ catalog packages retain demo provenance and two policies (1.220736ms)
+✔ evidence and future signed envelope validate shape without authorizing writes (1.573827ms)
+✔ chain projection/event/sync DTOs carry identity and stale provenance (2.702745ms)
+✔ economics allows losses, requires assumptions and four distinct scenarios (1.000355ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 159.595911
+
+> @openreserve/contracts-sdk@0.0.0 test
+> node --test test/*.test.mjs
+
+✔ read-only surface includes no transaction methods (0.732902ms)
+✔ immutable profiles and approved terms fail closed on mismatch (0.340733ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 2
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 81.597687
+
+[service-isolation]
+Command: npm run test:isolation
+Tool: Node 24.22.1 / npm 11.9.0
+Exit: 0
+Result: PASS
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> openreserve@0.0.0 test:isolation
+> node scripts/service-isolation.mjs
+
+START node services/catalog-evidence/dist/server.js PORT=3001 PID=458
+[catalog-evidence] {"level":30,"time":1794912027779,"pid":458,"hostname":"[redacted]","msg":"Server listening at http://127.0.0.1:3001"}
+[catalog-evidence] {"level":30,"time":1794912027785,"pid":458,"hostname":"[redacted]","reqId":"req-1","req":{"method":"GET","url":"/health","host":"127.0.0.1:3001","remoteAddress":"127.0.0.1","remotePort":39192},"msg":"incoming request"}
+{"service":"catalog-evidence","pid":458,"route":"/health","status":200,"body":{"service":"catalog-evidence","status":"alive"}}
+[catalog-evidence] {"level":30,"time":1794912027789,"pid":458,"hostname":"[redacted]","reqId":"req-1","res":{"statusCode":200},"responseTime":3.3421260000000075,"msg":"request completed"}
+[catalog-evidence] {"level":30,"time":1794912027796,"pid":458,"hostname":"[redacted]","reqId":"req-2","req":{"method":"GET","url":"/ready","host":"127.0.0.1:3001","remoteAddress":"127.0.0.1","remotePort":39198},"msg":"incoming request"}
+{"service":"catalog-evidence","pid":458,"route":"/ready","status":503,"body":{"service":"catalog-evidence","ready":false,"dependencies":[{"name":"database","ok":false,"reason":"NOT_CONFIGURED"}]}}
+[catalog-evidence] {"level":30,"time":1794912027797,"pid":458,"hostname":"[redacted]","reqId":"req-2","res":{"statusCode":503},"responseTime":0.844459999999998,"msg":"request completed"}
+STOP catalog-evidence PID=458 exit=0 signal=null
+START node services/chain-indexer/dist/server.js PORT=3002 PID=470
+[chain-indexer] {"level":30,"time":1794912028009,"pid":470,"hostname":"[redacted]","msg":"Server listening at http://127.0.0.1:3002"}
+[chain-indexer] {"level":30,"time":1794912028017,"pid":470,"hostname":"[redacted]","reqId":"req-1","req":{"method":"GET","url":"/health","host":"127.0.0.1:3002","remoteAddress":"127.0.0.1","remotePort":57104},"msg":"incoming request"}
+{"service":"chain-indexer","pid":470,"route":"/health","status":200,"body":{"service":"chain-indexer","status":"alive"}}
+[chain-indexer] {"level":30,"time":1794912028021,"pid":470,"hostname":"[redacted]","reqId":"req-1","res":{"statusCode":200},"responseTime":3.661135999999999,"msg":"request completed"}
+[chain-indexer] {"level":30,"time":1794912028024,"pid":470,"hostname":"[redacted]","reqId":"req-2","req":{"method":"GET","url":"/ready","host":"127.0.0.1:3002","remoteAddress":"127.0.0.1","remotePort":57118},"msg":"incoming request"}
+{"service":"chain-indexer","pid":470,"route":"/ready","status":503,"body":{"service":"chain-indexer","ready":false,"dependencies":[{"name":"database","ok":false,"reason":"NOT_CONFIGURED"},{"name":"rpc","ok":false,"reason":"NOT_CONFIGURED"},{"name":"sync","ok":false,"reason":"SYNC_NOT_IMPLEMENTED"}]}}
+[chain-indexer] {"level":30,"time":1794912028025,"pid":470,"hostname":"[redacted]","reqId":"req-2","res":{"statusCode":503},"responseTime":1.1718919999999855,"msg":"request completed"}
+STOP chain-indexer PID=470 exit=0 signal=null
+START node services/economics/dist/server.js PORT=3003 PID=482
+[economics] {"level":30,"time":1794912028251,"pid":482,"hostname":"[redacted]","msg":"Server listening at http://127.0.0.1:3003"}
+[economics] {"level":30,"time":1794912028295,"pid":482,"hostname":"[redacted]","reqId":"req-1","req":{"method":"GET","url":"/health","host":"127.0.0.1:3003","remoteAddress":"127.0.0.1","remotePort":54934},"msg":"incoming request"}
+{"service":"economics","pid":482,"route":"/health","status":200,"body":{"service":"economics","status":"alive"}}
+[economics] {"level":30,"time":1794912028299,"pid":482,"hostname":"[redacted]","reqId":"req-1","res":{"statusCode":200},"responseTime":4.308979999999963,"msg":"request completed"}
+{"service":"economics","pid":482,"route":"/ready","status":200,"body":{"service":"economics","ready":true,"dependencies":[]}}
+[economics] {"level":30,"time":1794912028300,"pid":482,"hostname":"[redacted]","reqId":"req-2","req":{"method":"GET","url":"/ready","host":"127.0.0.1:3003","remoteAddress":"127.0.0.1","remotePort":54948},"msg":"incoming request"}
+{"level":30,"time":1794912028301,"pid":482,"hostname":"[redacted]","reqId":"req-2","res":{"statusCode":200},"responseTime":0.7296680000000038,"msg":"request completed"}
+STOP economics PID=482 exit=0 signal=null
+START node services/catalog-evidence/dist/server.js PORT=3001 PID=494
+[catalog-evidence] {"level":30,"time":1794912028508,"pid":494,"hostname":"[redacted]","msg":"Server listening at http://127.0.0.1:3001"}
+[catalog-evidence] {"level":30,"time":1794912028518,"pid":494,"hostname":"[redacted]","reqId":"req-1","req":{"method":"GET","url":"/health","host":"127.0.0.1:3001","remoteAddress":"127.0.0.1","remotePort":39240},"msg":"incoming request"}
+{"service":"catalog-evidence","pid":494,"route":"/health","status":200,"body":{"service":"catalog-evidence","status":"alive"}}
+START node services/chain-indexer/dist/server.js PORT=3002 PID=506
+[catalog-evidence] {"level":30,"time":1794912028522,"pid":494,"hostname":"[redacted]","reqId":"req-1","res":{"statusCode":200},"responseTime":3.2508590000000197,"msg":"request completed"}
+[chain-indexer] {"level":30,"time":1794912028839,"pid":506,"hostname":"[redacted]","msg":"Server listening at http://127.0.0.1:3002"}
+[chain-indexer] {"level":30,"time":1794912028872,"pid":506,"hostname":"[redacted]","reqId":"req-1","req":{"method":"GET","url":"/health","host":"127.0.0.1:3002","remoteAddress":"127.0.0.1","remotePort":57174},"msg":"incoming request"}
+{"service":"chain-indexer","pid":506,"route":"/health","status":200,"body":{"service":"chain-indexer","status":"alive"}}
+START node services/economics/dist/server.js PORT=3003 PID=518
+[chain-indexer] {"level":30,"time":1794912028877,"pid":506,"hostname":"[redacted]","reqId":"req-1","res":{"statusCode":200},"responseTime":4.214779000000021,"msg":"request completed"}
+[economics] {"level":30,"time":1794912029135,"pid":518,"hostname":"[redacted]","msg":"Server listening at http://127.0.0.1:3003"}
+[economics] {"level":30,"time":1794912029140,"pid":518,"hostname":"[redacted]","reqId":"req-1","req":{"method":"GET","url":"/health","host":"127.0.0.1:3003","remoteAddress":"127.0.0.1","remotePort":54996},"msg":"incoming request"}
+{"service":"economics","pid":518,"route":"/health","status":200,"body":{"service":"economics","status":"alive"}}
+[economics] {"level":30,"time":1794912029145,"pid":518,"hostname":"[redacted]","reqId":"req-1","res":{"statusCode":200},"responseTime":4.498917000000006,"msg":"request completed"}
+STOP catalog-evidence PID=494 exit=0 signal=null
+[chain-indexer] {"level":30,"time":1794912029157,"pid":506,"hostname":"[redacted]","reqId":"req-2","req":{"method":"GET","url":"/health","host":"127.0.0.1:3002","remoteAddress":"127.0.0.1","remotePort":57174},"msg":"incoming request"}
+{"service":"chain-indexer","pid":506,"route":"/health","status":200,"body":{"service":"chain-indexer","status":"alive"}}
+[chain-indexer] {"level":30,"time":1794912029157,"pid":506,"hostname":"[redacted]","reqId":"req-2","res":{"statusCode":200},"responseTime":0.32759299999997893,"msg":"request completed"}
+[chain-indexer] {"level":30,"time":1794912029159,"pid":506,"hostname":"[redacted]","reqId":"req-3","req":{"method":"GET","url":"/ready","host":"127.0.0.1:3002","remoteAddress":"127.0.0.1","remotePort":57186},"msg":"incoming request"}
+{"service":"chain-indexer","pid":506,"route":"/ready","status":503,"body":{"service":"chain-indexer","ready":false,"dependencies":[{"name":"database","ok":false,"reason":"NOT_CONFIGURED"},{"name":"rpc","ok":false,"reason":"NOT_CONFIGURED"},{"name":"sync","ok":false,"reason":"SYNC_NOT_IMPLEMENTED"}]}}
+[chain-indexer] {"level":30,"time":1794912029160,"pid":506,"hostname":"[redacted]","reqId":"req-3","res":{"statusCode":503},"responseTime":1.3453339999999798,"msg":"request completed"}
+[economics] {"level":30,"time":1794912029161,"pid":518,"hostname":"[redacted]","reqId":"req-2","req":{"method":"GET","url":"/health","host":"127.0.0.1:3003","remoteAddress":"127.0.0.1","remotePort":54996},"msg":"incoming request"}
+{"service":"economics","pid":518,"route":"/health","status":200,"body":{"service":"economics","status":"alive"}}
+[economics] {"level":30,"time":1794912029162,"pid":518,"hostname":"[redacted]","reqId":"req-2","res":{"statusCode":200},"responseTime":0.2902970000000096,"msg":"request completed"}
+[economics] {"level":30,"time":1794912029163,"pid":518,"hostname":"[redacted]","reqId":"req-3","req":{"method":"GET","url":"/ready","host":"127.0.0.1:3003","remoteAddress":"127.0.0.1","remotePort":55004},"msg":"incoming request"}
+{"service":"economics","pid":518,"route":"/ready","status":200,"body":{"service":"economics","ready":true,"dependencies":[]}}
+START node services/catalog-evidence/dist/server.js PORT=3001 PID=530
+[economics] {"level":30,"time":1794912029164,"pid":518,"hostname":"[redacted]","reqId":"req-3","res":{"statusCode":200},"responseTime":0.9618169999999964,"msg":"request completed"}
+[catalog-evidence] {"level":30,"time":1794912029380,"pid":530,"hostname":"[redacted]","msg":"Server listening at http://127.0.0.1:3001"}
+[catalog-evidence] {"level":30,"time":1794912029426,"pid":530,"hostname":"[redacted]","reqId":"req-1","req":{"method":"GET","url":"/health","host":"127.0.0.1:3001","remoteAddress":"127.0.0.1","remotePort":39292},"msg":"incoming request"}
+{"service":"catalog-evidence","pid":530,"route":"/health","status":200,"body":{"service":"catalog-evidence","status":"alive"}}
+[catalog-evidence] {"level":30,"time":1794912029430,"pid":530,"hostname":"[redacted]","reqId":"req-1","res":{"statusCode":200},"responseTime":3.681476000000032,"msg":"request completed"}
+[chain-indexer] {"level":30,"time":1794912029431,"pid":506,"hostname":"[redacted]","reqId":"req-4","req":{"method":"GET","url":"/health","host":"127.0.0.1:3002","remoteAddress":"127.0.0.1","remotePort":57174},"msg":"incoming request"}
+{"service":"chain-indexer","pid":506,"route":"/health","status":200,"body":{"service":"chain-indexer","status":"alive"}}
+[chain-indexer] {"level":30,"time":1794912029432,"pid":506,"hostname":"[redacted]","reqId":"req-4","res":{"statusCode":200},"responseTime":0.3174070000000029,"msg":"request completed"}
+[economics] {"level":30,"time":1794912029433,"pid":518,"hostname":"[redacted]","reqId":"req-4","req":{"method":"GET","url":"/health","host":"127.0.0.1:3003","remoteAddress":"127.0.0.1","remotePort":54996},"msg":"incoming request"}
+{"service":"economics","pid":518,"route":"/health","status":200,"body":{"service":"economics","status":"alive"}}
+PASS stop/restart catalog-evidence: peer PIDs unchanged 506,518
+[economics] {"level":30,"time":1794912029433,"pid":518,"hostname":"[redacted]","reqId":"req-4","res":{"statusCode":200},"responseTime":0.37408300000004147,"msg":"request completed"}
+STOP chain-indexer PID=506 exit=0 signal=null
+[catalog-evidence] {"level":30,"time":1794912029443,"pid":530,"hostname":"[redacted]","reqId":"req-2","req":{"method":"GET","url":"/health","host":"127.0.0.1:3001","remoteAddress":"127.0.0.1","remotePort":39292},"msg":"incoming request"}
+{"service":"catalog-evidence","pid":530,"route":"/health","status":200,"body":{"service":"catalog-evidence","status":"alive"}}
+[catalog-evidence] {"level":30,"time":1794912029443,"pid":530,"hostname":"[redacted]","reqId":"req-2","res":{"statusCode":200},"responseTime":0.28037199999999984,"msg":"request completed"}
+[catalog-evidence] {"level":30,"time":1794912029444,"pid":530,"hostname":"[redacted]","reqId":"req-3","req":{"method":"GET","url":"/ready","host":"127.0.0.1:3001","remoteAddress":"127.0.0.1","remotePort":39306},"msg":"incoming request"}
+{"service":"catalog-evidence","pid":530,"route":"/ready","status":503,"body":{"service":"catalog-evidence","ready":false,"dependencies":[{"name":"database","ok":false,"reason":"NOT_CONFIGURED"}]}}
+[catalog-evidence] {"level":30,"time":1794912029445,"pid":530,"hostname":"[redacted]","reqId":"req-3","res":{"statusCode":503},"responseTime":0.9037690000000111,"msg":"request completed"}
+[economics] {"level":30,"time":1794912029446,"pid":518,"hostname":"[redacted]","reqId":"req-5","req":{"method":"GET","url":"/health","host":"127.0.0.1:3003","remoteAddress":"127.0.0.1","remotePort":54996},"msg":"incoming request"}
+{"service":"economics","pid":518,"route":"/health","status":200,"body":{"service":"economics","status":"alive"}}
+[economics] {"level":30,"time":1794912029447,"pid":518,"hostname":"[redacted]","reqId":"req-5","res":{"statusCode":200},"responseTime":0.349694999999997,"msg":"request completed"}
+[economics] {"level":30,"time":1794912029447,"pid":518,"hostname":"[redacted]","reqId":"req-6","req":{"method":"GET","url":"/ready","host":"127.0.0.1:3003","remoteAddress":"127.0.0.1","remotePort":55004},"msg":"incoming request"}
+{"service":"economics","pid":518,"route":"/ready","status":200,"body":{"service":"economics","ready":true,"dependencies":[]}}
+START node services/chain-indexer/dist/server.js PORT=3002 PID=542
+[economics] {"level":30,"time":1794912029447,"pid":518,"hostname":"[redacted]","reqId":"req-6","res":{"statusCode":200},"responseTime":0.22610999999994874,"msg":"request completed"}
+[chain-indexer] {"level":30,"time":1794912029696,"pid":542,"hostname":"[redacted]","msg":"Server listening at http://127.0.0.1:3002"}
+[chain-indexer] {"level":30,"time":1794912029713,"pid":542,"hostname":"[redacted]","reqId":"req-1","req":{"method":"GET","url":"/health","host":"127.0.0.1:3002","remoteAddress":"127.0.0.1","remotePort":57278},"msg":"incoming request"}
+{"service":"chain-indexer","pid":542,"route":"/health","status":200,"body":{"service":"chain-indexer","status":"alive"}}
+[chain-indexer] {"level":30,"time":1794912029717,"pid":542,"hostname":"[redacted]","reqId":"req-1","res":{"statusCode":200},"responseTime":3.8856640000000198,"msg":"request completed"}
+[catalog-evidence] {"level":30,"time":1794912029718,"pid":530,"hostname":"[redacted]","reqId":"req-4","req":{"method":"GET","url":"/health","host":"127.0.0.1:3001","remoteAddress":"127.0.0.1","remotePort":39292},"msg":"incoming request"}
+{"service":"catalog-evidence","pid":530,"route":"/health","status":200,"body":{"service":"catalog-evidence","status":"alive"}}
+[catalog-evidence] {"level":30,"time":1794912029718,"pid":530,"hostname":"[redacted]","reqId":"req-4","res":{"statusCode":200},"responseTime":0.2980890000000045,"msg":"request completed"}
+[economics] {"level":30,"time":1794912029719,"pid":518,"hostname":"[redacted]","reqId":"req-7","req":{"method":"GET","url":"/health","host":"127.0.0.1:3003","remoteAddress":"127.0.0.1","remotePort":54996},"msg":"incoming request"}
+{"service":"economics","pid":518,"route":"/health","status":200,"body":{"service":"economics","status":"alive"}}
+PASS stop/restart chain-indexer: peer PIDs unchanged 530,518
+[economics] {"level":30,"time":1794912029720,"pid":518,"hostname":"[redacted]","reqId":"req-7","res":{"statusCode":200},"responseTime":0.4148330000000442,"msg":"request completed"}
+STOP economics PID=518 exit=0 signal=null
+[catalog-evidence] {"level":30,"time":1794912029735,"pid":530,"hostname":"[redacted]","reqId":"req-5","req":{"method":"GET","url":"/health","host":"127.0.0.1:3001","remoteAddress":"127.0.0.1","remotePort":39292},"msg":"incoming request"}
+{"service":"catalog-evidence","pid":530,"route":"/health","status":200,"body":{"service":"catalog-evidence","status":"alive"}}
+[catalog-evidence] {"level":30,"time":1794912029736,"pid":530,"hostname":"[redacted]","reqId":"req-5","res":{"statusCode":200},"responseTime":0.4282140000000254,"msg":"request completed"}
+[catalog-evidence] {"level":30,"time":1794912029737,"pid":530,"hostname":"[redacted]","reqId":"req-6","req":{"method":"GET","url":"/ready","host":"127.0.0.1:3001","remoteAddress":"127.0.0.1","remotePort":39306},"msg":"incoming request"}
+{"service":"catalog-evidence","pid":530,"route":"/ready","status":503,"body":{"service":"catalog-evidence","ready":false,"dependencies":[{"name":"database","ok":false,"reason":"NOT_CONFIGURED"}]}}
+[catalog-evidence] {"level":30,"time":1794912029737,"pid":530,"hostname":"[redacted]","reqId":"req-6","res":{"statusCode":503},"responseTime":0.3104569999999285,"msg":"request completed"}
+[chain-indexer] {"level":30,"time":1794912029739,"pid":542,"hostname":"[redacted]","reqId":"req-2","req":{"method":"GET","url":"/health","host":"127.0.0.1:3002","remoteAddress":"127.0.0.1","remotePort":57278},"msg":"incoming request"}
+{"service":"chain-indexer","pid":542,"route":"/health","status":200,"body":{"service":"chain-indexer","status":"alive"}}
+[chain-indexer] {"level":30,"time":1794912029739,"pid":542,"hostname":"[redacted]","reqId":"req-2","res":{"statusCode":200},"responseTime":0.41214899999999943,"msg":"request completed"}
+[chain-indexer] {"level":30,"time":1794912029741,"pid":542,"hostname":"[redacted]","reqId":"req-3","req":{"method":"GET","url":"/ready","host":"127.0.0.1:3002","remoteAddress":"127.0.0.1","remotePort":57294},"msg":"incoming request"}
+{"service":"chain-indexer","pid":542,"route":"/ready","status":503,"body":{"service":"chain-indexer","ready":false,"dependencies":[{"name":"database","ok":false,"reason":"NOT_CONFIGURED"},{"name":"rpc","ok":false,"reason":"NOT_CONFIGURED"},{"name":"sync","ok":false,"reason":"SYNC_NOT_IMPLEMENTED"}]}}
+START node services/economics/dist/server.js PORT=3003 PID=554
+[chain-indexer] {"level":30,"time":1794912029743,"pid":542,"hostname":"[redacted]","reqId":"req-3","res":{"statusCode":503},"responseTime":1.8551700000000437,"msg":"request completed"}
+[economics] {"level":30,"time":1794912029962,"pid":554,"hostname":"[redacted]","msg":"Server listening at http://127.0.0.1:3003"}
+[economics] {"level":30,"time":1794912030008,"pid":554,"hostname":"[redacted]","reqId":"req-1","req":{"method":"GET","url":"/health","host":"127.0.0.1:3003","remoteAddress":"127.0.0.1","remotePort":55070},"msg":"incoming request"}
+{"service":"economics","pid":554,"route":"/health","status":200,"body":{"service":"economics","status":"alive"}}
+[economics] {"level":30,"time":1794912030012,"pid":554,"hostname":"[redacted]","reqId":"req-1","res":{"statusCode":200},"responseTime":3.9107009999999605,"msg":"request completed"}
+[catalog-evidence] {"level":30,"time":1794912030013,"pid":530,"hostname":"[redacted]","reqId":"req-7","req":{"method":"GET","url":"/health","host":"127.0.0.1:3001","remoteAddress":"127.0.0.1","remotePort":39292},"msg":"incoming request"}
+{"service":"catalog-evidence","pid":530,"route":"/health","status":200,"body":{"service":"catalog-evidence","status":"alive"}}
+[catalog-evidence] {"level":30,"time":1794912030013,"pid":530,"hostname":"[redacted]","reqId":"req-7","res":{"statusCode":200},"responseTime":0.36908500000004096,"msg":"request completed"}
+[chain-indexer] {"level":30,"time":1794912030014,"pid":542,"hostname":"[redacted]","reqId":"req-4","req":{"method":"GET","url":"/health","host":"127.0.0.1:3002","remoteAddress":"127.0.0.1","remotePort":57278},"msg":"incoming request"}
+{"service":"chain-indexer","pid":542,"route":"/health","status":200,"body":{"service":"chain-indexer","status":"alive"}}
+PASS stop/restart economics: peer PIDs unchanged 530,542
+PASS 3 standalone startups, 3 stop/restart cycles, HTTP schemas and peer PID isolation; no financial E2E claim
+[chain-indexer] {"level":30,"time":1794912030015,"pid":542,"hostname":"[redacted]","reqId":"req-4","res":{"statusCode":200},"responseTime":0.30633100000000013,"msg":"request completed"}
+STOP catalog-evidence PID=530 exit=0 signal=null
+STOP chain-indexer PID=542 exit=0 signal=null
+STOP economics PID=554 exit=0 signal=null
+
+[sdk]
+Command: npm run sdk:check
+Tool: Node 24.22.1 / npm 11.9.0 / Forge 1.7.1 (4072e48705)
+Exit: 0
+Result: PASS
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> openreserve@0.0.0 sdk:check
+> node scripts/generate-sdk.mjs --check
+
+SDK ABI check PASS: 54 entries; frozen interface matches
+
+[foundry]
+Command: forge test --root contracts
+Tool: Forge 1.7.1 (4072e48705)
+Exit: 0
+Result: PASS
+Compiling 24 files with Solc 0.8.30
+Solc 0.8.30 finished in 615.76ms
+Compiler run successful!
+
+Ran 5 tests for test/DeployFuji.t.sol:DeployFujiTest
+[PASS] test_FujiDryRunDeploysAndRehearsesDemoWithoutNetwork() (gas: 6362938)
+[PASS] test_FujiDryRunRejectsLocalAndMainnet() (gas: 17936)
+[PASS] test_FujiDryRunRejectsMerchantAtPlannedVaultBeforeCreation() (gas: 19941)
+[PASS] test_FujiDryRunRejectsZeroAndDuplicateWallets() (gas: 36637)
+[PASS] test_FujiDryRunRequiresExplicitSufficientMockSupply() (gas: 16629)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 1.67ms (989.25µs CPU time)
+
+Ran 4 tests for test/ReserveVaultSecurity.t.sol:ReserveVaultSecurityTest
+[PASS] test_D17_05_DeadlineCastAtUint64Boundary() (gas: 490961)
+[PASS] test_D17_05_High01RejectionLeavesBalancesLogsAndIdsUnchanged() (gas: 392173)
+[PASS] test_D17_05_MaxSupplyTimeSplitRejectsOverflowAndConserves() (gas: 581657)
+[PASS] test_D17_05_RejectsVaultAsItsOwnMerchant() (gas: 17175)
+Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 2.61s (1.27ms CPU time)
+
+Ran 5 tests for test/ReserveVaultDeposit.t.sol:ReserveVaultDepositTest
+[PASS] test_DepositAcrossTwoAgreementsSeparatesLedgers() (gas: 324364)
+[PASS] test_DepositMockTokenAndEmitAgreementOpened() (gas: 223957)
+[PASS] test_DepositRejectsResolverAsBuyerOrMerchant() (gas: 37259)
+[PASS] test_DepositRequiresCallerAllowanceAndKeepsSequentialIdOnFailure() (gas: 211917)
+[PASS] test_DepositShortReceiptRevertsTokenAndAgreementChanges() (gas: 5568599)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 2.61s (1.20ms CPU time)
+
+Ran 42 tests for test/ReserveVault.t.sol:ReserveVaultTest
+[PASS] testFuzz_DepositAndAuthorizedRefundConserve(uint16) (runs: 256, μ: 365972, ~: 372296)
+[PASS] test_D17_01_EarningsAndWithdrawalsAreAgreementScoped() (gas: 1188166)
+[PASS] test_D17_01_LiveCapacityAndCancellationReplay() (gas: 1666189)
+[PASS] test_D17_01_RejectsMissingAgreementAndClaimOnWrites() (gas: 212949)
+[PASS] test_D17_01_RejectsPtProposalOnTimeAccess() (gas: 247213)
+[PASS] test_D17_01_RejectsZeroSessionIdAndEvidence() (gas: 380386)
+[PASS] test_D17_01_ZeroValueSlotsStillAdvanceHead() (gas: 2232568)
+[PASS] test_D17_03_ActiveTimeTerminationBlocksNewIntervals() (gas: 1174069)
+[PASS] test_D17_03_PtChallengeAndConfirmationEvents() (gas: 880551)
+[PASS] test_D17_03_TerminationRolesAndTerminalEvents() (gas: 594353)
+[PASS] test_D17_03_TimeResolutionReleasesOnlyItsOwnHold() (gas: 2653215)
+[PASS] test_DepositRejectsUnapprovedTermsBeforeTransfer() (gas: 26450)
+[PASS] test_DepositTransfersExactlyAndOpensAgreement() (gas: 227772)
+[PASS] test_DisputeIsIsolatedAndPayableFundsRemainAvailable() (gas: 1259527)
+[PASS] test_DisputedTerminationRequiresScopedResolverDecision() (gas: 352369)
+[PASS] test_PtCancellationReleasesCapacityAndEmitsIndexerEvent() (gas: 1030210)
+[PASS] test_PtLastSlotConfirmationAndResolutionCannotBothSettle() (gas: 4714389)
+[PASS] test_PtRefundDoesNotAdvanceGymRoundingIndex() (gas: 748438)
+[PASS] test_PtRejectsCancellationAfterConfirmationOrChallenge() (gas: 770593)
+[PASS] test_PtRejectsNonPartyActionsAndDuplicateSession() (gas: 473322)
+[PASS] test_PtRejectsRepeatedCancellationAndLateConfirmation() (gas: 342558)
+[PASS] test_PtRejectsUnauthorizedCancellation() (gas: 372219)
+[PASS] test_PtRequiresBuyerConfirmation() (gas: 483423)
+[PASS] test_PtTenSessionsRoundAndWithdrawExactlyOnce() (gas: 2543969)
+[PASS] test_PtTwoEndedRefundsBeforeGymAndSupplementalTermination() (gas: 2914251)
+[PASS] test_PtZeroAwardRetainsCapacityButBurnsSessionId() (gas: 737957)
+[PASS] test_PtZeroValueHoldStillBlocksOtherAllocations() (gas: 843485)
+[PASS] test_RefundRequiresCounterpartyAndCannotBeReplayed() (gas: 397562)
+[PASS] test_SupplementalRefundCannotExceedResidual() (gas: 440145)
+[PASS] test_TerminationRequiresLastLiveClaimToBeCancelled() (gas: 513820)
+[PASS] test_TimeChallengeDeadlineEquality() (gas: 1207485)
+[PASS] test_TimeChallengePreservesIntervalAndLocksOnlyItsAmount() (gas: 1711386)
+[PASS] test_TimeConfigurationFujiRejectsShortenedWindow() (gas: 4871967)
+[PASS] test_TimeConfigurationLocal() (gas: 6788)
+[PASS] test_TimeDisputeSplitAuthorizationReplayAndConservation() (gas: 1390969)
+[PASS] test_TimeEvidenceOfZeroOrFifteenVisitsDoesNotAffectEarnings() (gas: 2363889)
+[PASS] test_TimePastIntervalsAccrueWithoutCheckIns() (gas: 1662109)
+[PASS] test_TimeRejectsFutureAndOverlappingIntervals() (gas: 1167173)
+[PASS] test_TimeRejectsIntervalsOutsideAgreementAndEmptyIntervals() (gas: 218402)
+[PASS] test_TimeRejectsShortenedLocalDurationAndWindow() (gas: 29187)
+[PASS] test_TimeUnauthorizedActionsAndMissingEvidence() (gas: 1242751)
+[PASS] test_TimeZeroValueIntervalPreservesCoverageAndCumulativeRounding() (gas: 2735842)
+Suite result: ok. 42 passed; 0 failed; 0 skipped; finished in 2.61s (110.04ms CPU time)
+
+Ran 4 tests for test/ReserveVaultInvariant.t.sol:ReserveVaultInvariantTest
+[PASS] testFuzz_D17_04_LastSlotRace(uint16,bool) (runs: 256, μ: 13017071, ~: 13038046)
+[PASS] testFuzz_D17_04_PtSequences(uint16,uint32,uint16) (runs: 256, μ: 17206567, ~: 17023923)
+[PASS] testFuzz_D17_04_TimeFujiProfile(uint16,uint16) (runs: 256, μ: 13496843, ~: 13583778)
+[PASS] testFuzz_D17_04_TimeLocal(uint16,uint16) (runs: 256, μ: 15456542, ~: 15543477)
+Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 2.61s (9.95s CPU time)
+
+Ran 5 test suites in 2.61s (10.43s CPU time): 60 tests passed, 0 failed, 0 skipped (60 total tests)
+
+[economics]
+Command: npm test --workspace @openreserve/economics
+Tool: Node 24.22.1 / npm 11.9.0
+Exit: 0
+Result: PASS
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> @openreserve/economics@0.0.0 test
+> node --test test/*.test.mjs
+
+✔ economics: liveness and actual unconfigured readiness (64.740696ms)
+✔ economics ignores DB and RPC configuration (4.183322ms)
+✔ economics: invalid port fails startup configuration (0.453162ms)
+✔ business routes never fabricate success (5.853403ms)
+✔ workbook A/B/C/D references, units, warnings, funding and aggregate math (66.342234ms)
+✔ coverage at day 0, 10, 27, 30 and expiry only advances in C and D (8.467976ms)
+✔ zero case, finite large amounts, full advance, and positive platform margin (4.183282ms)
+✔ capacity and attribution warnings preserve the submitted count (3.627426ms)
+✔ v2 strict validation and v1 preserves its existing schema and behavior (10.931621ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 9
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 270.555881
+
+[catalog-migration]
+Command: DATABASE_URL="$CATALOG_DATABASE_URL" node services/catalog-evidence/scripts/migrate.mjs
+Tool: Node 24.22.1 / npm 11.9.0 where invoked / PostgreSQL 18.6
+Exit: 0
+Result: PASS
+Catalog evidence migration applied.
+
+[postgres-integration]
+Command: npm test --workspace @openreserve/catalog-evidence (D17_TEST_CATALOG_DATABASE_URL configured)
+Tool: Node 24.22.1 / npm 11.9.0 where invoked / PostgreSQL 18.6
+Exit: 0
+Result: PASS
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> @openreserve/catalog-evidence@0.0.0 test
+> node --test test/*.test.mjs
+
+✔ catalog-evidence: liveness and actual unconfigured readiness (60.228911ms)
+✔ catalog-evidence: injected dependency transitions keep liveness independent (4.373117ms)
+✔ catalog-evidence: invalid port fails startup configuration (0.410167ms)
+✔ configured but unreachable database degrades without leaking credentials (9.166516ms)
+✔ catalog and evidence fail closed without their own database (7.663787ms)
+✔ read routes reject invalid IDs, parameters and cursors before storage access (7.574832ms)
+✔ evidence upload stays disabled for arbitrary JSON and request absence (5.847444ms)
+✔ malformed database URL returns 503 without leaking configuration (2.415333ms)
+✔ catalog PostgreSQL: fixtures, scoped evidence, pagination, disabled writes and storage loss (138.246695ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 9
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 321.759745
+
+[cross-db]
+Command: node scripts/test-db-ownership.mjs (CATALOG_DATABASE_URL and CHAIN_DATABASE_URL configured)
+Tool: Node 24.22.1 / npm 11.9.0 where invoked / PostgreSQL 18.6
+Exit: 0
+Result: PASS
+PASS catalog_user owns schema and can write catalog_db (rolled back)
+PASS catalog_user denied CONNECT to chain_db (42501)
+PASS chain_user owns schema and can write chain_db (rolled back)
+PASS chain_user denied CONNECT to catalog_db (42501)
+{"label":"Catalog with own DB","health":200,"ready":200,"body":{"service":"catalog-evidence","ready":true,"dependencies":[{"name":"database","ok":true,"reason":"OK"}]}}
+{"label":"Catalog with other service credentials","health":200,"ready":503,"body":{"service":"catalog-evidence","ready":false,"dependencies":[{"name":"database","ok":false,"reason":"WRONG_DATABASE"}]}}
+{"label":"Indexer with own DB and no RPC","health":200,"ready":503,"body":{"service":"chain-indexer","ready":false,"dependencies":[{"name":"database","ok":true,"reason":"OK"},{"name":"rpc","ok":false,"reason":"NOT_CONFIGURED"},{"name":"sync","ok":false,"reason":"SYNC_NOT_IMPLEMENTED"}]}}
+
+[responsive]
+Command: node "$check_dir/verify-routes.cjs"
+Tool: Node 24.22.1 / Vite 7.3.8 / Playwright 1.65.1 / Chromium bundle 153.0.0
+Exit: 0
+Result: PASS
+1440x900: PASS customer package flows, pass deep links and all three portal entries
+390x844: PASS customer package flows, pass deep links and all three portal entries
+
+[customer-functional]
+Command: node "$check_dir/verify-local.mjs"
+Tool: Node 24.22.1 / Vite 7.3.8 / Playwright 1.65.1 / Chromium bundle 153.0.0 / Anvil 1.7.1 (4072e48705)
+Exit: 0
+Result: PASS
+PASS local Anvil: wrong network, rejected signature, pending receipt, approval, PT deposit, buyer-only confirmation, PT challenge authorized refund, TIME_ACCESS deposit and challenge
+
+[diff-check]
+Command: git diff --check
+Tool: Git 2.52.0
+Exit: 0
+Result: PASS
+(no output)
+
+[postgres runtime output]
+Tool: PostgreSQL 18.6
+2026-11-17 10:40:34.214 UTC [752] LOG:  starting PostgreSQL 18.6 on x86_64-pc-linux-gnu, compiled by gcc (Ubuntu 7.5.0-3ubuntu1~18.04) 7.5.0, 64-bit
+2026-11-17 10:40:34.214 UTC [752] LOG:  listening on IPv4 address "127.0.0.1", port 55433
+2026-11-17 10:40:34.216 UTC [759] LOG:  database system was interrupted; last known up at 2026-11-17 10:13:23 UTC
+2026-11-17 10:40:34.221 UTC [759] LOG:  database system was not properly shut down; automatic recovery in progress
+2026-11-17 10:40:34.222 UTC [759] LOG:  redo starts at 0/1768FE8
+2026-11-17 10:40:34.237 UTC [759] LOG:  invalid record length at 0/2000928: expected at least 24, got 0
+2026-11-17 10:40:34.237 UTC [759] LOG:  redo done at 0/2000900 system usage: CPU: user: 0.00 s, system: 0.01 s, elapsed: 0.01 s
+2026-11-17 10:40:34.238 UTC [757] LOG:  checkpoint starting: end-of-recovery immediate wait
+2026-11-17 10:40:34.250 UTC [757] LOG:  checkpoint complete: wrote 1909 buffers (11.7%), wrote 3 SLRU buffers; 0 WAL file(s) added, 0 removed, 1 recycled; write=0.012 s, sync=0.001 s, total=0.013 s; sync files=614, longest=0.001 s, average=0.000 s; distance=8798 kB, estimate=8798 kB; lsn=0/2000928, redo lsn=0/2000928
+2026-11-17 10:40:34.252 UTC [752] LOG:  database system is ready to accept connections
+2026-11-17 10:40:36.082 UTC [837] FATAL:  permission denied for database "chain_db"
+2026-11-17 10:40:36.082 UTC [837] DETAIL:  User does not have CONNECT privilege.
+2026-11-17 10:40:36.096 UTC [839] FATAL:  permission denied for database "catalog_db"
+2026-11-17 10:40:36.096 UTC [839] DETAIL:  User does not have CONNECT privilege.
+2026-11-17 10:40:36.185 UTC [752] LOG:  received smart shutdown request
+2026-11-17 10:40:36.185 UTC [752] LOG:  background worker "logical replication launcher" (PID 762) exited with exit code 1
+2026-11-17 10:40:36.186 UTC [757] LOG:  shutting down
+2026-11-17 10:40:36.186 UTC [757] LOG:  checkpoint starting: shutdown immediate
+2026-11-17 10:40:36.187 UTC [757] LOG:  checkpoint complete: wrote 74 buffers (0.5%), wrote 1 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.001 s, sync=0.001 s, total=0.002 s; sync files=62, longest=0.001 s, average=0.000 s; distance=335 kB, estimate=7952 kB; lsn=0/20546B0, redo lsn=0/20546B0
+2026-11-17 10:40:36.191 UTC [752] LOG:  database system is shut down
+
+[vite runtime output]
+Tool: Vite 7.3.8
+
+  VITE v7.3.8  ready in 174 ms
+
+  ➜  Local:   http://127.0.0.1:4173/
+
+[anvil runtime output]
+Tool: Anvil 1.7.1
+(no output)
