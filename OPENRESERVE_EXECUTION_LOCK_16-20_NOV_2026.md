@@ -539,6 +539,19 @@ Next: D17-01 after owner merges PR #9, as a separately reviewed task.
 PlanB: none
 ```
 
+
+```text
+[2026-11-17 18:06 ICT] TASK=D17-GATE STATUS=TECHNICALLY_ACCEPTED_WITH_DOCUMENTED_LIMITATIONS
+Owner: independent reviewer accepted the local prototype at the integration checkpoint. The timestamp records the evidence commit time.
+Git: 2422b8eef9ec04a15e38f6ca301612d890b9402c (unihack-final, PR #19 merge).
+Proof: proofs/d17-gate/README.md and proofs/d17-gate/post-merge-regression.log.
+Tests: Foundry 60 PASS, workspace 33 PASS, Catalog PostgreSQL 9 PASS, Economics 9 PASS, Chromium 1440x900 and 390x844 PASS, local Anvil PASS. Typecheck, build, isolation and SDK ABI PASS.
+Scope: D17-09 prototype acceptance uses POST /v2/scenarios/compare under the documented Service Contract exception. V1 remains HTTP 501. A/B/C/D are illustrative research scenarios.
+Limitations: Actual Catalog proxy, real browser wallet extension, Docker Compose end-to-end and Fuji deployment NOT_RUN. OR-02 and OR-03 remain MEDIUM per prior review. No on-chain advance or non-Full-Reserve mode authorized. Production and real-money custody unapproved.
+Next: Controlled-merge authorization after the documentation corrections. Fuji remains NO-GO_PENDING_SEPARATE_AUTHORIZATION.
+PlanB: none
+```
+
 ---
 
 ## I. NON-NEGOTIABLE SAFETY / QUALITY
