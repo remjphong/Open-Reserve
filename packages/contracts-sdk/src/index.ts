@@ -32,3 +32,6 @@ export type Agreement = AbiTuple<FunctionNamed<'getAgreement'>['outputs'][0]['co
 export type Claim = AbiTuple<FunctionNamed<'getClaim'>['outputs'][0]['components']>
 export type Termination = AbiTuple<FunctionNamed<'getTermination'>['outputs'][0]['components']>
 export type Balances = AbiTuple<FunctionNamed<'getBalances'>['outputs']>
+export { queryKeys, classifyVaultRole } from './shared.js'
+export type { VaultActorRole, ReceiptPhase, IndexerActivityStatus } from './shared.js'
+export { verifiedFujiDeployment, assertVerifiedFujiDeployment } from './deployment.js'
