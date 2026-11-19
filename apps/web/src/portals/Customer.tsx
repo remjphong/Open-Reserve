@@ -4,6 +4,7 @@ import { approvedTermsHash } from '@openreserve/contracts-sdk'
 import { ClaimEvidenceReview } from './ClaimEvidenceReview'
 import { CustomerPreview } from './CustomerPreview'
 import { EmptyState, ErrorState, LoadingSkeleton, OverviewCard, PortalPage } from '../design-system/portal'
+import { readSharedAgreement } from '../lib/shared-ledger'
 import {
   checkoutState, deployment, errorMessage, listPasses, parseId, provider, purchase,
   readPass, runBuyerAction, sameAddress, walletSession, type Session,
@@ -186,7 +187,10 @@ function Passes() {
 
 function Pass({ agreementId, dispute }: { agreementId: string; dispute: boolean }) {
   const id = BigInt(agreementId)
-  const state = useWallet(session => readPass(session, id))
+  type PassData = Awaited<ReturnType<typeof readPass>> |
+    Awaited<ReturnType<typeof readSharedAgreement>>
+  const state = useWallet<PassData>(session => session.chain.id === 43113
+    ? readSharedAgreement(session, id) : readPass(session, id))
   const transaction = useTransaction()
   const [evidence, setEvidence] = useState('')
   const { session, data } = state.value ?? {}
@@ -204,6 +208,10 @@ function Pass({ agreementId, dispute }: { agreementId: string; dispute: boolean 
   }
   return <Page title={dispute ? 'Phản đối đề nghị' : 'Gói của tôi · #' + id}>
     <Card><WalletControls {...walletControls(state)} busy={transaction.busy} />
+      {data && 'activity' in data && <p className="caption customer-wrap">
+        Nguồn số tiền: Vault Fuji · block {data.blockNumber.toString()} · Indexer: {data.activity.status}
+        {data.activity.reason && <> · {data.activity.reason}</>}
+      </p>}
       <p><a className="inline-link" href={dispute ? passRoot + '/' + id : passRoot}>{dispute ? 'Về chi tiết gói' : 'Về danh sách gói'}</a></p>
       {!isBuyer && data && <p>Chỉ ví người mua của hợp đồng có quyền ký các thao tác dưới đây.</p>}
       {transaction.feedback}
