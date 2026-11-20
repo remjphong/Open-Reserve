@@ -722,6 +722,20 @@ Next: Worker4 gather actual post-merge desktop Merchant/claim/negative/post-fix 
 PlanB: none.
 ```
 
+
+```text
+[2026-11-20 ICT] TASK=D18-05-TX3 STATUS=RECEIPT_VERIFIED_PER_WALLET2_REPORT
+Authority: Explicit Owner ONE_TX_GO for exact finalizeClaim(2,1) recorded in Issue #27 comment 7043172991, following CTO technical approval comment 7043106106.
+Evidence: Wallet2 reviewed Owner-provided raw cast tx/receipt/getClaim/getBalances and reported SUCCESS in Issue #27 comment 7043508116; CTO did not independently re-query Fuji RPC and original raw Owner console output is not embedded in this GitHub State Log.
+Fuji TX: 0xe7bcd43b3b86ef752413ce09d6b8a2da8ea630ae2e42603dadd916ad20aa3603
+Block: 61384394; status=1; Merchant nonce=3; Vault ClaimFinalized(agreementId=2,claimId=1,amount=900 MRES base units), Claim state FINALIZED=4, awardedToGym=900, awardedToBuyer=0.
+Owner/WALLET2-reported post-TX3 getBalances(2): remainingLocked=900, withdrawable=900, refundable=0, disputedLocked=0, unallocated=0. Gym has earned but not withdrawn: gymWithdrawn=0. Do NOT claim token payout, ERC20 Transfer or gym balance increment from TX3.
+Provenance label: USER_PROVIDED_CAST_ONCHAIN_RAW_OUTPUT + WALLET2_REVIEWED_SUCCESS / CTO_INDEPENDENT_RPC_NOT_RUN.
+TX3: NO RETRY. TX4 claimEarned(2): separate exact candidate pending CTO technical review and separate Owner ONE_TX_GO; no signed/broadcast TX4 yet in evidence. D18-06 refund still open; TIME #2 has no unallocated budget after full earned award.
+D19-06 Worker4: may reference historical TX3 reported-finalized proof, but current browser amounts must come only from fresh pinned Vault read, not from this historic snapshot. Same-block three-role E2E remains NOT_VERIFIED.
+PlanB: none.
+```
+
 ---
 
 ## I. NON-NEGOTIABLE SAFETY / QUALITY
