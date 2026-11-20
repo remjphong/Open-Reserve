@@ -774,6 +774,28 @@ D20_ZOD_AUDIT_BOUNDED=ACCEPTED; D20_PRODUCTION_SECURITY=NOT_APPROVED; D20_RELEAS
 PlanB: not activated.
 ```
 
+
+[2026-11-21 ICT] TASK=D18-06-TX1 STATUS=ONCHAIN_SUCCESS_PER_WALLET2_OWNER_RPC_REPORT
+Source: https://github.com/remjphong/Open-Reserve/issues/27#issuecomment-7045700542
+Owner exact ONE_TX_GO reported in Issue comment 7045067264; CTO technical conditional GO comment 7044865050.
+Fuji 43113 TX1 proposeTermination(agreementId=1,proposedRefund=903,evidenceHash=0xcc5b89e994155b1fd3e44997f2e1a10c6630fc076cda00dae55754bca29a64ee) Buyer 0x124C7DE92Df945477cAEbdC6745756C4B29e7b7B to Vault 0x20D55E7Fc137a5924f6Bf76608eFaf99002474ad; nonce8/value0.
+TX 0x9af4e6884900c97234b2cc583f34ed02add58fbe69e9c260ba425d40313e965b; Wallet2 reviewed Owner RPC block 61387585/hash 0x4141acf46040d3204dbc6f82127d9748157504d3c1151e1267a1d722fb04384b status1, gasUsed151038, effectiveGasPrice160wei.
+Log TerminationProposed agreement#1/proposal#1/Buyer/903 MRES ERC20 base units and demo hash; later getActiveTerminationId(1)=1 and getTermination(1,1)=PROPOSED; Buyer nonce latest/pending9/9. Reported getBalances(1)=(903,0,0,0,903) remainingLocked,withdrawable,refundable,disputedLocked,unallocated; no refundAuthorized or token payout from TX1.
+Provenance USER_PROVIDED_FUJI_RPC_PYTHON_TERMINAL_OUTPUT + WALLET2_REVIEWED_SUCCESS, CTO NOT independently queried Fuji. DEMO_ONLY_NO_REAL_PROVIDER_AGREEMENT hash does NOT establish provider assent, legal refund, financial viability. TX1 NO RETRY.
+
+[2026-11-21 ICT] TASK=D18-06-TX2 STATUS=CTO_TECHNICAL_GO_CONDITIONAL_OWNER_ONE_TX_GO_PENDING
+Source https://github.com/remjphong/Open-Reserve/issues/27#issuecomment-7045840567
+Technical Solidity direct review: ReserveVault.sol acceptTermination(agreementId,proposalId), _checkTerminationBudget, _settleTermination; requires other party Merchant when Buyer proposed state PROPOSED, liveClaims0, refund budget<=unallocated; agreement may terminate and refundAuthorized increase, but no ERC20 transfer in TX2.
+Exact candidate Fuji43113 FROM Merchant 0xA337FCeC5f9508C3Ab5E10aE571610E167548878, TO Vault 0x20D55E7Fc137a5924f6Bf76608eFaf99002474ad, selector reported 0x1f187aa3, calldata 0x1f187aa300000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000001, nonce5, gasLimit109919, maxFeePerGas180wei, maxPriorityFee150wei, nativeValue0, cap19785420wei.
+Owner WSL cast snapshot at block 61388056/hash 0x021fb6385c3591e7aebb707977b793367bf7d759dd9db5e6b5d442d16c06a20f: OPEN PER_SESSION #1, termination PROPOSED Buyer amount903, activeTerminationId1, liveClaims0, getBalances(1)=(903,0,0,0,903), Merchant latest/pending5/5, eth_call void success0x, gas estimate76861, gas fees+native cap passes. CTO structurally decoded calldata (1,1), did NOT direct live RPC.
+CTO technical GO is NOT signing permission. Require fresh exact Owner ONE_TX_GO TX2 and immediate new read-only check of chain/Core Merchant EIP1193, source/call, signer, transaction nonce+fees, budget, termination state and eth_call; drift HOLD/re-candidate/re-GO. After real receipt status1 expected termination ACCEPTED, agreement TERMINATED, refundAuthorized903 and refundable903 BEFORE Buyer claim; expectation only, not actual. TX3 Buyer claimRefund separate CTO candidate/Owner ONE_TX_GO. D18-06 overall IN_PROGRESS.
+
+[2026-11-21 ICT] TASK=D20-LOCAL-DEMO-WAIVER STATUS=OWNER_SCOPE_DECISION_ACCEPTED_WITH_MENTOR_PROVENANCE_LIMIT
+Source https://github.com/remjphong/Open-Reserve/issues/27#issuecomment-7045841754
+Owner reports UniHack mentor directly confirmed local presentation allowed and public hosting not mandatory. This is OWNER_REPORTED_MENTOR_CONFIRMATION, not independently verified organizer written rule. CTO accepts revised Owner demo scope: D20_PUBLIC_HTTPS_DEPLOYMENT=WAIVED_FOR_THIS_UNIHACK_PER_OWNER_MENTOR_REPORT, NOT PASS/DEPLOYED. D20_PUBLIC_URL=NOT_DEPLOYED; THREE_INDEPENDENT_HOSTED_WEBSITES=NOT_VERIFIED.
+Architecture truthful: /customer, /gym, /operations role paths in same React SPA; 3 independent Fastify microservices accepted by Compose CI, NOT verified all local services actually running. Replacement mandatory D20_LOCAL_DEMO_READINESS: Owner machine code SHA/cwd/port, proper Core roles/Fuji43113, live pinned PT/TIME Vault states and claim views, truthful Catalog/Indexer degraded labels, local deep-link refresh, presentation rehearsal and recorded proof fallback. Local Fuji still network RPC-dependent; no offline guarantee.
+D19-06 full desktop negatives and same-block cross-role; D19-07 mobile 390x844 remain NOT_VERIFIED unless genuine evidence. Submission receipt and any organizer form constraint NOT_VERIFIED. No public hosting/tunnel/cloud spending/key access authorized, no fabricated URLs or independent website claims. No production/legal VNĐ custody/PMF/security pentest claims.
+
 ---
 
 ## I. NON-NEGOTIABLE SAFETY / QUALITY
