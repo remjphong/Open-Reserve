@@ -72,7 +72,7 @@ function useLiveData(route: LiveRoute) {
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
   const revision = useRef(0)
-  const routeKey = route.page + ':' + route.id.toString() + ':' + (route.claimId?.toString() ?? '')
+  const routeKey = route.page + ':' + route.id.toString() + ':' + (route.page === 'claim' ? route.claimId?.toString() ?? '' : '')
 
   async function refresh(connect = false) {
     const current = ++revision.current
@@ -282,5 +282,8 @@ export function Operations({ path }: { path: string }) {
   if (route.page === 'overview' || route.page === 'agreements' || route.page === 'disputes') {
     return <Browse page={route.page} />
   }
-  return <Live route={route} />
+  if (route.page === 'detail' || route.page === 'claim') return <Live route={route} />
+  return <PortalPage breadcrumb="Vận hành" title="Không tìm thấy trang">
+    <EmptyState title="Đường dẫn không tồn tại">Không có dữ liệu cho đường dẫn này.</EmptyState>
+  </PortalPage>
 }
