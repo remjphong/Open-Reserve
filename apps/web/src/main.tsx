@@ -5,12 +5,13 @@ import { Customer, isCustomerRoute } from './portals/Customer'
 import { Gym } from './portals/Gym'
 import { parseGymRoute } from './lib/gym-chain'
 import { Operations } from './portals/Operations'
+import { parseOperationsRoute } from './lib/operations-chain'
 import './style.css'
 
 const navigation: Record<Role, NavItem[]> = {
   customer: [{ href: '/customer', label: 'Tổng quan', icon: 'layout-dashboard' }, { href: '/customer/passes', label: 'Gói của tôi', icon: 'layers' }],
   gym: [{ href: '/gym', label: 'Tổng quan', icon: 'layout-dashboard' }, { href: '/gym/agreements', label: 'Hợp đồng', icon: 'clipboard-list' }, { href: '/gym/payouts', label: 'Giải ngân', icon: 'wallet' }],
-  operations: [{ href: '/operations', label: 'Tổng quan', icon: 'layout-dashboard' }, { href: '/operations/agreements/OR-024', label: 'Sổ cái', icon: 'clipboard-list' }, { href: '/operations/disputes/PT-04', label: 'Phản đối', icon: 'scale' }],
+  operations: [{ href: '/operations', label: 'Tổng quan', icon: 'layout-dashboard' }, { href: '/operations/agreements/1', label: 'Sổ cái', icon: 'clipboard-list' }, { href: '/operations/disputes/1?claimId=1', label: 'Phản đối', icon: 'scale' }],
 }
 const views = { customer: Customer, gym: Gym, operations: Operations }
 const labels = { customer: 'Khách hàng', gym: 'Phòng gym', operations: 'Vận hành' }
@@ -19,7 +20,7 @@ const role = (Object.keys(views) as Role[]).find(key => path === '/' + key || pa
 const known = role && (navigation[role].some(item => item.href === path) ||
   isCustomerRoute(path) ||
   (role === 'gym' && parseGymRoute(path, window.location.search).page !== 'not-found') ||
-  path === '/operations/agreements' || path === '/operations/disputes')
+  (role === 'operations' && parseOperationsRoute(path, window.location.search).page !== 'not-found'))
 const View = role ? views[role] : null
 
 createRoot(document.getElementById('root')!).render(
