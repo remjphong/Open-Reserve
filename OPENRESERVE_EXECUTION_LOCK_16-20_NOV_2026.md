@@ -674,6 +674,22 @@ Next: Wallet2 D18-05 TX2 Merchant proposeTime only when elapsed and with separat
 PlanB: none
 ```
 
+
+```text
+[2026-11-20 ICT] TASK=D19-02 STATUS=TECHNICALLY_ACCEPTED_WITH_LIMITATIONS
+Reviewer: CTO 2 directly reviewed Worker 4 PR #31 exact source delta and GitHub Actions; not full Merchant browser E2E.
+PR: https://github.com/remjphong/Open-Reserve/pull/31
+Exact reviewed HEAD: f4901d29aa406308a96375a96804bec87bffcf26
+Base: a50601dec7a2106a8d9c21e3b63df9f60a484657
+Controlled merge SHA: 9869803b6f074714eccd165e750cbeb03e4b694d
+Scope: 5 paths: D19-02 Gym direct PT #1 and TIME_ACCESS #2 pinned Vault ledger, documented historical receipt provenance, safety arithmetic, targeted regressions; no contract/ABI/backend/chain-write changes.
+CI: https://github.com/remjphong/Open-Reserve/actions/runs/44749385721 workspaces/contracts/real Compose SUCCESS 3/3; targeted Gym 6/6, prior Customer 6/6 and Operations 7/7 PASS; live Compose isolation/proxy/stopped Indexer fail-closed verified in CI logs.
+Evidence limitations: No actual Owner Fuji Merchant browser 1440x900/390x844 read and invalid-wallet negative traces; full Fuji Indexer historical sync not verified; TIME_ACCESS #2 only TX1 deposit reported by Wallet 2, no earned/finalized/withdraw/refund receipt in PR. HIGH npm audit advisory still open for targeted D20 triage.
+Ownership: Worker 3 D18-10 closed and formally succeeded by Worker 4 (PR #25 handoff); no new Worker 3 task assigned.
+Next: Worker 4 D19-03 Operations cross-portal consistency, then D19-06/07 browser E2E, D19-08 proof ledger, D19-09 failure, D20 release/submission.
+PlanB: none
+```
+
 ---
 
 ## I. NON-NEGOTIABLE SAFETY / QUALITY
