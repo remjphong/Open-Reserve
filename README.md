@@ -53,9 +53,37 @@ docker compose ps
 docker compose up -d --no-deps --build economics
 ```
 
-Healthcheck của container Chain Indexer gọi `/health` để kiểm tra tiến trình
-Fastify còn sống. Container có thể healthy trong khi `/ready` trả HTTP 503
-với `SYNC_NOT_IMPLEMENTED`. Dùng `/ready` để kiểm tra khả năng đồng bộ,
-và không coi trạng thái healthy của container là bằng chứng đã đồng bộ.
-Mở UI tĩnh bằng `npm run dev --workspace @openreserve/web` hoặc cổng 4173
-khi dùng Compose. API nghiệp vụ, proxy tích hợp và đồng bộ Fuji để ở các task sau.
+### D18-11 — Compose preview và ba API proxy
+
+`docker compose up --build -d` chạy **web :4173**, Catalog :3001, Chain
+Indexer :3002, Economics :3003 và PostgreSQL. Mỗi backend là container riêng;
+`catalog_db` và `chain_db` có user riêng. Vite dev/preview proxy theo
+`/api/catalog/*`, `/api/chain/*`, `/api/economics/*` về `/v1/*`
+của service tương ứng; **không thêm gateway service**.
+
+Các URL preview/refresh: `http://127.0.0.1:4173/customer`,
+`/gym`, `/operations` và các deep link của từng portal. Chạy kiểm tra
+không ký giao dịch:
+
+```bash
+docker compose --env-file .env.example config --quiet
+docker compose --env-file .env.example up -d --build
+node scripts/compose-smoke.mjs
+docker compose --env-file .env.example ps
+```
+
+Script smoke mặc định dùng `.env.example` **không có Fuji RPC** và kiểm
+Indexer `/health=200`, `/ready=503`, `/v1/sync=503`; không dùng kết quả
+này để chứng minh historical sync. Nếu cấu hình Fuji RPC thật, kiểm tra trạng
+thái hiện tại bằng `/api/chain/v1/sync` và `/api/chain/ready` theo dữ liệu thật,
+không ép trạng thái PASS. Các biến `VITE_*` trong `.env.example` là public
+config tùy chọn cho ví trình duyệt; **không đặt RPC URL có credential hoặc khóa
+bí mật vào VITE**. Khi chưa điền, các màn hình on-chain phải báo chưa cấu hình.
+
+`/health` chỉ chứng minh process còn sống, `/ready` còn kiểm tra DB/RPC/sync;
+Docker healthcheck Indexer cố ý dùng `/health`, không ngụ ý số liệu đã cập
+nhật. **Full Fuji historical sync vẫn NOT_VERIFIED**; mã D18-10 có bounded
+real event proof riêng. D18-11 kiểm thử HTTP/Compose; giao dịch Fuji nhiều
+vai và ảnh browser cần bằng chứng bổ sung ở D19/D20.
+
+Xem [hướng dẫn nghiệm thu và giới hạn D18-11](proofs/d18-11-compose-integration.md).
