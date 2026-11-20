@@ -736,6 +736,32 @@ D19-06 Worker4: may reference historical TX3 reported-finalized proof, but curre
 PlanB: none.
 ```
 
+
+```text
+[2026-11-20 ICT] TASK=D18-05 STATUS=ONCHAIN_HAPPY_PATH_ACCEPTED_PER_WALLET2
+Reviewer: CTO 2 acceptance based on Wallet2 review of Owner-provided raw cast tx, receipts, event logs and Fuji RPC ledger; CTO independent live RPC query NOT_RUN (explorer URL not machine-accessible during review).
+Source: https://github.com/remjphong/Open-Reserve/issues/27#issuecomment-7044296152
+Chain: Avalanche Fuji ID 43113; Vault: 0x20D55E7Fc137a5924f6Bf76608eFaf99002474ad; Agreement #2 TIME_ACCESS; 900 MRES ERC20 base units (18 decimals, not 900 whole MRES/VND).
+TX1 openAgreement Buyer deposit, block 61380299, receipt status 1 per Wallet2: 0xdb4c9d91f1895c88e719cb1062db8a61cd096c00e5bf75e58b70bf389808ae85
+TX2 proposeTime Merchant Claim #1, block 61382886, receipt status 1: 0x4a24979eb2b8b254d7ccab1169689eea94325148b50dec1332842ff1b1fdb030
+TX3 finalizeClaim(2,1) amount 900 earned to gym, block 61384394, receipt status 1: 0xe7bcd43b3b86ef752413ce09d6b8a2da8ea630ae2e42603dadd916ad20aa3603
+TX4 claimEarned(2) Merchant, block 61385657, receipt status 1: 0x44c653605fb0db3fa5890d8338ac8d40e136b0737fa9a359e29019371b0a14b2
+TX4 reported event EarnedClaimed(2,Merchant,900), ERC20 Transfer(Vault,Merchant,900). Reported fresh post-TX4 getBalances(2) = remainingLocked 0, withdrawable 0, refundable 0, disputedLocked 0, unallocated 0. Merchant MRES token balance 1000, Vault balance 903, delta +900/-900 versus prior.
+Decision: D18-05 Fuji TIME_ACCESS four-transaction demo HAPPY PATH accepted WITH PROVENANCE LIMITATIONS; do not retry. Owner ONE_TX_GO TX4 reported in GitHub issue comment 7044076905. Original Owner exact candidate approval provenance discrepancy on TX1 remains OPEN and is NOT waived by on-chain success. Evidence hash is demo owner attestation, NOT independent attendance proof; no production, real legal custody, audit, PMF or pilot claims.
+D18-06 remains HOLD: TIME #2 unallocated=0/refundable=0; PT #1 903 unallocated/remainingLocked as reported but no automatic Buyer refund; separate read-only termination feasibility and mutually authorized amount, CTO review and per-write Owner ONE_TX_GO required.
+```
+
+```text
+[2026-11-20 ICT] TASK=D19-06-DESKTOP-PARTIAL STATUS=BOUNDED_QA_ACCEPTED_WITH_LIMITATIONS
+Source: Worker4 Issue #27 comments 7043994059, 7044055135, 7044130629 and 7044331021. Original screenshot PNGs held in Owner-Worker4 ChatGPT; GitHub contains only reports/file names/SHA256, not actual image bytes; CTO did NOT independently inspect original pixel files/checksum.
+Owner WSL QA provenance: /home/phong/openreserve-d19-06-postmerge on accepted source HEAD 460eec44fa208184a4737048db9071b7673de3f3, Vite 127.0.0.1:5175, Chrome responsive 1440x900, Fuji chain 43113, Core Merchant address 0xA337FCeC5f9508C3Ab5E10aE571610E167548878.
+Bounded Owner/Worker4-reported PASS: Operations PR33 neutral banner post-fix rendered, Merchant Gym #1/#2 direct identity + pinned Vault financial ledgers, Resolver Agreement #1/#2 claimId1 below-fold direct FINALIZED rendered, and Indexer DOWN/HTTP500 isolated from direct Vault read with no false VERIFIED_EMPTY. Claim #1 on PT amount=100 earned/finalized; claim #1 on TIME amount=900 finalized; no attested attendance from UI.
+Browser-reported Gym PT #1 at block 61385754: deposited 1003, earnedFinalized 100, gymWithdrawn 100, withdrawable 0, remainingLocked/unallocated 903, refundable 0.
+Browser-reported Gym TIME #2 at block 61385727: deposited 900, earnedFinalized 900, gymWithdrawn 900, withdrawable 0, remainingLocked 0, unallocated 0, refundable 0, consistent with Wallet2 TX4 receipt at earlier block 61385657.
+NOT_VERIFIED: original image pixel independent CTO inspection; buyer/merchant/resolver pinned same BLOCK HASH simultaneous financial concordance (screens differ); wrong-account, wrong-chain, rejected wallet connect, disconnect/reconnect negative browser traces; independent per-route HTTP status measured; 390x844 mobile; full Fuji historical Indexer sync. D19-06_FULL_BROWSER_E2E remains HOLD, D19-07_NOT_RUN, D20 security 1 HIGH npm advisory pending bounded audit. No new Worker4 PR open as of this review; PR33 had already been merged.
+Next: Worker4 complete negative desktop QA or explicitly close with known limits; start high-priority mobile 390x844 and D20 readiness/security/public demo proof under CTO-controlled scope. No Worker4 Fuji writes.
+```
+
 ---
 
 ## I. NON-NEGOTIABLE SAFETY / QUALITY
