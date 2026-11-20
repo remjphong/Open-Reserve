@@ -648,6 +648,32 @@ Next: Worker 4 D19-01/02/03/06/07/08/09 technical integration; Wallet 2 D18-05/0
 PlanB: none
 ```
 
+
+```text
+[2026-11-20 ICT] TASK=D19-01 STATUS=TECHNICALLY_ACCEPTED_WITH_LIMITATIONS
+Reviewer: CTO 2 targeted technical review of exact source diff and CI, not real Buyer browser end-to-end acceptance.
+PR: https://github.com/remjphong/Open-Reserve/pull/30
+Reviewed HEAD: c79eea4789e9473dbc3853842f96d9e34906d3e8
+Base: d1af9e4a60ccb1f4573cad0d27bd8cd0d3617c26
+Controlled merge SHA: 89f544dd1f96d82a87668d2ef4763b6a25d19230
+Scope: 5 source/CI/test/proof paths, Customer PT Agreement #1 direct read, Vault ledger/base-unit classification and four historical PT receipt hashes as WALLET1_REPORTED_RECEIPTS_VERIFIED. Optional read-only structural receipt/transaction/canonical block check does not independently prove attendance or full event/value settlement.
+CI: https://github.com/remjphong/Open-Reserve/actions/runs/44739567915 completed workspaces/contracts/real Compose 3/3 SUCCESS; targeted D19-01 6/6 PASS; logs examined for npm HIGH advisory and bounded Compose failure smoke.
+Limitations: real Buyer browser, 1440x900 and 390x844 screenshots, manual Fuji receipt-click verification, full historical Indexer sync and full three-role E2E NOT_VERIFIED. Existing one HIGH npm advisory requires D20 targeted triage.
+Next: Worker4 D19-02 Gym, then D19-03/06/07/08 and D20 integration/QA; Wallet2 on-chain D18-05/06 remains separate.
+PlanB: none
+```
+
+```text
+[2026-11-20 ICT] TASK=D18-05-TX1 STATUS=ONCHAIN_RECEIPT_VERIFIED_PER_WALLET2_REPORT
+Reviewer: CTO 2 records Wallet 2 final read-only receipt/ledger review reported in GitHub issue #27 comments 7040947288 and 7041015347; CTO did not independently re-query Fuji RPC.
+Transaction: 0xdb4c9d91f1895c88e719cb1062db8a61cd096c00e5bf75e58b70bf389808ae85; block 61380299; status 1; Buyer to Vault, agreementId 2 TIME_ACCESS, 900 MRES base units; getBalances(2) remainingLocked=900, withdrawable=0, refundable=0, disputedLocked=0, unallocated=900 per Owner cast output validated by Wallet 2.
+Actual event parameters reported: startAt=1795182500, endAt=1795182770, challenge=60; gasUsed=177904, effectiveGasPrice=167 wei.
+Provenance: USER_PROVIDED_CAST_RECEIPT_AND_RPC_STATE + WALLET2_REPORTED_VERIFIED, not direct fresh CTO RPC; no auto retry.
+Governance caveat: in CTO chat an earlier ONE_TX_GO candidate had startAt=1795181258, endAt=1795181528 and maxPriority=68 wei. Actual reported TX uses different time fields and Wallet2 reported an additional Owner-authorized fee candidate. Evidence of the exact Owner approval for actual new candidate must be cross-referenced before marking GOVERNANCE_AUTHORIZATION_VERIFIED; receipt success itself is not an authorization record.
+Next: Wallet2 D18-05 TX2 Merchant proposeTime only when elapsed and with separate exact Owner ONE_TX_GO; then remaining TIME sequence and D18-06 refund. D18-05 task gate remains open.
+PlanB: none
+```
+
 ---
 
 ## I. NON-NEGOTIABLE SAFETY / QUALITY
