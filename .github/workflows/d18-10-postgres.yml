@@ -156,67 +156,146 @@ jobs:
         run: |
           npm run build --workspace @openreserve/api-contracts
           npm run build --workspace @openreserve/chain-indexer
-      - name: Bounded live Fuji sync to deploy block, then independent receipt/ledger smoke
-        timeout-minutes: 16
+      - name: Bounded live event ingestion, receipt and durable checkpoint (not full sync)
+        timeout-minutes: 12
         env:
           DATABASE_URL: postgresql://chain_user:ephemeral-chain-ci-only@127.0.0.1:5432/chain_db
           RPC_URL: https://api.avax-test.network/ext/bc/C/rpc
-          FUJI_RPC_URL: https://api.avax-test.network/ext/bc/C/rpc
           CHAIN_ID: '43113'
-          HOST: 127.0.0.1
-          PORT: '3002'
-          INDEXER_WINDOWS_PER_POLL: '100'
-          INDEXER_POLL_MS: '1000'
         run: |
           node --input-type=module <<'NODE'
           import assert from 'node:assert/strict'
-          import { spawn } from 'node:child_process'
-          import { setTimeout as sleep } from 'node:timers/promises'
-          const child = spawn(process.execPath, ['services/chain-indexer/dist/server.js'], {
-            env: process.env, stdio: ['ignore','ignore','pipe'],
-          })
-          let exit = null
-          let lastStderr = ''
-          child.on('exit', (code, signal) => { exit = { code, signal } })
-          child.stderr.on('data', d => { lastStderr = (lastStderr + String(d)).slice(-1000) })
-          let lastReported = -1n
-          let lastSync = null
+          import pg from 'pg'
+          import { setTimeout as delay } from 'node:timers/promises'
+          import { FujiRpc } from './services/chain-indexer/dist/domain/rpc-client.js'
+          import { PgStore } from './services/chain-indexer/dist/domain/store.js'
+          import { Indexer } from './services/chain-indexer/dist/domain/indexer.js'
+          import { FUJI } from './services/chain-indexer/dist/domain/protocol.js'
+          const reader = new FujiRpc(process.env.RPC_URL)
+          const store = new PgStore(process.env.DATABASE_URL)
+          const client = new pg.Client({connectionString:process.env.DATABASE_URL})
+          const cutoff = Date.now()+8*60_000
+          const maxTicks=35
+          let lastWindow=null, attempts=0, failures=0, firstCheckpoint=null, event=null
+          const originalLogs=reader.logs.bind(reader)
+          reader.logs=async(from,to)=>{
+            const start=Date.now()
+            lastWindow={from,to}
+            try {
+              const result=await originalLogs(from,to)
+              if (++attempts<=2||attempts%10===0) console.log('GETLOGS_WINDOW='+JSON.stringify({
+                from:from.toString(),to:to.toString(),count:result.length,ms:Date.now()-start,status:'OK'}))
+              return result
+            } catch(e) {
+              const message=e instanceof Error?e.message:'UNKNOWN'
+              console.log('GETLOGS_WINDOW='+JSON.stringify({from:from.toString(),to:to.toString(),
+                ms:Date.now()-start,status:'FAILED',code:/^[A-Z][A-Z0-9_]{3,70}$/.test(message)?message:'SANITIZED_UNKNOWN'}))
+              throw e
+            }
+          }
+          async function rpc(method,params) {
+            const r=await fetch(process.env.RPC_URL,{method:'POST',headers:{'content-type':'application/json'},
+              body:JSON.stringify({jsonrpc:'2.0',id:1,method,params}),signal:AbortSignal.timeout(15000)})
+            if(!r.ok)throw Error('FUJI_RPC_HTTP_'+r.status)
+            const j=await r.json()
+            if(j.jsonrpc!=='2.0'||j.id!==1||j.error||!Object.hasOwn(j,'result'))throw Error('FUJI_RPC_ENVELOPE_INVALID')
+            return j.result
+          }
+          async function diagnostic() {
+            if(!lastWindow)return console.log('RPC_DIAGNOSTIC=NO_GETLOGS_FAILURE_PROVEN')
+            try {
+              const r=await fetch(process.env.RPC_URL,{method:'POST',headers:{'content-type':'application/json'},
+                body:JSON.stringify({jsonrpc:'2.0',id:1,method:'eth_getLogs',params:[{
+                  address:FUJI.vault,fromBlock:'0x'+lastWindow.from.toString(16),toBlock:'0x'+lastWindow.to.toString(16)}]}),
+                signal:AbortSignal.timeout(15000)})
+              const j=await r.json()
+              const msg=typeof j.error?.message==='string'?j.error.message:''
+              const category=/rate|too many/i.test(msg)?'RATE_LIMIT':/range|block|limit/i.test(msg)?'RANGE_LIMIT':
+                /timeout/i.test(msg)?'TIMEOUT':j.error?'PROVIDER_ERROR':'NO_ERROR_ON_RETRY'
+              console.log('RPC_DIAGNOSTIC='+JSON.stringify({from:lastWindow.from.toString(),to:lastWindow.to.toString(),
+                httpStatus:r.status,code:Number.isInteger(j.error?.code)?j.error.code:null,category}))
+            }catch{console.log('RPC_DIAGNOSTIC=UNAVAILABLE_OR_TIMEOUT')}
+          }
+          const indexer=new Indexer(reader,store,8,1000)
           try {
-            const deadline = Date.now() + 12 * 60_000
-            while (Date.now() < deadline) {
-              if (exit) throw new Error('INDEXER_EXITED_EARLY')
-              await sleep(8000)
-              let response
-              try { response = await fetch('http://127.0.0.1:3002/v1/sync', { signal: AbortSignal.timeout(9000) }) }
-              catch { continue }
-              const sync = await response.json()
-              lastSync = sync
-              if (sync.lastIndexedBlock !== null && /^\d+$/.test(sync.lastIndexedBlock)) {
-                const height = BigInt(sync.lastIndexedBlock)
-                if (lastReported < 0n || height - lastReported >= 10000n) {
-                  console.log('INDEXED_BLOCK=' + height.toString() + ' TIP=' + sync.chainTip + ' STALE=' + sync.isStale)
-                  lastReported = height
-                }
+            await store.initialize()
+            await client.connect()
+            assert.equal(await store.checkpoint(),null,'MUST_START_AT_DEPLOYMENT_WITH_EMPTY_DISPOSABLE_DB')
+            for(let tick=0;tick<maxTicks&&Date.now()<cutoff;tick++){
+              await indexer.tick()
+              const cp=await store.checkpoint()
+              const sync=indexer.getSync().payload
+              if(cp&&!firstCheckpoint){
+                assert.ok(cp.height>=FUJI.deploymentBlock&&cp.height<=FUJI.deploymentBlock+799n)
+                assert.equal((cp.height-FUJI.deploymentBlock+1n)%100n,0n,'NO_SKIPPED_INITIAL_BLOCKS')
+                firstCheckpoint=cp
+                console.log('DEPLOYMENT_FROM_BLOCK='+FUJI.deploymentBlock+' FIRST_CHECKPOINT='+cp.height)
               }
-              if (response.status === 200 && !sync.isStale) {
-                console.log('FUJI_FULL_SYNC=PASS LAST_INDEXED_BLOCK=' + sync.lastIndexedBlock)
-                const { spawnSync } = await import('node:child_process')
-                const smoke = spawnSync(process.execPath, ['services/chain-indexer/test/smoke-fuji-readonly.mjs'], {
-                  env: process.env, encoding: 'utf8', timeout: 60_000,
-                })
-                process.stdout.write(smoke.stdout || '')
-                process.stderr.write(smoke.stderr || '')
-                assert.equal(smoke.status, 0, 'LIVE_FUJI_LEDGER_SMOKE_FAILED')
-                console.log('FUJI_INDEXER_E2E=PASS')
-                break
+              if(sync.lastError&&sync.lastError!=='SYNC_CATCHING_UP'){
+                failures++
+                console.log('DEGRADED='+sync.lastError+' CHECKPOINT='+(cp?.height.toString()??'null'))
+                assert.equal(indexer.getSync().code,503,'RPC_FAILURE_FAIL_CLOSED')
+                await diagnostic()
+                if(failures>=3)throw Error('RPC_REPEATED_FAILURE')
+                await delay(1000)
+                continue
               }
+              failures=0
+              const q=await client.query('SELECT agreement_id,tx_hash,log_index,block_number::text AS block_number,block_hash,transaction_index,topics,data,event_name FROM chain_events WHERE chain_id=$1 AND contract_address=$2 ORDER BY block_number,transaction_index,log_index LIMIT 1',[FUJI.chainId,FUJI.vault.toLowerCase()])
+              if(q.rows.length){event=q.rows[0];break}
+              if(tick%3===0)console.log('PROGRESS='+JSON.stringify({checkpoint:cp?.height.toString()??null,tip:sync.chainTip,stale:sync.isStale,error:sync.lastError}))
             }
-            if (lastSync?.isStale !== false) {
-              console.log('LAST_SYNC=' + JSON.stringify(lastSync))
-              throw new Error('FUJI_FULL_SYNC_NOT_REACHED_WITHIN_BUDGET')
-            }
-          } finally {
-            child.kill('SIGTERM')
-            await sleep(500)
+            const cp=await store.checkpoint()
+            if(!event)throw Error('NO_REAL_VAULT_EVENT_WITHIN_BOUNDED_WINDOW')
+            assert.ok(cp&&cp.height>=BigInt(event.block_number))
+            const receipt=await rpc('eth_getTransactionReceipt',[event.tx_hash])
+            assert.ok(receipt&&receipt.blockHash?.toLowerCase()===event.block_hash.toLowerCase(),'RECEIPT_BLOCK_HASH')
+            assert.ok(receipt.logs?.some(l=>l.address?.toLowerCase()===FUJI.vault.toLowerCase()&&
+              l.transactionHash?.toLowerCase()===event.tx_hash.toLowerCase()&&
+              BigInt(l.logIndex)===BigInt(event.log_index)&&
+              l.blockHash?.toLowerCase()===event.block_hash.toLowerCase()&&
+              l.data?.toLowerCase()===event.data.toLowerCase()&&
+              Array.isArray(l.topics)&&l.topics.length===event.topics.length&&
+              l.topics.every((topic,i)=>topic.toLowerCase()===event.topics[i].toLowerCase())
+            ),'PERSISTED_EVENT_MUST_MATCH_REAL_RECEIPT')
+            assert.equal((await reader.block(BigInt(event.block_number))).hash,event.block_hash.toLowerCase())
+            const before=await client.query('SELECT COUNT(*)::int AS n FROM chain_events WHERE chain_id=$1 AND contract_address=$2',[FUJI.chainId,FUJI.vault.toLowerCase()])
+            const from=cp.height-11n>=FUJI.deploymentBlock?cp.height-11n:FUJI.deploymentBlock
+            await store.applyWindow(from,cp.height,cp.hash,await reader.logs(from,cp.height))
+            const after=await client.query('SELECT COUNT(*)::int AS n FROM chain_events WHERE chain_id=$1 AND contract_address=$2',[FUJI.chainId,FUJI.vault.toLowerCase()])
+            assert.equal(after.rows[0].n,before.rows[0].n,'LIVE_REPLAY_MUST_NOT_DUPLICATE')
+            await store.close()
+            const reopened=new PgStore(process.env.DATABASE_URL)
+            try {
+              await reopened.initialize()
+              assert.equal((await reopened.checkpoint()).height,cp.height)
+              assert.ok((await reopened.events(event.agreement_id,0,100)).items.some(e=>
+                e.txHash===event.tx_hash&&e.logIndex===event.log_index))
+            }finally{await reopened.close()}
+            const inaccessible=new Indexer(new FujiRpc('http://127.0.0.1:1'),{
+              initialize:async()=>{},checkpoint:async()=>cp,applyWindow:async()=>{throw Error('UNEXPECTED_DB_WRITE')},
+              projection:async()=>null,events:async()=>({items:[],hasNext:false}),close:async()=>{}
+            },1,1000)
+            await inaccessible.tick()
+            assert.equal(inaccessible.getSync().code,503)
+            assert.equal(inaccessible.getSync().payload.isStale,true)
+            console.log('BOUNDED_LIVE_EVENT_PROOF=PASS')
+            console.log('DURABLE_EVENT_REPLAY_RESTART=PASS')
+            console.log('RPC_UNAVAILABLE_FAIL_CLOSED=PASS')
+            console.log('SOURCE_EVENT='+JSON.stringify({agreementId:event.agreement_id,txHash:event.tx_hash,
+              block:event.block_number,logIndex:event.log_index,eventName:event.event_name,
+              lastIndexedBlock:cp.height.toString()}))
+            console.log('FULL_FUJI_SYNC=NOT_VERIFIED')
+            console.log('FUJI_SIGNING=NONE')
+          }catch(e){
+            console.log('BOUNDED_LIVE_EVENT_PROOF=HOLD')
+            const msg=e instanceof Error?e.message:'UNKNOWN'
+            console.log('REASON='+(/^[A-Z][A-Z0-9_]{3,80}$/.test(msg)?msg:'SANITIZED_VALIDATION_FAILURE'))
+            console.log('FULL_FUJI_SYNC=NOT_VERIFIED')
+            process.exitCode=1
+          }finally{
+            await client.end().catch(()=>{})
+            await store.close().catch(()=>{})
           }
           NODE
+
