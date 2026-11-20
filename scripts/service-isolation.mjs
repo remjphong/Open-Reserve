@@ -18,7 +18,7 @@ async function http(name, port, route) {
     if (name === 'chain-indexer') {
       assert.equal(readiness.ready, false)
       assert.deepEqual(readiness.dependencies.find(dependency => dependency.name === 'sync'), {
-        name: 'sync', ok: false, reason: 'SYNC_NOT_IMPLEMENTED',
+        name: 'sync', ok: false, reason: 'UNAVAILABLE',
       })
     }
   }

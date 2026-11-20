@@ -9,7 +9,7 @@ export async function database(url?: string): Promise<Dependency> {
     const endpoint = new URL(url)
     if (!['postgres:', 'postgresql:'].includes(endpoint.protocol)) throw new Error('Invalid database protocol')
     client = new pg.Client({ connectionString: url, connectionTimeoutMillis: 1000, query_timeout: 1000, statement_timeout: 1000 })
-    client.on('error', () => { /* report probe failure without logging upstream details */ })
+    client.on('error', () => { /* suppress upstream errors and credentials */ })
     await client.connect()
     const { rows: [identity] } = await client.query('SELECT current_database() AS db, current_user AS role')
     if (identity?.db !== 'chain_db' || identity?.role !== 'chain_user') {
@@ -33,6 +33,7 @@ export async function rpc(url: string | undefined, expected: number): Promise<De
   } catch { return { name: 'rpc', ok: false, reason: 'UNAVAILABLE' } }
 }
 
-export async function checkDependencies(config: Config): Promise<Dependency[]> {
-  return [...await Promise.all([database(config.databaseUrl), rpc(config.rpcUrl, config.chainId)]), { name: 'sync', ok: false, reason: 'SYNC_NOT_IMPLEMENTED' }]
+export async function checkDependencies(config: Config, synced = false): Promise<Dependency[]> {
+  return [...await Promise.all([database(config.databaseUrl), rpc(config.rpcUrl, config.chainId)]),
+    { name: 'sync', ok: synced, reason: synced ? 'OK' : 'UNAVAILABLE' } as Dependency]
 }
