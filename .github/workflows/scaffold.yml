@@ -26,6 +26,8 @@ jobs:
         run: node --test apps/web/test/gym-known-evidence.test.mjs
       - name: D19-03 Operations PT/TIME cross-portal Fuji audit
         run: node --test apps/web/test/operations-cross-portal.test.mjs
+      - name: D19-06 actual desktop QA banner and wallet-safe state regression
+        run: node --test apps/web/test/operations-desktop-qa-notice.test.mjs
       - run: npm test
       - run: npm run test:isolation
   contracts:
