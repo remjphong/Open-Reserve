@@ -762,6 +762,18 @@ NOT_VERIFIED: original image pixel independent CTO inspection; buyer/merchant/re
 Next: Worker4 complete negative desktop QA or explicitly close with known limits; start high-priority mobile 390x844 and D20 readiness/security/public demo proof under CTO-controlled scope. No Worker4 Fuji writes.
 ```
 
+
+```text
+[2026-11-20 ICT] TASK=D20-ZOD SECURITY_PATCH_SCOPE=ACCEPTED_WITH_PROVENANCE_LIMITS
+CTO controlled-merged PR #34 https://github.com/remjphong/Open-Reserve/pull/34 after review exact source diff and Actions. Base e54a97104602a89ca40ad6c23e150c5f1fef30aa, reviewed HEAD c7001d92054ddcf787c59a07af02b1ac2caa03ea, controlled merge SHA 3963e4df020d21ef8a698dd44195ee3345293844.
+Scope: exactly 2 files packages/api-contracts/package.json pin zod 4.1.12 -> 4.6.7 and package-lock.json corresponding api-contracts pin and canonical zod package entry (version, tarball URL, integrity); unrelated lock entries/SDK/Solidity/ABI/portal/service code unmodified. GHSA-mrhx-c7xc-m3w5 HIGH affected <4.6.6 mitigated by chosen 4.6.7.
+Exact-head CI: https://github.com/remjphong/Open-Reserve/actions/runs/44775322903 completed SUCCESS 3/3: real npm ci found 0 vulnerabilities in workspaces and Compose services, strict TypeScript/build/workspace API/service tests, previous portal regressions, Foundry/SDK, real five-container Compose service isolation, API proxy/readiness, DB-role separation, Indexer outage/restart.
+Additional explicit audits: Owner reported WSL detached exact reviewed HEAD c7001d... (clean /home/phong/openreserve-d20-zod-audit) with npm audit --json and npm audit --omit=dev --json, both exit 0, metadata vulnerabilities info/low/moderate/high/critical/total all 0, affectedPackages=[] and error=null. Evidence source: OWNER_PROVIDED_WSL_PARSED_AUDIT_JSON / WORKER4_REVIEW; raw JSON retained only in Owner WSL /tmp/d20-zod-full.KSKalN.json and /tmp/d20-zod-prod.TjJgk8.json; CTO did not independently read those bytes. npm audit 0 is not exhaustive application security/pentest/regulatory clearance.
+Remaining warning: esbuild@0.28.2 install-scripts allowScripts; Vite bundle size advisory; not equal a remaining npm HIGH. No adversarial large-array stress tests were added to exact two-file patch; existing API validation and 16KiB body limit retained.
+D20_ZOD_AUDIT_BOUNDED=ACCEPTED; D20_PRODUCTION_SECURITY=NOT_APPROVED; D20_RELEASE_AND_SUBMISSION=HOLD until actual public address, incognito access, Owner evidence and submission receipt. D19-06 desktop partial/negatives and D19-07 390x844 mobile remain unaccepted. D18-06 refund separate Owner-authorized TX1 only, no CTO on-chain post-tx confirmation in this review.
+PlanB: not activated.
+```
+
 ---
 
 ## I. NON-NEGOTIABLE SAFETY / QUALITY
