@@ -632,6 +632,22 @@ Next: Worker 4 D18-09 Operations then D19/D20; Wallet 2 D18-05/D18-06 independen
 PlanB: none
 ```
 
+
+```text
+[2026-11-20 ICT] TASK=D18-09 STATUS=TECHNICALLY_ACCEPTED_WITH_LIMITATIONS
+Owner: CTO 2 direct technical review and controlled merge (not an independent full browser acceptance).
+PR: https://github.com/remjphong/Open-Reserve/pull/29
+Exact reviewed source HEAD: b03a232ac4b7b40181f1f1e682add9a22240f51e
+Base: 081c62312df3674426c1f793a2acf25119e5e0c4
+Merge SHA: 47c1a1713aa960df95bd01c47ee16d55f17aa32d
+Scope: 7 paths, read-only Operations financial audit and claim/evidence provenance; no ABI, contract or backend writing and no Fuji transaction.
+CI: https://github.com/remjphong/Open-Reserve/actions/runs/44736389273 completed 3/3 SUCCESS, workspaces typecheck/build/tests and 7/7 targeted Operations tests, contracts Foundry/SDK, real five-container Compose HTTP/proxy/isolation/failure smoke.
+Direct technical review: Operations numerical routes use shared direct Vault financial reads; getClaim shares pinned session.read.blockNumber; role classification derives from Vault, no signer/writeContract path in Operations; fixture labeling isolated; Catalog evidence bounded to agreement/claim/hash; indexer advisory/fail-closed; I1 equality displayed in token base units.
+Limitations: No actual 1440x900/390x844 browser wallet-resolver profile verification, wrong-chain/account live EIP-1193 negative cases, signed Resolver settlement action, live verified Catalog evidence or full Fuji historical sync evidence. No production-ready claim. npm one HIGH advisory still needs targeted D20 triage.
+Next: Worker 4 D19-01/02/03/06/07/08/09 technical integration; Wallet 2 D18-05/06 separate Owner-signed tx lane; CTO D20 release/screenshot/evidence review.
+PlanB: none
+```
+
 ---
 
 ## I. NON-NEGOTIABLE SAFETY / QUALITY
