@@ -1,4 +1,10 @@
-import { classifyPtBalances, wallet1PtReport, type FinancialView } from './customer-pt-proof'
+/** Exact bigint getter shape for both PT and TIME, without a test-only module loader. */
+export type FinancialView = {
+  deposited: bigint; earnedFinalized: bigint; gymWithdrawn: bigint;
+  refundAuthorized: bigint; buyerRefunded: bigint; remainingLocked: bigint;
+  withdrawable: bigint; refundable: bigint; disputedLocked: bigint; unallocated: bigint;
+}
+
 
 /**
  * Accepted report provenance only, NOT a substitute for a new RPC read.
@@ -23,7 +29,6 @@ export const gymKnownEvidence = {
     policy: 0,
     label: 'PT · Agreement #1',
     provenance: 'WALLET1_REPORTED_RECEIPTS_VERIFIED',
-    reportedTx: wallet1PtReport,
   },
   2: {
     policy: 1,
@@ -47,10 +52,17 @@ export function knownGymAgreement(id: bigint, policy: number) {
  */
 export function assessGymLedger(id: bigint, policy: number, ledger: FinancialView) {
   const source = knownGymAgreement(id, policy)
-  const conserved = classifyPtBalances(ledger)
-  const valid = conserved.valid && source.status !== 'POLICY_MISMATCH' &&
+  const amounts = Object.values(ledger)
+  const nonnegative = amounts.every(value => value >= 0n)
+  const conserved = ledger.deposited === ledger.gymWithdrawn + ledger.buyerRefunded + ledger.remainingLocked
+  const derived = ledger.earnedFinalized >= ledger.gymWithdrawn &&
+    ledger.refundAuthorized >= ledger.buyerRefunded &&
+    ledger.withdrawable === ledger.earnedFinalized - ledger.gymWithdrawn &&
+    ledger.refundable === ledger.refundAuthorized - ledger.buyerRefunded
+  const valid = nonnegative && conserved && derived && source.status !== 'POLICY_MISMATCH' &&
     ledger.withdrawable <= ledger.remainingLocked &&
-    ledger.refundable <= ledger.remainingLocked &&
+    ledger.refundable <= ledger.remainingLocked && ledger.unallocated <= ledger.remainingLocked &&
+    ledger.disputedLocked <= ledger.remainingLocked &&
     ledger.disputedLocked + ledger.withdrawable + ledger.refundable <= ledger.remainingLocked
   const ptMatchesReportedSnapshot = source.status === 'KNOWN' && id === 1n
     ? ledger.deposited === 1003n && ledger.earnedFinalized === 100n &&
