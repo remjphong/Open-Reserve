@@ -3,6 +3,7 @@ import { agreement as fixtureAgreement } from '../demo/agreement'
 import { DisabledAction, EmptyState, ErrorState, LoadingSkeleton, MoneyFigure, PortalPage } from '../design-system/portal'
 import { deployment, errorMessage, provider, sameAddress, walletSession, type Session } from '../lib/customer-chain'
 import { readSharedAgreement } from '../lib/shared-ledger'
+import { wallet1PtReport } from '../lib/customer-pt-proof'
 import { assessGymLedger, matchesWallet2TimeAgreement, wallet2TimeDepositReport } from '../lib/gym-known-evidence'
 import {
   GYM_CHAIN_WRITES_ENABLED, discoverMerchantAgreements, readDirectGymAgreement, parseGymRoute, simulateGymIntent,
@@ -323,7 +324,11 @@ function KnownReceiptEvidence({ item }: { item: SharedData }) {
     <h2>Biên nhận tham chiếu · Agreement #{short(item.agreementId)}</h2>
     <p className="caption customer-wrap">PROVENANCE: {source.provenance}
       {' · '}Hồ sơ được báo cáo, không phải bằng chứng RPC vừa đọc tại trình duyệt Gym.</p>
-    <ol>{source.reportedTx.map(tx => <li key={tx.hash} className="customer-wrap">
+    <ol>{(item.agreementId === 1n ? wallet1PtReport : [{
+        step: 'Nạp TIME_ACCESS', hash: wallet2TimeDepositReport.hash,
+        block: wallet2TimeDepositReport.block,
+      }]).map(tx =>
+      <li key={tx.hash} className="customer-wrap">
       {tx.step} · block {tx.block.toString()}
       {' · '}<a className="inline-link" href={'https://build.avax.network/explorer/fuji/c-chain/tx/' + tx.hash}
         target="_blank" rel="noopener noreferrer">Mở biên nhận trên Fuji</a>
