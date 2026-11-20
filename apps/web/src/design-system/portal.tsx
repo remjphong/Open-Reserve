@@ -28,7 +28,8 @@ export function StatusPill({ children, warning = false }: { children: ReactNode;
 export function WalletIdentity({ role }: { role: Role }) {
   return <span className="wallet" style={role === 'gym' ? { minWidth: 0, whiteSpace: 'normal' } : undefined}><Icon name="wallet" />
     <span style={role === 'gym' ? { minWidth: 0, overflowWrap: 'anywhere' } : undefined}><span className="wallet-label">{roles[role].wallet} · </span>
-      {role === 'gym' ? 'Trạng thái xác minh ở trang Gym' : 'Chưa kết nối'}</span>
+      {role === 'gym' ? 'Trạng thái xác minh ở trang Gym' : role === 'operations' ?
+        'Xác minh ví ở trang sổ cái' : 'Chưa kết nối'}</span>
   </span>
 }
 
