@@ -70,3 +70,47 @@ jobs:
           D18_10_TEST_DATABASE_URL: postgresql://chain_user:ephemeral-chain-ci-only@127.0.0.1:5432/chain_db
           D18_10_ALLOW_TEST_DB_WRITES: '1'
         run: node --test services/chain-indexer/test/store.integration.test.mjs
+
+  fuji-readonly-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.22.1'
+          cache: npm
+      - run: npm ci
+      - name: Build read-only indexer RPC client
+        run: |
+          npm run build --workspace @openreserve/api-contracts
+          npm run build --workspace @openreserve/chain-indexer
+      - name: Verify live Fuji deployment and Agreement 1 ledger read-only
+        env:
+          RPC_URL: https://api.avax-test.network/ext/bc/C/rpc
+        run: |
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict'
+          import { FujiRpc } from './services/chain-indexer/dist/domain/rpc-client.js'
+          import { FUJI } from './services/chain-indexer/dist/domain/protocol.js'
+          const rpc = new FujiRpc(process.env.RPC_URL)
+          await rpc.assertIdentity()
+          const agreement = await rpc.financial('1')
+          const tip = await rpc.tip()
+          assert.equal(agreement.agreementId, '1')
+          assert.ok(BigInt(agreement.deposited) > 0n)
+          assert.equal(BigInt(agreement.remainingLocked),
+            BigInt(agreement.deposited) - BigInt(agreement.gymWithdrawn) - BigInt(agreement.buyerRefunded))
+          console.log('FUJI_READONLY_DEPLOYMENT=PASS')
+          console.log('FUJI_AGREEMENT_1_ATOMIC_VIEW=PASS')
+          console.log('CHAIN_ID=' + FUJI.chainId)
+          console.log('VAULT=' + FUJI.vault)
+          console.log('CHAIN_TIP=' + tip.toString())
+          console.log('LEDGER=' + JSON.stringify({
+            deposited: agreement.deposited, earnedFinalized: agreement.earnedFinalized,
+            gymWithdrawn: agreement.gymWithdrawn, buyerRefunded: agreement.buyerRefunded,
+            remainingLocked: agreement.remainingLocked, withdrawable: agreement.withdrawable,
+            refundable: agreement.refundable, unallocated: agreement.unallocated,
+          }))
+          console.log('FUJI_SIGNING=NONE')
+          NODE
