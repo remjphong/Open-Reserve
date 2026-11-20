@@ -705,6 +705,23 @@ NEXT: Worker 4 D19-06/07 actual three-role browser QA, then D19-08/09 and D20 su
 PlanB: none
 ```
 
+
+```text
+[2026-11-20 ICT] TASK=D19-06-P1 STATUS=SCOPED_SOURCE_FIX_ACCEPTED_WITH_LIMITATIONS
+Reviewer: CTO 2 directly reviewed PR #33 source/test/CI, GitHub proof record, NOT the 8 original Owner screenshot pixels.
+PR: https://github.com/remjphong/Open-Reserve/pull/33
+Exact reviewed HEAD: befd4778b4ed42cd6d7205b5ebd344ae7cc07ed3
+Base: 7f45cee5ab810281866906a6f4f3730f087b87fa
+Controlled merge SHA: aa84b54743d6443ec3e3bb5f2cb8cedad4159fea
+Scope: 4 paths, Operations AppShell P1 unconditional disconnected-demo banner replaced with neutral read-only per-page notice, 2 new negative tests, exact-head CI, Owner screenshot provenance + route outcomes documented; no chain writes/contracts/roles/money changes.
+CI: https://github.com/remjphong/Open-Reserve/actions/runs/44762028317 workspaces/contracts/real Compose SUCCESS 3/3; D19-06 2/2 tests, previous regressions and service failure smoke PASS. One existing npm HIGH still open.
+Actual browser evidence source: Owner-reported eight Chrome 1440×900 screenshots with filename/SHA256 listed in proofs/d19-06-desktop-browser-qa.md. CTO did not receive screenshot image bytes from this GitHub PR and did NOT independently verify pixels/checksums. Owner WSL reported QA worktree at 7f45cee and Vite 127.0.0.1:5174; original screenshots PRE-FIX.
+D19-06_FULL_DESKTOP_E2E=HOLD: Merchant real wallet remains not connected, two claim states below fold, wrong-account/chain/rejection/disconnect tests NOT_RUN, same-block three-role agreement matching NOT_VERIFIED, exact HTTP statuses/PID not measured, post-fix screenshot NOT_RUN.
+D19-07_MOBILE=NOT_RUN; full Fuji historical sync NOT_VERIFIED; TX3/TX4 status separate Wallet2 chain lane.
+Next: Worker4 gather actual post-merge desktop Merchant/claim/negative/post-fix and 390x844 mobile evidence. If blocked, report exact unresolved status; prioritize D20 security/release and Owner submission deadline.
+PlanB: none.
+```
+
 ---
 
 ## I. NON-NEGOTIABLE SAFETY / QUALITY
