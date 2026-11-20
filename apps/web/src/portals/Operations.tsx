@@ -1,10 +1,10 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import type { Claim } from '@openreserve/contracts-sdk'
 import { AgreementReceipt } from '../design-system/receipt'
 import { agreement as fixture } from '../demo/agreement'
 import {
-  DisabledAction, EmptyState, ErrorState, LoadingSkeleton, MoneyBreakdown, MoneyFigure,
-  OverviewCard, PortalPage, StatusPill,
+  DisabledAction, EmptyState, ErrorState, LoadingSkeleton, MoneyBreakdown,
+  OverviewCard, PortalPage,
 } from '../design-system/portal'
 import { errorMessage, provider, sameAddress, walletSession, type Session } from '../lib/customer-chain'
 import { readSharedAgreement } from '../lib/shared-ledger'
@@ -20,7 +20,7 @@ const base = (amount: bigint) => amount.toLocaleString('vi-VN') + ' đơn vị n
 const claimStates = ['Không có', 'Đã đề xuất', 'Đã xác nhận', 'Đang phản đối', 'Đã chốt', 'Đã phân xử', 'Đã hủy']
 const fixtureLabel = 'MINH HỌA · DEMO_FIXTURE · KHÔNG PHẢI DỮ LIỆU FUJI'
 
-function Section({ children }: { children: React.ReactNode }) {
+function Section({ children }: { children: ReactNode }) {
   return <section className="card card-pad customer-flow-card">{children}</section>
 }
 
