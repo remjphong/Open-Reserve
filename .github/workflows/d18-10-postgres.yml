@@ -114,3 +114,109 @@ jobs:
           }))
           console.log('FUJI_SIGNING=NONE')
           NODE
+
+  fuji-indexer-end-to-end:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:17.6-bookworm
+        env:
+          POSTGRES_DB: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: ephemeral-admin-ci-only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d postgres"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.22.1'
+          cache: npm
+      - run: npm ci
+      - name: Create dedicated disposable chain_db with non-superuser chain_user
+        run: |
+          node --input-type=module <<'NODE'
+          import pg from 'pg'
+          const admin = new pg.Client({connectionString:'postgresql://postgres:ephemeral-admin-ci-only@127.0.0.1:5432/postgres'})
+          await admin.connect()
+          try {
+            await admin.query("CREATE ROLE chain_user LOGIN PASSWORD 'ephemeral-chain-ci-only' NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION")
+            await admin.query('CREATE DATABASE chain_db OWNER chain_user')
+            await admin.query('REVOKE ALL ON DATABASE chain_db FROM PUBLIC')
+          } finally { await admin.end() }
+          console.log('DISPOSABLE_CHAIN_DB_READY=PASS')
+          NODE
+      - name: Build indexer runtime
+        run: |
+          npm run build --workspace @openreserve/api-contracts
+          npm run build --workspace @openreserve/chain-indexer
+      - name: Bounded live Fuji sync to deploy block, then independent receipt/ledger smoke
+        timeout-minutes: 16
+        env:
+          DATABASE_URL: postgresql://chain_user:ephemeral-chain-ci-only@127.0.0.1:5432/chain_db
+          RPC_URL: https://api.avax-test.network/ext/bc/C/rpc
+          FUJI_RPC_URL: https://api.avax-test.network/ext/bc/C/rpc
+          CHAIN_ID: '43113'
+          HOST: 127.0.0.1
+          PORT: '3002'
+          INDEXER_WINDOWS_PER_POLL: '100'
+          INDEXER_POLL_MS: '1000'
+        run: |
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict'
+          import { spawn } from 'node:child_process'
+          import { setTimeout as sleep } from 'node:timers/promises'
+          const child = spawn(process.execPath, ['services/chain-indexer/dist/server.js'], {
+            env: process.env, stdio: ['ignore','ignore','pipe'],
+          })
+          let exit = null
+          let lastStderr = ''
+          child.on('exit', (code, signal) => { exit = { code, signal } })
+          child.stderr.on('data', d => { lastStderr = (lastStderr + String(d)).slice(-1000) })
+          let lastReported = -1n
+          let lastSync = null
+          try {
+            const deadline = Date.now() + 12 * 60_000
+            while (Date.now() < deadline) {
+              if (exit) throw new Error('INDEXER_EXITED_EARLY')
+              await sleep(8000)
+              let response
+              try { response = await fetch('http://127.0.0.1:3002/v1/sync', { signal: AbortSignal.timeout(9000) }) }
+              catch { continue }
+              const sync = await response.json()
+              lastSync = sync
+              if (sync.lastIndexedBlock !== null && /^\d+$/.test(sync.lastIndexedBlock)) {
+                const height = BigInt(sync.lastIndexedBlock)
+                if (lastReported < 0n || height - lastReported >= 10000n) {
+                  console.log('INDEXED_BLOCK=' + height.toString() + ' TIP=' + sync.chainTip + ' STALE=' + sync.isStale)
+                  lastReported = height
+                }
+              }
+              if (response.status === 200 && !sync.isStale) {
+                console.log('FUJI_FULL_SYNC=PASS LAST_INDEXED_BLOCK=' + sync.lastIndexedBlock)
+                const { spawnSync } = await import('node:child_process')
+                const smoke = spawnSync(process.execPath, ['services/chain-indexer/test/smoke-fuji-readonly.mjs'], {
+                  env: process.env, encoding: 'utf8', timeout: 60_000,
+                })
+                process.stdout.write(smoke.stdout || '')
+                process.stderr.write(smoke.stderr || '')
+                assert.equal(smoke.status, 0, 'LIVE_FUJI_LEDGER_SMOKE_FAILED')
+                console.log('FUJI_INDEXER_E2E=PASS')
+                break
+              }
+            }
+            if (lastSync?.isStale !== false) {
+              console.log('LAST_SYNC=' + JSON.stringify(lastSync))
+              throw new Error('FUJI_FULL_SYNC_NOT_REACHED_WITHIN_BUDGET')
+            }
+          } finally {
+            child.kill('SIGTERM')
+            await sleep(500)
+          }
+          NODE
