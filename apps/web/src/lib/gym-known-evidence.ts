@@ -63,3 +63,19 @@ export function assessGymLedger(id: bigint, policy: number, ledger: FinancialVie
     merchantMayClaimEarned: valid && ledger.withdrawable > 0n,
   }
 }
+
+/** Check acceptance-record identity against CURRENT pinned Vault Agreement #2 metadata.
+ * This check is not fresh receipt verification, only a fail-closed association gate.
+ */
+export function matchesWallet2TimeAgreement(agreement: {
+  buyer: string; merchant: string; policy: number; deposited: bigint;
+  startAt: bigint; endAt: bigint; challengeWindow: bigint
+}): boolean {
+  return agreement.policy === wallet2TimeDepositReport.policy &&
+    agreement.deposited === wallet2TimeDepositReport.amount &&
+    agreement.startAt === wallet2TimeDepositReport.startAt &&
+    agreement.endAt === wallet2TimeDepositReport.endAt &&
+    agreement.challengeWindow === wallet2TimeDepositReport.challengeWindow &&
+    agreement.buyer.toLowerCase() === '0x124c7de92df945477caebdc6745756c4b29e7b7b' &&
+    agreement.merchant.toLowerCase() === '0xa337fcec5f9508c3ab5e10ae571610e167548878'
+}
