@@ -20,6 +20,8 @@ jobs:
       - run: npm run build
       - name: D18-09 Operations route, evidence and role-safe tests
         run: node --test apps/web/test/operations-routes.test.mjs
+      - name: D19-01 Customer PT receipt/ledger/provenance tests
+        run: node --test apps/web/test/customer-pt-journey.test.mjs
       - run: npm test
       - run: npm run test:isolation
   contracts:

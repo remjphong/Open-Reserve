@@ -6,6 +6,10 @@ import { CustomerPreview } from './CustomerPreview'
 import { EmptyState, ErrorState, LoadingSkeleton, OverviewCard, PortalPage } from '../design-system/portal'
 import { readSharedAgreement } from '../lib/shared-ledger'
 import {
+  classifyPtBalances, ptAgreementId, verifyWallet1PtReport, wallet1PtReport,
+  type FinancialView, type PtProofResult,
+} from '../lib/customer-pt-proof'
+import {
   checkoutState, deployment, errorMessage, listPasses, parseId, provider, purchase,
   readPass, runBuyerAction, sameAddress, walletSession, type Session,
 } from '../lib/customer-chain'
@@ -62,13 +66,21 @@ function useWallet<T>(load: (session: Session) => Promise<T>) {
   useEffect(() => {
     const injected = provider()
     const changed = () => void refresh()
+    const disconnected = () => {
+      ++version.current
+      setValue(undefined)
+      setLoading(false)
+      setMessage('Mất kết nối ví. Không hiển thị số dư cũ; hãy kết nối lại để xác minh.')
+    }
     injected?.on?.('accountsChanged', changed)
     injected?.on?.('chainChanged', changed)
+    injected?.on?.('disconnect', disconnected)
     changed()
     return () => {
       ++version.current
       injected?.removeListener?.('accountsChanged', changed)
       injected?.removeListener?.('chainChanged', changed)
+      injected?.removeListener?.('disconnect', disconnected)
     }
   }, [])
   return { value, loading, message, refresh }
@@ -176,6 +188,8 @@ function Passes() {
   const state = useWallet(listPasses)
   return <Page title="Các gói của tôi"><Card>
     <WalletControls {...walletControls(state)} />
+    <p className="caption">Lịch sử theo ví dùng quét AgreementOpened; nếu RPC giới hạn log, không được kết luận không có hợp đồng.</p>
+    <a className="inline-link" href="/customer/passes/1">Đọc trực tiếp Agreement #1 PT trên Fuji (không cần quét lịch sử)</a>
     {state.value && (state.value.data.length
       ? <ul>{state.value.data.map(log => <li key={String(log.args.agreementId)}><a className="inline-link" href={passRoot + '/' + log.args.agreementId}>
         Hợp đồng #{String(log.args.agreementId)} · {log.args.policy === 0 ? 'PT 10 buổi' : 'Tập không giới hạn'}
@@ -183,6 +197,88 @@ function Passes() {
       : <EmptyState title="Chưa có gói">Ví này chưa mở hợp đồng trên Vault đang kết nối.</EmptyState>)}
     {!deployment && <a className="inline-link" href={passRoot + '/OR-024'}>Xem gói mẫu OR-024 · {fixture}</a>}
   </Card></Page>
+}
+
+
+function CustomerFinancialLedger({ ledger }: { ledger: FinancialView }) {
+  const result = classifyPtBalances(ledger)
+  return <div className="customer-claim">
+    <h3>Phân tách dòng tiền (đơn vị nhỏ nhất MRES)</h3>
+    <dl className="money-list">
+      {([
+        ['Tổng đã nạp', ledger.deposited],
+        ['Gym đã hưởng (earnedFinalized)', ledger.earnedFinalized],
+        ['Gym đã thực rút (gymWithdrawn)', ledger.gymWithdrawn],
+        ['Buyer đã nhận hoàn', ledger.buyerRefunded],
+        ['Khoản còn chưa phân bổ', ledger.unallocated],
+      ] as const).map(([label, value]) => <div key={label}>
+        <dt>{label}</dt><dd className="customer-wrap">{token(value)}</dd>
+      </div>)}
+    </dl>
+    <p className="caption">{result.valid
+      ? 'VAULT_LEDGER_CONSISTENT · Không cộng chồng earned, withdrawn, withdrawable và locked.'
+      : 'LEDGER_MISMATCH · Đọc lại block và không suy ra quyền hoàn.'}</p>
+    <p className="caption">Phân biệt: earned là giá trị đã chốt; withdrawn là số Gym đã nhận;
+      withdrawable là số Gym có thể nhận tiếp; refundable chỉ là khoản Buyer đã được duyệt và chưa nhận.</p>
+  </div>
+}
+
+function PtProofPanel({ session, buyer, merchant }: {
+  session: Session; buyer: string; merchant: string
+}) {
+  const [checking, setChecking] = useState(false)
+  const [proof, setProof] = useState<PtProofResult>()
+  const generation = useRef(0)
+  useEffect(() => () => { ++generation.current }, [session])
+  async function check() {
+    if (checking) return
+    const current = ++generation.current
+    setChecking(true)
+    setProof(undefined)
+    const result = await verifyWallet1PtReport({
+      chainId: session.chain.id, vault: session.vault, buyer, merchant,
+      pinnedBlock: session.head.number,
+    }, async hash => {
+      const receipt = await session.publicClient.getTransactionReceipt({ hash })
+      const transaction = await session.publicClient.getTransaction({ hash })
+      const block = await session.publicClient.getBlock({ blockNumber: receipt.blockNumber })
+      return {
+        receipt: {
+          transactionHash: receipt.transactionHash, status: receipt.status,
+          blockNumber: receipt.blockNumber, blockHash: receipt.blockHash, to: receipt.to,
+        },
+        transaction: { from: transaction.from, to: transaction.to, input: transaction.input },
+        canonicalBlockHash: block.hash,
+      }
+    })
+    const [account] = await session.wallet.getAddresses().catch(() => [undefined])
+    const chainId = await session.wallet.getChainId().catch(() => -1)
+    if (current === generation.current) {
+      setProof(account && sameAddress(account, session.account) && chainId === session.chain.id
+        ? result : { status: 'NOT_VERIFIED', checked: result.checked,
+            reason: 'Wallet session changed during receipt verification.' })
+      setChecking(false)
+    }
+  }
+  return <Card>
+    <h2>Bốn giao dịch PT #1 · theo hồ sơ Wallet 1</h2>
+    <p className="caption">WALLET1_REPORTED_RECEIPTS_VERIFIED · Đây là báo cáo lịch sử từ Wallet 1,
+      chưa phải kiểm chứng RPC mới của trình duyệt này. Không xác nhận buổi tập thực tế.</p>
+    <ol className="customer-pt-receipts">
+      {wallet1PtReport.map(item => <li key={item.hash} className="customer-wrap">
+        <strong>{item.step}</strong> · block {item.block.toString()}
+        <p className="caption"><a className="inline-link" href={'https://testnet.snowtrace.io/tx/' + item.hash}
+          target="_blank" rel="noopener noreferrer">{item.hash}</a></p>
+      </li>)}
+    </ol>
+    <button type="button" className="button" disabled={checking} onClick={() => void check()}>
+      {checking ? 'Đang đọc receipt, transaction và block…' : 'Đối chiếu 4 receipt trực tiếp qua RPC (chỉ đọc)'}
+    </button>
+    {proof && <p role="status" className="customer-wrap">{proof.status} · {proof.checked}/4 receipt
+      {proof.reason ? ' · ' + proof.reason :
+        ' · Đúng Vault/Buyer/Merchant/calldata và block theo RPC tại snapshot; không chứng minh buổi tập đã xảy ra.'}
+    </p>}
+  </Card>
 }
 
 function Pass({ agreementId, dispute }: { agreementId: string; dispute: boolean }) {
@@ -208,10 +304,12 @@ function Pass({ agreementId, dispute }: { agreementId: string; dispute: boolean 
   }
   return <Page title={dispute ? 'Phản đối đề nghị' : 'Gói của tôi · #' + id}>
     <Card><WalletControls {...walletControls(state)} busy={transaction.busy} />
-      {data && 'activity' in data && <p className="caption customer-wrap">
-        Nguồn số tiền: Vault Fuji · block {data.blockNumber.toString()} · Indexer: {data.activity.status}
-        {data.activity.reason && <> · {data.activity.reason}</>}
-      </p>}
+      {data && 'activity' in data && <div className="customer-wrap">
+        <p className="caption">Nguồn số tiền: VAULT_READ_CONTRACT · Fuji 43113 · block {data.blockNumber.toString()}
+          {' · '}Indexer: {data.activity.status}
+          {data.activity.reason && <> · {data.activity.reason}</>}</p>
+        <p className="caption">Indexer chỉ cung cấp lịch sử tham khảo; không được coi dữ liệu thiếu là danh sách trống đã xác minh.</p>
+      </div>}
       <p><a className="inline-link" href={dispute ? passRoot + '/' + id : passRoot}>{dispute ? 'Về chi tiết gói' : 'Về danh sách gói'}</a></p>
       {!isBuyer && data && <p>Chỉ ví người mua của hợp đồng có quyền ký các thao tác dưới đây.</p>}
       {transaction.feedback}
@@ -251,9 +349,16 @@ function Pass({ agreementId, dispute }: { agreementId: string; dispute: boolean 
         {['Đang được Vault giữ', 'Gym có thể rút', 'Đã được duyệt hoàn', 'Đang tranh chấp'].map((label, index) =>
           <div key={label}><dt>{label}</dt><dd className="money">{token(data.balances[index])}</dd></div>)}
       </dl>
-        {data.balances[2] > 0n && <Button disabled={!isBuyer || transaction.busy}
+        {data && 'ledger' in data && <CustomerFinancialLedger ledger={data.ledger} />}
+        <p className="caption">Số dư còn trong Vault KHÔNG tự động là tiền được duyệt hoàn;
+          chỉ trường refundable khác 0 từ Vault mới mở quyền nhận hoàn.</p>
+        {data.balances[2] > 0n && <Button disabled={!isBuyer || transaction.busy ||
+            ('ledger' in data && !classifyPtBalances(data.ledger).canClaimRefund)}
           onClick={() => void act({ type: 'claimRefund', id })}>Nhận token được duyệt hoàn</Button>}
       </Card>
+      {id === ptAgreementId && session.chain.id === 43113 && 'ledger' in data &&
+        <PtProofPanel key={session.account + ':' + session.head.hash}
+          session={session} buyer={data.agreement.buyer} merchant={data.agreement.merchant} />}
     </div>}
   </Page>
 }
@@ -261,6 +366,12 @@ function Pass({ agreementId, dispute }: { agreementId: string; dispute: boolean 
 export function Customer({ path }: { path: string }) {
   if (path === '/customer') return <Page title="Chọn gói tập">
     <p className="caption customer-catalog-note">{fixture} · Thanh toán bằng token thử nghiệm.</p>
+    <Card><h2>Theo dõi Agreement #1 đã có trên Fuji</h2>
+      <p>Ví Buyer có thể đọc sổ cái và bốn giao dịch PT do Wallet 1 báo cáo.
+        Số dư chỉ được hiển thị sau khi kiểm tra Vault tại block được ghim.</p>
+      <p className="caption">WALLET1_REPORTED_VERIFIED · Không tự động xác nhận số dư hiện tại hay quyền hoàn tiền.</p>
+      <a className="inline-link" href="/customer/passes/1">Mở quyền lợi và lịch sử PT #1</a>
+    </Card>
     <div className="grid customer-package-grid">{packages.map(pack => <OverviewCard key={pack.id} title={pack.name}
       href={'/customer/packages/' + pack.id} link="Xem quyền lợi và điều kiện">
       <p>{pack.description}</p><p className="money">{token(BigInt(pack.price))}</p>
