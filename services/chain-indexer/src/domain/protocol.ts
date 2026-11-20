@@ -113,8 +113,20 @@ export function parseFinancialView(agreementData: string, balancesData: string, 
   const b = Array.from({ length: 5 }, (_, i) => wordAt(balancesData, i))
   const [buyer, merchant, policy, state, terms, startAt, endAt, challengeWindow, challengedSessionClaimId, sessionsFinalized, positiveRefundSlots, sessionsConsumed, liveClaims, deposited, earnedFinalized, gymWithdrawn, refundAuthorized, buyerRefunded, disputedLocked] = a as bigint[]
   if (policy !== 0n && policy !== 1n || (state !== 1n && state !== 2n) || narrow(sessionsFinalized!, 8) > 10 || narrow(positiveRefundSlots!, 8) > 10 || narrow(sessionsConsumed!, 8) > 10) throw new Error('INVALID_VAULT_STATE')
+  // Solidity's getBalances uses checked uint256 subtraction. Reject impossible
+  // underflows/over-allocation before comparing every derived amount; BigInt
+  // subtraction alone would silently accept negative intermediate values.
+  if (gymWithdrawn! > earnedFinalized! || buyerRefunded! > refundAuthorized! ||
+    gymWithdrawn! + buyerRefunded! > deposited! || earnedFinalized! + refundAuthorized! > deposited!) {
+    throw new Error('VAULT_INVARIANT_MISMATCH')
+  }
   if (disputedLocked !== b[3]) throw new Error('VAULT_BALANCE_MISMATCH')
-  if (deposited! !== gymWithdrawn! + buyerRefunded! + b[0]!) throw new Error('VAULT_INVARIANT_MISMATCH')
+  if (b[0] !== deposited! - gymWithdrawn! - buyerRefunded! ||
+    b[1] !== earnedFinalized! - gymWithdrawn! ||
+    b[2] !== refundAuthorized! - buyerRefunded! ||
+    b[4] !== deposited! - earnedFinalized! - refundAuthorized!) {
+    throw new Error('VAULT_INVARIANT_MISMATCH')
+  }
   return {
     agreementId: decimalId(agreementId), buyer: addressWord(buyer!), merchant: addressWord(merchant!),
     policy: policy === 0n ? 'PER_SESSION' : 'TIME_ACCESS', state: state === 1n ? 'OPEN' : 'TERMINATED',

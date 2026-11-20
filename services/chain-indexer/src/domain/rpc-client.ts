@@ -60,10 +60,19 @@ export class FujiRpc implements ChainReader {
   }
   async financial(id: string): Promise<ReturnType<typeof parseFinancialView>> {
     await this.assertIdentity() // fail closed if the RPC/network changed since last polling tick
+    // Pin both getters to a single observed canonical height. Independent 'latest'
+    // reads can cross a finalization/withdrawal boundary and invent a mixed ledger.
+    const anchor = await this.block(await this.tip())
+    if (anchor.number < FUJI.deploymentBlock) throw new Error('FINANCIAL_BLOCK_BEFORE_DEPLOYMENT')
+    const blockTag = `0x${anchor.number.toString(16)}`
     const [agreement, balances] = await Promise.all([
-      this.call('eth_call', [{ to: FUJI.vault, data: encodeIdCall(CALL_GET_AGREEMENT, id) }, 'latest']),
-      this.call('eth_call', [{ to: FUJI.vault, data: encodeIdCall(CALL_GET_BALANCES, id) }, 'latest']),
+      this.call('eth_call', [{ to: FUJI.vault, data: encodeIdCall(CALL_GET_AGREEMENT, id) }, blockTag]),
+      this.call('eth_call', [{ to: FUJI.vault, data: encodeIdCall(CALL_GET_BALANCES, id) }, blockTag]),
     ])
+    // The number must still identify the same canonical block after both reads.
+    // Fail closed on a reorg, RPC inconsistency or invalid canonical response.
+    const canonicalAfter = await this.block(anchor.number)
+    if (canonicalAfter.hash !== anchor.hash) throw new Error('FINANCIAL_BLOCK_REORG')
     if (typeof agreement !== 'string' || typeof balances !== 'string') throw new Error('RPC_INVALID_VAULT_VIEW')
     return parseFinancialView(agreement, balances, id)
   }
