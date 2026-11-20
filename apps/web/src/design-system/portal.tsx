@@ -26,8 +26,9 @@ export function StatusPill({ children, warning = false }: { children: ReactNode;
 }
 
 export function WalletIdentity({ role }: { role: Role }) {
-  return <span className="wallet"><Icon name="wallet" />
-    <span><span className="wallet-label">{roles[role].wallet} · </span>Chưa kết nối</span>
+  return <span className="wallet" style={role === 'gym' ? { minWidth: 0, whiteSpace: 'normal' } : undefined}><Icon name="wallet" />
+    <span style={role === 'gym' ? { minWidth: 0, overflowWrap: 'anywhere' } : undefined}><span className="wallet-label">{roles[role].wallet} · </span>
+      {role === 'gym' ? 'Trạng thái xác minh ở trang Gym' : 'Chưa kết nối'}</span>
   </span>
 }
 
@@ -63,8 +64,10 @@ export function AppShell({ role, path, items, children }: {
     </header>
     {nav('mobile-nav')}
     <main id="main" className="container" tabIndex={-1}>
-      {role !== 'customer' && <div className="notice"><Icon name="info" /><span><strong>DEMO UI — CHƯA KẾT NỐI</strong><br />
+      {role === 'operations' && <div className="notice"><Icon name="info" /><span><strong>DEMO UI — CHƯA KẾT NỐI</strong>
         Dữ liệu minh họa. Chưa đọc Fuji hoặc ký giao dịch.</span></div>}
+      {role === 'gym' && <div className="notice"><Icon name="info" /><span><strong>FUJI READ ONLY — GỬI GIAO DỊCH ĐANG KHÓA</strong>
+        Số dư thật chỉ có sau khi xác minh Vault và ví merchant. Hợp đồng OR-024 được gắn nhãn DEMO_FIXTURE riêng.</span></div>}
       {children}
     </main>
   </>
