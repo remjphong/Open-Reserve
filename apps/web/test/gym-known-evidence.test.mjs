@@ -2,7 +2,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import {
-  assessGymLedger, knownGymAgreement, gymKnownEvidence, wallet2TimeDepositReport,
+  assessGymLedger, knownGymAgreement, gymKnownEvidence, matchesWallet2TimeAgreement, wallet2TimeDepositReport,
 } from '../src/lib/gym-known-evidence.ts'
 import { wallet1PtReport } from '../src/lib/customer-pt-proof.ts'
 
@@ -64,6 +64,21 @@ test('TIME_ACCESS #2 only has reported TX1 deposit; no earned/withdrawn/refund r
   assert.equal(status.ptMatchesReportedSnapshot, undefined)
 })
 
+test('TIME #2 receipt report is associated only with exact pinned Vault agreement identity', () => {
+  const agreement = {
+    policy: 1, deposited: 900n, startAt: 1795182500n, endAt: 1795182770n,
+    challengeWindow: 60n,
+    buyer: '0x124C7DE92Df945477cAEbdC6745756C4B29e7b7B',
+    merchant: '0xA337FCeC5f9508C3Ab5E10aE571610E167548878',
+  }
+  assert.equal(matchesWallet2TimeAgreement(agreement), true)
+  for (const override of [
+    { policy: 0 }, { deposited: 899n }, { startAt: 1795182501n },
+    { endAt: 1795182771n }, { challengeWindow: 59n },
+    { buyer: agreement.merchant }, { merchant: agreement.buyer },
+  ]) assert.equal(matchesWallet2TimeAgreement({ ...agreement, ...override }), false)
+})
+
 test('Independent Vault getter mismatch fails closed: no false withdrawable/refund eligibility', () => {
   for (const corrupt of [
     { ...pt, remainingLocked: 1003n },
@@ -89,6 +104,7 @@ test('Gym UI preserves pinned Vault, errors and read-only merchant signing fence
   assert.match(gym, /href="\/gym\/agreements\/2"/)
   assert.match(gym, /WALLET1|source\.provenance/)
   assert.match(gym, /USER_PROVIDED|wallet2TimeDepositReport/)
+  assert.match(gym, /matchesWallet2TimeAgreement/)
   assert.match(gym, /VAULT_READ_CONTRACT/)
   assert.match(gym, /VAULT_LEDGER_CONSISTENT/)
   assert.match(gym, /CURRENT_PT_STATE_DIFFERS_FROM_REPORTED_SNAPSHOT/)
