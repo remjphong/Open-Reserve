@@ -1,0 +1,25 @@
+
+> @openreserve/chain-indexer@0.0.0 test
+> node --test test/*.test.mjs
+
+✔ health is independent; unconfigured sync is degraded, never verified empty (9278.110625ms)
+✔ unavailable known IDs return 503 and malformed IDs return 400 (8.046596ms)
+✔ readiness reports configured failures without leaking DB password (6.824087ms)
+✔ invalid configuration fails (0.530355ms)
+✔ success APIs obey strict immutable v1 schema (injected indexed read-model fixture) (20.901803ms)
+✔ checkpoint replay and restart preserve exactly one event and authority from live view (8.11376ms)
+✔ wrong chain and incomplete log windows fail closed; no fabricated verified empty (0.438962ms)
+✔ Keccak-256 Ethereum padding matches standard event hash (2.44951ms)
+✔ parse known indexed Vault AgreementOpened; reject forged contract/ABI/block (1.21461ms)
+✔ manual view decode enforces Vault conservation, data length and state (0.860676ms)
+✔ RPC probe checks real JSON-RPC chain ID, not self-reported config (41.086136ms)
+✔ Fuji RPC refuses wrong chain before log scanning (9.208324ms)
+﹣ OPTIONAL isolated chain_db/chain_user integration: replay, unique events, persisted checkpoint (0.42722ms) # NOT_RUN: isolated PostgreSQL and explicit test-write opt-in not configured
+ℹ tests 13
+ℹ suites 0
+ℹ pass 12
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 1
+ℹ todo 0
+ℹ duration_ms 20566.949652
