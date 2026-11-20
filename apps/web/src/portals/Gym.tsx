@@ -3,7 +3,7 @@ import { agreement as fixtureAgreement } from '../demo/agreement'
 import { DisabledAction, EmptyState, ErrorState, LoadingSkeleton, MoneyFigure, PortalPage } from '../design-system/portal'
 import { deployment, errorMessage, provider, sameAddress, walletSession, type Session } from '../lib/customer-chain'
 import { readSharedAgreement } from '../lib/shared-ledger'
-import { assessGymLedger, wallet2TimeDepositReport } from '../lib/gym-known-evidence'
+import { assessGymLedger, matchesWallet2TimeAgreement, wallet2TimeDepositReport } from '../lib/gym-known-evidence'
 import {
   GYM_CHAIN_WRITES_ENABLED, discoverMerchantAgreements, readDirectGymAgreement, parseGymRoute, simulateGymIntent,
   verifyGymDeployment, type GymIntent, type GymRoute,
@@ -312,6 +312,12 @@ function Ledger({ item }: { item: SharedData }) {
 function KnownReceiptEvidence({ item }: { item: SharedData }) {
   const check = assessGymLedger(item.agreementId, item.agreement.policy, item.ledger)
   if (check.source.status !== 'KNOWN') return null
+  if (item.agreementId === wallet2TimeDepositReport.agreementId &&
+      !matchesWallet2TimeAgreement(item.agreement)) {
+    return <Card><ErrorState>TIME_TX1_IDENTITY_NOT_VERIFIED · Không gắn biên nhận Wallet 2 với
+      Agreement #2 khi buyer/merchant/policy/amount/điều khoản thời gian trên Vault không khớp
+      hồ sơ nguồn.</ErrorState></Card>
+  }
   const source = check.source.evidence
   return <Card>
     <h2>Biên nhận tham chiếu · Agreement #{short(item.agreementId)}</h2>
@@ -441,15 +447,16 @@ function Payouts({ entries, session, onlyId }: { entries: NonNullable<GymSnapsho
     {selected.length === 0 && <Card><EmptyState title="Chưa tìm thấy hợp đồng">Danh sách chỉ gồm hợp đồng đã xác minh quyền merchant.</EmptyState></Card>}
     {selected.map(({ id, data }) => <div key={short(id)}>
       <Card><h2>Hợp đồng #{short(id)}</h2><VaultLabel item={data} />
-        <p><strong>Có thể rút: {baseUnits(data.ledger.withdrawable)}</strong></p>
-        <p>Đã chốt: {baseUnits(data.ledger.earnedFinalized)} · Đã thực rút: {baseUnits(data.ledger.gymWithdrawn)}</p>
-        <p>Đang tranh chấp (vẫn khóa): {baseUnits(data.ledger.disputedLocked)}
-          {' · '}Buyer được duyệt hoàn chưa nhận: {baseUnits(data.ledger.refundable)}</p>
-        {!assessGymLedger(id, data.agreement.policy, data.ledger).valid &&
-          <ErrorState>VAULT_LEDGER_MISMATCH · Không mô phỏng giải ngân khi số dư không nhất quán.</ErrorState>}
-        <Simulate session={session} title="Rút khoản earned"
-          intent={assessGymLedger(id, data.agreement.policy, data.ledger).merchantMayClaimEarned
-            ? { type: 'claimEarned', agreementId: id } : undefined} />
+        {assessGymLedger(id, data.agreement.policy, data.ledger).valid ? <>
+          <p><strong>Có thể rút: {baseUnits(data.ledger.withdrawable)}</strong></p>
+          <p>Đã chốt: {baseUnits(data.ledger.earnedFinalized)} · Đã thực rút: {baseUnits(data.ledger.gymWithdrawn)}</p>
+          <p>Đang tranh chấp (vẫn khóa): {baseUnits(data.ledger.disputedLocked)}
+            {' · '}Buyer được duyệt hoàn chưa nhận: {baseUnits(data.ledger.refundable)}</p>
+          <Simulate session={session} title="Rút khoản earned"
+            intent={assessGymLedger(id, data.agreement.policy, data.ledger).merchantMayClaimEarned
+              ? { type: 'claimEarned', agreementId: id } : undefined} />
+        </> : <ErrorState>VAULT_LEDGER_MISMATCH · Không hiển thị số dư hay mô phỏng giải ngân
+          khi getters không nhất quán.</ErrorState>}
         <GymLink id={id}>Mở hợp đồng #{short(id)}</GymLink>
       </Card>
     </div>)}
