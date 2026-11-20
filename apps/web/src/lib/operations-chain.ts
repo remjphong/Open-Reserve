@@ -2,7 +2,8 @@ import type { Session } from './customer-chain'
 
 export type OperationsRoute =
   | { page: 'overview' | 'agreements' | 'disputes' | 'fixture-agreement' | 'fixture-dispute' | 'not-found'; reason?: string }
-  | { page: 'detail' | 'claim'; id: bigint; claimId?: bigint }
+  | { page: 'detail'; id: bigint }
+  | { page: 'claim'; id: bigint; claimId?: bigint }
 
 const MAX_UINT = (1n << 256n) - 1n
 export function parseOperationsId(value: string | null | undefined): bigint | undefined {
@@ -43,7 +44,7 @@ export type EvidenceResult =
 type FetchLike = typeof fetch
 const isObject = (value: unknown): value is Record<string, unknown> =>
   value !== null && typeof value === 'object' && !Array.isArray(value)
-const hash32 = (value: unknown) => typeof value === 'string' && /^0x[0-9a-fA-F]{64}$/.test(value)
+const hash32 = (value: unknown): value is string => typeof value === 'string' && /^0x[0-9a-fA-F]{64}$/.test(value)
 
 /** Catalog is untrusted metadata. Matching a hash never certifies gym attendance. */
 export async function readOperationsEvidence(
