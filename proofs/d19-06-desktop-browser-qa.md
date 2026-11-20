@@ -3,7 +3,7 @@
 **Authority:** CTO 2 [Issue #27 comment 7042379751](https://github.com/remjphong/Open-Reserve/issues/27#issuecomment-7042379751), Execution Lock Rev 1.2.
 **Base:** `7f45cee5ab810281866906a6f4f3730f087b87fa`, compared identical with `unihack-final` before this branch.
 **Evidence origin:** Eight real OWNER_UPLOADED_CHROMIUM_SCREENSHOTS in Worker4 ChatGPT conversation on 20 Nov 2026 ICT. Original uploads are **not in GitHub**. This document records filename + checksum; it does **not** represent screenshots as independently witnessed by CTO or as CI screenshots.
-**Exact Owner QA checkout SHA and Vite 5174 PID/cwd:** **NOT_VERIFIED** pending read-only machine checks. The screenshots display a live-looking D19-03 interface but do not alone prove checked-out commit SHA. **HTTP transport status:** NOT_MEASURED in this screenshot packet (browser rendered; no independent curl per URL).
+**Owner QA checkout and launch (later raw WSL log): VERIFIED_FROM_OWNER_TERMINAL.** Owner created clean Linux worktree `/home/phong/openreserve-d19-06` on `d19-06-desktop-qa` at SHA `7f45cee5ab810281866906a6f4f3730f087b87fa` (accepted `unihack-final`), ran native `npm ci` and `npm run prebuild` PASS, then from that checkout started Vite `127.0.0.1:5174` with public Fuji 43113 Vault/deploy/merchant configuration. `VITE ready / Local: http://127.0.0.1:5174/` reported. **Independent process PID + current working directory after startup:** NOT_MEASURED. **HTTP transport status for each screenshot:** NOT_MEASURED (browser rendered; no separate curl).
 **Viewport:** Chrome Device Toolbar set to Responsive **1440×900** in every screenshot; screenshot captures are scaled/cropped within DevTools, not complete below-fold pages.
 
 ## Desktop route matrix
@@ -22,10 +22,10 @@
 **Financial observations, all MRES integer base units (not whole MRES/VND):**
 
 - PT #1 Buyer/Resolver screenshots: `deposited=1003, earnedFinalized=100, gymWithdrawn=100, remainingLocked=903, withdrawable=0, refundable=0, disputedLocked=0`. **903 locked is not 903 refunded or authorized for refund.**
-- TIME_ACCESS #2 Buyer/Resolver screenshots: `deposited=900, earnedFinalized=0, gymWithdrawn=0, remainingLocked=900, withdrawable=0, refundable=0, disputedLocked=0`. Historic Wallet2 TX1 deposit report is **not** proof of TX2/finalization/withdraw/refund.
+- TIME_ACCESS #2 Buyer/Resolver screenshots: `deposited=900, earnedFinalized=0, gymWithdrawn=0, remainingLocked=900, withdrawable=0, refundable=0, disputedLocked=0`. Historic Wallet2 TX1 deposit report **alone** is not proof of TX2/finalization/withdraw/refund. **Separate later-accepted evidence:** Wallet2 reviewed Owner CAST receipt for TX2 `0x4a24979eb2b8b254d7ccab1169689eea94325148b50dec1332842ff1b1fdb030`, Fuji block 61382886 / status 1; CTO accepted as `TX2_ONCHAIN_RECEIPT_AND_GETCLAIM_PASS_PER_OWNER_CAST_WALLET2_REVIEW` in issue #27 comments 7042956066 and 7043106106. The associated claim was reported PROPOSED (Agreement #2, claim #1, 900 base units). **This screenshot packet itself does not verify TX2 receipt or visible claim state; TX3 finalize, withdrawn income and refund are still not accepted as performed.**
 - Customer and Operations show `VAULT_READ_CONTRACT`, Fuji 43113 and accepted Vault `0x20D55E7Fc137a5924f6Bf76608eFaf99002474ad`. Operations prints `ROLE=resolver / RESOLVER_ADDRESS_MATCHED · READ_ONLY`.
 - **SAME_BLOCK_MATCHED = NOT_VERIFIED.** Each route snapshot was observed at a different block, and Merchant had no read. Matching-looking amounts at different blocks do not prove same-block financial concordance.
-- **Indexer source:** Buyer shows `Indexer: DOWN · Indexer HTTP 500` while read-only pinned Vault balances are rendered, preserving failure separation. Full historical sync is **NOT_VERIFIED**.
+- **Indexer source:** Buyer shows `Indexer: DOWN · Indexer HTTP 500` while read-only pinned Vault balances are rendered, preserving failure separation. Owner Vite terminal confirms repeated proxy `ECONNREFUSED 127.0.0.1:3002`; the local Chain Indexer service was not listening. This is a valid degraded read-only state, not successful local Indexer E2E. Full historical sync is **NOT_VERIFIED**.
 
 ## Observed P1: contradictory Operations global notice
 
@@ -51,6 +51,6 @@ d470bcc5c3af3d8eeaca090f0e794aef9f4c3b1de8dd25aa3436f0329efc3798  image(20261120
 - Merchant profile wallet-positive read (real correct Merchant address, Fuji 43113) **NOT_RUN**; no claim the screens prove a Gym code failure.
 - The two direct `getClaim` responses are **BELOW FOLD / NOT_VERIFIED**, need screenshot after scrolling.
 - Wrong chain/account, Core `eth_requestAccounts` rejection, disconnect/reconnect, missing RPC and Indexer DOWN at exact page and account: **NOT_VERIFIED** except observed Buyer Indexer failure. No TX signing or broadcast.
-- Exact Owner checkout SHA, server PID/cwd at 5174, and independent HTTP statuses: **NOT_VERIFIED** pending safe read-only command.
+- Owner QA checkout HEAD `7f45cee5ab810281866906a6f4f3730f087b87fa`, startup cwd `/home/phong/openreserve-d19-06`, clean branch and Vite `Local: http://127.0.0.1:5174/`: **CONFIRMED BY RAW OWNER WSL LOG**. Independent running PID/cwd inspection and HTTP statuses per route: **NOT_MEASURED**.
 - Browser post-fix Operations notice screenshot, 390×844 D19-07 and three independent deployed hostnames: **NOT_VERIFIED**.
 - **CTO request:** review limited P1 code/test/CI and accept partial real-desktop browser packet; do not mark full D19-06 PASS until Merchant/claim/negative and exact-SHA evidence gates are collected. CTO alone may controlled-merge.
