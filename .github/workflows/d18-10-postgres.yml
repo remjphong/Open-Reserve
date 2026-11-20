@@ -183,6 +183,8 @@ jobs:
             lastWindow={from,to}
             try {
               const result=await originalLogs(from,to)
+              // Public RPC has a bounded request budget; avoid hot-loop bursts.
+              await delay(300)
               if (++attempts<=2||attempts%10===0) console.log('GETLOGS_WINDOW='+JSON.stringify({
                 from:from.toString(),to:to.toString(),count:result.length,ms:Date.now()-start,status:'OK'}))
               return result
@@ -208,12 +210,16 @@ jobs:
                 body:JSON.stringify({jsonrpc:'2.0',id:1,method:'eth_getLogs',params:[{
                   address:FUJI.vault,fromBlock:'0x'+lastWindow.from.toString(16),toBlock:'0x'+lastWindow.to.toString(16)}]}),
                 signal:AbortSignal.timeout(15000)})
-              const j=await r.json()
-              const msg=typeof j.error?.message==='string'?j.error.message:''
-              const category=/rate|too many/i.test(msg)?'RATE_LIMIT':/range|block|limit/i.test(msg)?'RANGE_LIMIT':
-                /timeout/i.test(msg)?'TIMEOUT':j.error?'PROVIDER_ERROR':'NO_ERROR_ON_RETRY'
+              const raw=await r.text()
+              let j=null
+              try { j=JSON.parse(raw) } catch {}
+              const msg=typeof j?.error?.message==='string'?j.error.message:''
+              const category=r.status===429?'RATE_LIMIT':r.status===503?'SERVICE_UNAVAILABLE':
+                /rate|too many/i.test(msg)?'RATE_LIMIT':/range|block|limit/i.test(msg)?'RANGE_LIMIT':
+                /timeout/i.test(msg)?'TIMEOUT':j?.error?'PROVIDER_ERROR':
+                j===null?'NON_JSON_RESPONSE':'NO_ERROR_ON_RETRY'
               console.log('RPC_DIAGNOSTIC='+JSON.stringify({from:lastWindow.from.toString(),to:lastWindow.to.toString(),
-                httpStatus:r.status,code:Number.isInteger(j.error?.code)?j.error.code:null,category}))
+                httpStatus:r.status,code:Number.isInteger(j?.error?.code)?j.error.code:null,category}))
             }catch{console.log('RPC_DIAGNOSTIC=UNAVAILABLE_OR_TIMEOUT')}
           }
           const indexer=new Indexer(reader,store,8,1000)
@@ -236,8 +242,9 @@ jobs:
                 console.log('DEGRADED='+sync.lastError+' CHECKPOINT='+(cp?.height.toString()??'null'))
                 assert.equal(indexer.getSync().code,503,'RPC_FAILURE_FAIL_CLOSED')
                 await diagnostic()
-                if(failures>=3)throw Error('RPC_REPEATED_FAILURE')
-                await delay(1000)
+                if(failures>=6)throw Error('RPC_REPEATED_FAILURE')
+                // Bounded backoff. Never skip the failed block window.
+                await delay(Math.min(30000, 2000 * 2 ** (failures-1)))
                 continue
               }
               failures=0
