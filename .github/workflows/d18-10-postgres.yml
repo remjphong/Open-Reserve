@@ -160,7 +160,7 @@ jobs:
         timeout-minutes: 12
         env:
           DATABASE_URL: postgresql://chain_user:ephemeral-chain-ci-only@127.0.0.1:5432/chain_db
-          RPC_URL: https://api.avax-test.network/ext/bc/C/rpc
+          RPC_URL: https://avalanche-fuji-c-chain-rpc.publicnode.com
           CHAIN_ID: '43113'
         run: |
           node --input-type=module <<'NODE'
