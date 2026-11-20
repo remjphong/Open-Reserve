@@ -3,6 +3,8 @@ import { agreement as fixtureAgreement } from '../demo/agreement'
 import { DisabledAction, EmptyState, ErrorState, LoadingSkeleton, MoneyFigure, PortalPage } from '../design-system/portal'
 import { deployment, errorMessage, provider, sameAddress, walletSession, type Session } from '../lib/customer-chain'
 import { readSharedAgreement } from '../lib/shared-ledger'
+import { wallet1PtReport } from '../lib/customer-pt-proof'
+import { assessGymLedger, matchesWallet2TimeAgreement, wallet2TimeDepositReport } from '../lib/gym-known-evidence'
 import {
   GYM_CHAIN_WRITES_ENABLED, discoverMerchantAgreements, readDirectGymAgreement, parseGymRoute, simulateGymIntent,
   verifyGymDeployment, type GymIntent, type GymRoute,
@@ -266,28 +268,81 @@ function WalletPanel({ state }: { state: GymControl }) {
     {!deployment && <p className="caption">NOT_VERIFIED · Chưa cấu hình Vault. Không có dữ liệu on-chain.</p>}
     <p className="caption">Quyền ký phải thuộc địa chỉ merchant trong từng agreement. Nhân viên chỉ xem DEMO_FIXTURE; không có tài khoản nhân viên xác thực.</p>
     <p><a className="inline-link" href="/gym/agreements/1">Đọc trực tiếp Agreement #1 từ Vault (không quét lịch sử)</a></p>
+    <p><a className="inline-link" href="/gym/agreements/2">Đọc trực tiếp Agreement #2 TIME_ACCESS từ Vault (không quét lịch sử)</a></p>
+    <p className="caption">TX mở Agreement #2 có receipt được Wallet 2 báo cáo, không đồng nghĩa
+      đã chốt/đã rút doanh thu hoặc đã duyệt hoàn.</p>
     <a className="inline-link" href={fLink}>Xem hợp đồng minh họa tách biệt</a>
   </Card>
 }
 
 function Ledger({ item }: { item: SharedData }) {
+  const check = assessGymLedger(item.agreementId, item.agreement.policy, item.ledger)
   const rows = [
-    ['Đã nạp', item.ledger.deposited],
-    ['Giá trị đã chốt', item.ledger.earnedFinalized],
-    ['Đã rút', item.ledger.gymWithdrawn],
-    ['Gym có thể rút', item.ledger.withdrawable],
-    ['Vault còn giữ', item.ledger.remainingLocked],
-    ['Đang tranh chấp, vẫn khóa', item.ledger.disputedLocked],
-    ['Được duyệt hoàn cho buyer', item.ledger.refundable],
-    ['Chưa phân bổ', item.ledger.unallocated],
+    ['Đã nạp (deposited)', item.ledger.deposited],
+    ['Giá trị đã chốt (earnedFinalized)', item.ledger.earnedFinalized],
+    ['Gym đã thực rút (gymWithdrawn)', item.ledger.gymWithdrawn],
+    ['Gym còn có thể rút (withdrawable)', item.ledger.withdrawable],
+    ['Vault còn giữ (remainingLocked)', item.ledger.remainingLocked],
+    ['Buyer đã nhận hoàn (buyerRefunded)', item.ledger.buyerRefunded],
+    ['Đã duyệt hoàn tích lũy (refundAuthorized)', item.ledger.refundAuthorized],
+    ['Được duyệt hoàn, chưa nhận (refundable)', item.ledger.refundable],
+    ['Đang tranh chấp, vẫn khóa (disputedLocked)', item.ledger.disputedLocked],
+    ['Chưa phân bổ (unallocated)', item.ledger.unallocated],
   ] as const
   return <Card><h2>Sổ cái do Vault xác nhận</h2><VaultLabel item={item} />
-    <dl className="money-list">{rows.map(([label, value]) =>
-      <div key={label} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 24rem), 1fr))', gap: 4 }}>
-        <dt style={{ minWidth: 0 }}>{label}</dt>
-        <dd className="money customer-wrap" style={{ minWidth: 0, maxWidth: '100%', whiteSpace: 'normal', overflowWrap: 'anywhere', textAlign: 'right' }}>{baseUnits(value)}</dd>
-      </div>)}</dl>
-    <p className="caption">Pending/challenged không được cộng vào withdrawable. MRES là token thử nghiệm, không phải VNĐ.</p>
+    {!check.valid ? <ErrorState>VAULT_LEDGER_MISMATCH / POLICY_MISMATCH · Không hiển thị số tiền
+      vì các getter tại block đã ghim không vượt qua kiểm tra bảo toàn hoặc định danh gói.</ErrorState> : <>
+      <p className="caption">VAULT_LEDGER_CONSISTENT · Agreement #{short(item.agreementId)} · Block {short(item.blockNumber)}
+        {' · '}Các giá trị dưới đây được đọc trực tiếp, không lấy từ hồ sơ Wallet 1/2.</p>
+      <dl className="money-list">{rows.map(([label, value]) =>
+        <div key={label} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 24rem), 1fr))', gap: 4 }}>
+          <dt style={{ minWidth: 0 }}>{label}</dt>
+          <dd className="money customer-wrap" style={{ minWidth: 0, maxWidth: '100%', whiteSpace: 'normal', overflowWrap: 'anywhere', textAlign: 'right' }}>{baseUnits(value)}</dd>
+        </div>)}</dl>
+      {check.ptMatchesReportedSnapshot !== undefined && <p className="caption">
+        {check.ptMatchesReportedSnapshot
+          ? 'CURRENT_4_FIELDS_MATCH_PRIOR_PT_SNAPSHOT · Chỉ 4 trường đã đối chiếu.'
+          : 'CURRENT_PT_STATE_DIFFERS_FROM_REPORTED_SNAPSHOT · Hiển thị getter mới, không ghi đè bằng số cũ.'}
+      </p>}
+      <p className="caption">Pending/challenged KHÔNG là earned. Earned KHÔNG tự động đã rút.
+        remainingLocked KHÔNG tự động là refundable. MRES là token thử nghiệm, không phải VNĐ.</p>
+    </>}
+  </Card>
+}
+
+function KnownReceiptEvidence({ item }: { item: SharedData }) {
+  const check = assessGymLedger(item.agreementId, item.agreement.policy, item.ledger)
+  if (check.source.status !== 'KNOWN') return null
+  if (item.agreementId === wallet2TimeDepositReport.agreementId &&
+      !matchesWallet2TimeAgreement(item.agreement)) {
+    return <Card><ErrorState>TIME_TX1_IDENTITY_NOT_VERIFIED · Không gắn biên nhận Wallet 2 với
+      Agreement #2 khi buyer/merchant/policy/amount/điều khoản thời gian trên Vault không khớp
+      hồ sơ nguồn.</ErrorState></Card>
+  }
+  const source = check.source.evidence
+  return <Card>
+    <h2>Biên nhận tham chiếu · Agreement #{short(item.agreementId)}</h2>
+    <p className="caption customer-wrap">PROVENANCE: {source.provenance}
+      {' · '}Hồ sơ được báo cáo, không phải bằng chứng RPC vừa đọc tại trình duyệt Gym.</p>
+    <ol>{(item.agreementId === 1n ? wallet1PtReport : [{
+        step: 'Nạp TIME_ACCESS', hash: wallet2TimeDepositReport.hash,
+        block: wallet2TimeDepositReport.block,
+      }]).map(tx =>
+      <li key={tx.hash} className="customer-wrap">
+      {tx.step} · block {tx.block.toString()}
+      {' · '}<a className="inline-link" href={'https://build.avax.network/explorer/fuji/c-chain/tx/' + tx.hash}
+        target="_blank" rel="noopener noreferrer">Mở biên nhận trên Fuji</a>
+    </li>)}</ol>
+    {item.agreementId === wallet2TimeDepositReport.agreementId && <p className="caption">
+      Wallet 2 đã báo cáo TX1 nạp 900 đơn vị nhỏ nhất MRES cho TIME_ACCESS #2;
+      KHÔNG có biên nhận riêng về earned/finalize/withdraw/refund trong hồ sơ này.
+      Số dư hiện tại chỉ lấy từ Vault ở phần trên, không lấy từ giá trị nạp lịch sử.</p>}
+    {item.agreementId === 1n && <p className="caption">
+      Bốn TX PT do Wallet 1 báo cáo. Các trường earnedFinalized/gymWithdrawn hiện tại
+      chỉ được xác nhận bởi Vault; biên nhận tham chiếu không xác minh buổi tập thực tế.</p>}
+    {item.activity.status !== 'FRESH' && <p className="caption">
+      INDEXER_ACTIVITY={item.activity.status}. Không suy ra lịch sử đã quét đầy đủ hoặc đã trống.
+      Các số tiền từ Vault không phụ thuộc trạng thái này.</p>}
   </Card>
 }
 
@@ -397,10 +452,16 @@ function Payouts({ entries, session, onlyId }: { entries: NonNullable<GymSnapsho
     {selected.length === 0 && <Card><EmptyState title="Chưa tìm thấy hợp đồng">Danh sách chỉ gồm hợp đồng đã xác minh quyền merchant.</EmptyState></Card>}
     {selected.map(({ id, data }) => <div key={short(id)}>
       <Card><h2>Hợp đồng #{short(id)}</h2><VaultLabel item={data} />
-        <p><strong>Có thể rút: {baseUnits(data.ledger.withdrawable)}</strong></p>
-        <p>Đã chốt: {baseUnits(data.ledger.earnedFinalized)} · Đang tranh chấp: {baseUnits(data.ledger.disputedLocked)}</p>
-        <Simulate session={session} title="Rút khoản earned"
-          intent={data.ledger.withdrawable > 0n ? { type: 'claimEarned', agreementId: id } : undefined} />
+        {assessGymLedger(id, data.agreement.policy, data.ledger).valid ? <>
+          <p><strong>Có thể rút: {baseUnits(data.ledger.withdrawable)}</strong></p>
+          <p>Đã chốt: {baseUnits(data.ledger.earnedFinalized)} · Đã thực rút: {baseUnits(data.ledger.gymWithdrawn)}</p>
+          <p>Đang tranh chấp (vẫn khóa): {baseUnits(data.ledger.disputedLocked)}
+            {' · '}Buyer được duyệt hoàn chưa nhận: {baseUnits(data.ledger.refundable)}</p>
+          <Simulate session={session} title="Rút khoản earned"
+            intent={assessGymLedger(id, data.agreement.policy, data.ledger).merchantMayClaimEarned
+              ? { type: 'claimEarned', agreementId: id } : undefined} />
+        </> : <ErrorState>VAULT_LEDGER_MISMATCH · Không hiển thị số dư hay mô phỏng giải ngân
+          khi getters không nhất quán.</ErrorState>}
         <GymLink id={id}>Mở hợp đồng #{short(id)}</GymLink>
       </Card>
     </div>)}
@@ -449,6 +510,7 @@ function LiveGym({ route }: { route: GymRoute }) {
                 {' · '}<a className="inline-link" href={'/gym/payouts?agreementId=' + short(target.id)}>Giải ngân</a></p>
             </Card>
             <Ledger item={target.data} />
+            <KnownReceiptEvidence item={target.data} />
             {route.page === 'claim' && <ClaimForm id={target.id} item={target.data} session={snap.session} />}
             <ClaimHistory id={target.id} item={target.data} session={snap.session} />
           </PortalPage>
