@@ -90,11 +90,15 @@ export async function readSharedAgreement(
     unallocated,
   }
 
+  // Same-origin Vite/Compose proxy by default; an explicitly configured URL may override it.
+  // HTTP activity stays advisory: all monetary fields above come from pinned Vault reads.
+  const indexerUrl = import.meta.env.VITE_INDEXER_BASE_URL ||
+    (typeof window === 'undefined' ? undefined : window.location.origin + '/api/chain')
   const activity = await readIndexedActivity({
     chainId: session.chain.id,
     vault: session.vault,
     headBlock: session.head.number,
-  }, agreementId, import.meta.env.VITE_INDEXER_BASE_URL)
+  }, agreementId, indexerUrl)
 
   return {
     agreementId,
