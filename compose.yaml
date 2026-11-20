@@ -67,12 +67,35 @@ services:
   web:
     image: node:24.22.1-bookworm-slim
     working_dir: /app
+    environment:
+      OPENRESERVE_CATALOG_ORIGIN: http://catalog-evidence:3001
+      OPENRESERVE_CHAIN_ORIGIN: http://chain-indexer:3002
+      OPENRESERVE_ECONOMICS_ORIGIN: http://economics:3003
+      # Browser-side Fuji verification remains opt-in; never inject RPC credentials.
+      VITE_VAULT_CHAIN_ID: ${VITE_VAULT_CHAIN_ID:-}
+      VITE_VAULT_ADDRESS: ${VITE_VAULT_ADDRESS:-}
+      VITE_VAULT_DEPLOYMENT_BLOCK: ${VITE_VAULT_DEPLOYMENT_BLOCK:-}
+      VITE_MERCHANT_ADDRESS: ${VITE_MERCHANT_ADDRESS:-}
+    depends_on:
+      catalog-evidence:
+        condition: service_started
+      chain-indexer:
+        condition: service_started
+      economics:
+        condition: service_started
     volumes:
       - .:/app
       - web_dependencies:/app/node_modules
-    command: ["sh", "-c", "npm ci && npm run build --workspace @openreserve/web && npm run preview --workspace @openreserve/web -- --host 0.0.0.0 --port 4173 --strictPort"]
+    command: ["sh", "-c", "npm ci && npm run prebuild && npm run build --workspace @openreserve/web && npm run preview --workspace @openreserve/web -- --host 0.0.0.0 --port 4173 --strictPort"]
     ports:
       - "127.0.0.1:${WEB_PORT:-4173}:4173"
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:4173/customer').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      start_period: 60s
+      retries: 12
+    restart: unless-stopped
 volumes:
   web_dependencies:
   postgres_data:

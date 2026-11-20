@@ -60,3 +60,23 @@ test('invalid response and invalid URL are not confused with indexer downtime', 
   assert.equal((await readIndexedActivity(ctx, 1n, 'not-an-url', respond(valid()))).status, 'INVALID_RESPONSE')
   assert.equal((await readIndexedActivity(ctx, 0n, 'https://indexer.example', respond(valid()))).status, 'INVALID_RESPONSE')
 })
+
+test('D18-11 preview proxy preserves /api/chain path and never misroutes to Vite HTML', async () => {
+  let observed
+  const result = await readIndexedActivity(ctx, 1n, 'http://preview.example:4173/api/chain', async url => {
+    observed = url
+    return new Response(JSON.stringify(valid()), { status: 200, headers: { 'content-type': 'application/json' } })
+  })
+  assert.equal(observed, 'http://preview.example:4173/api/chain/v1/agreements/1/events')
+  assert.equal(result.status, 'FRESH')
+  let root
+  await readIndexedActivity(ctx, 1n, 'https://indexer.example', async url => {
+    root = url
+    return new Response(JSON.stringify(valid()), { status: 200, headers: { 'content-type': 'application/json' } })
+  })
+  assert.equal(root, 'https://indexer.example/v1/agreements/1/events')
+  const withSecret = await readIndexedActivity(ctx, 1n, 'https://user:password@indexer.example', async () => {
+    throw new Error('must never fetch URL containing credentials')
+  })
+  assert.equal(withSecret.status, 'INVALID_RESPONSE')
+})

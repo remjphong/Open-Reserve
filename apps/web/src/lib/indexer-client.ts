@@ -118,8 +118,14 @@ export async function readIndexedActivity(
   }
   let url: URL
   try {
-    url = new URL('/v1/agreements/' + agreementId.toString() + '/events', baseUrl)
-    if (!['https:', 'http:'].includes(url.protocol)) return invalid('Invalid indexer protocol.')
+    url = new URL(baseUrl)
+    if (!['https:', 'http:'].includes(url.protocol) || url.username || url.password) {
+      return invalid('Invalid indexer protocol or credentials.')
+    }
+    // Preserve the same-origin /api/chain prefix used by Compose/Vite preview.
+    url.pathname = url.pathname.replace(/\/+$/, '') + '/v1/agreements/' + agreementId.toString() + '/events'
+    url.search = ''
+    url.hash = ''
   } catch {
     return invalid('Invalid indexer URL.')
   }

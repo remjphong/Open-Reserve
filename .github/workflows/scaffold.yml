@@ -37,7 +37,66 @@ jobs:
       - run: npm run sdk:check
   compose:
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.22.1'
       - run: docker compose --env-file .env.example config --quiet
       - run: docker compose --env-file .env.example config --format json | node scripts/check-compose-indexer.mjs
+      - name: Build and launch independent runtime containers
+        run: docker compose --env-file .env.example up --build -d
+      - name: Three portals, proxy API, readiness and schema smoke
+        run: node scripts/compose-smoke.mjs
+      - name: Verify catalog and chain database roles cannot cross-connect
+        shell: bash
+        run: |
+          set -euo pipefail
+          if docker compose --env-file .env.example exec -T postgres sh -ec 'PGPASSWORD="$CATALOG_DB_PASSWORD" psql -h 127.0.0.1 -U catalog_user -d chain_db -Atqc "SELECT 1"' >/dev/null 2>&1; then
+            echo 'FAIL catalog_user can connect to chain_db'; exit 1
+          fi
+          if docker compose --env-file .env.example exec -T postgres sh -ec 'PGPASSWORD="$CHAIN_DB_PASSWORD" psql -h 127.0.0.1 -U chain_user -d catalog_db -Atqc "SELECT 1"' >/dev/null 2>&1; then
+            echo 'FAIL chain_user can connect to catalog_db'; exit 1
+          fi
+          echo 'PASS cross-database connection denied for both service roles'
+      - name: Recreate only Economics and preserve other containers
+        shell: bash
+        run: |
+          set -euo pipefail
+          catalog_before="$(docker compose --env-file .env.example ps -q catalog-evidence)"
+          chain_before="$(docker compose --env-file .env.example ps -q chain-indexer)"
+          postgres_before="$(docker compose --env-file .env.example ps -q postgres)"
+          economics_before="$(docker compose --env-file .env.example ps -q economics)"
+          test -n "$catalog_before" && test -n "$chain_before" && test -n "$postgres_before" && test -n "$economics_before"
+          docker compose --env-file .env.example up -d --no-deps --build --force-recreate economics
+          test "$catalog_before" = "$(docker compose --env-file .env.example ps -q catalog-evidence)"
+          test "$chain_before" = "$(docker compose --env-file .env.example ps -q chain-indexer)"
+          test "$postgres_before" = "$(docker compose --env-file .env.example ps -q postgres)"
+          test "$economics_before" != "$(docker compose --env-file .env.example ps -q economics)"
+          echo 'PASS Economics isolated restart, Catalog/Indexer/Postgres IDs stable'
+      - run: node scripts/compose-smoke.mjs
+      - name: Stop Indexer and verify proxy fails closed without breaking other portals
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker compose --env-file .env.example stop chain-indexer
+          node scripts/compose-smoke.mjs --indexer-down
+          docker compose --env-file .env.example start chain-indexer
+          node scripts/compose-smoke.mjs
+      - name: Save bounded Compose evidence (no environment or credentials)
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p ci-artifacts/d18-11
+          docker compose --env-file .env.example ps > ci-artifacts/d18-11/compose-ps.txt 2>&1 || true
+          docker compose --env-file .env.example logs --no-color --tail=100 > ci-artifacts/d18-11/compose-logs.txt 2>&1 || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: d18-11-compose-runtime
+          path: ci-artifacts/d18-11/
+          retention-days: 7
+      - name: Stop Compose
+        if: always()
+        run: docker compose --env-file .env.example down --remove-orphans
