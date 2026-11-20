@@ -16,6 +16,7 @@
    - reported deposit 900 base units, startAt 1795182500, endAt 1795182770, challenge 60.
    - provenance **USER_PROVIDED_CAST_RECEIPT_AND_RPC_STATE + WALLET2_REPORTED_VERIFIED**; not a fresh Worker4 RPC check.
    - **No subsequent TIME_ACCESS finalize, earned, withdrawal, authorized refund or payout receipt has been provided for this branch**. Current getters, if they change later, are not rewritten from this historical snapshot; no wallet write is initiated here.
+   - Receipt is associated with current Agreement #2 **only after** comparing pinned getter's buyer/merchant/policy/deposit/startAt/endAt/challengeWindow with accepted TX1 record; mismatch displays `TIME_TX1_IDENTITY_NOT_VERIFIED` instead of historical receipt linkage.
 6. Pending/confirmed/finalized/withdrawn are distinct. `disputedLocked` is not withdrawable. `remainingLocked=903` is not `refundable=903`. `INDEXER_ACTIVITY` is advisory and its failure cannot prove VERIFIED_EMPTY.
 7. Existing `GYM_CHAIN_WRITES_ENABLED=false`, simulated-only controls and event fencing stay unchanged. The narrow Gym reconnect-list P2 has not been modified without a fresh reproducer; no risky unrelated refactor.
 
