@@ -8,6 +8,9 @@ import {
 import { errorMessage, provider, sameAddress, walletSession, type Session } from '../lib/customer-chain'
 import { readSharedAgreement } from '../lib/shared-ledger'
 import {
+  auditKnownOperationsSnapshot, knownOperations, knownPortalPaths, reviewedTimeTx1,
+} from '../lib/operations-known-audit'
+import {
   isVerifiedResolver, parseOperationsRoute, readOperationsEvidence,
   type EvidenceResult, type OperationsRoute,
 } from '../lib/operations-chain'
@@ -16,7 +19,7 @@ type LiveRoute = Extract<OperationsRoute, { page: 'detail' | 'claim' }>
 type Shared = Awaited<ReturnType<typeof readSharedAgreement>>
 type OpsClaim = { state: number; evidenceHash: string; amount: bigint; awardedToBuyer: bigint;
   awardedToGym: bigint; challengeEndsAt: bigint }
-type OpsValue = { session: Session; data: Shared; claim?: OpsClaim; claimError?: string }
+type OpsValue = { session: Session; data: Shared; claim?: OpsClaim; claimError?: string; routeKey: string }
 const base = (amount: bigint) => amount.toLocaleString('vi-VN') + ' đơn vị nhỏ nhất MRES (không phải VNĐ)'
 const claimStates = ['Không có', 'Đã đề xuất', 'Đã xác nhận', 'Đang phản đối', 'Đã chốt', 'Đã phân xử', 'Đã hủy']
 const fixtureLabel = 'MINH HỌA · DEMO_FIXTURE · KHÔNG PHẢI DỮ LIỆU FUJI'
@@ -50,15 +53,30 @@ function Browse({ page }: { page: 'overview' | 'agreements' | 'disputes' }) {
   return <PortalPage breadcrumb="Vận hành / Fuji — chỉ đọc" title={title}>
     <p className="caption">Không quét toàn bộ lịch sử, không suy ra số hợp đồng hoặc số tranh chấp từ danh sách đang hiển thị.</p>
     <div className="grid">
-      {page !== 'disputes' && <OverviewCard title="Agreement #1 · Fuji" href="/operations/agreements/1"
-        link="Kiểm toán sổ cái từ Vault">
-        <p>Đọc trực tiếp trạng thái Vault khi có ví trên đúng mạng. Chưa hiển thị tiền khi chưa xác minh.</p>
-      </OverviewCard>}
-      {page !== 'agreements' && <OverviewCard title="Phản đối / đề nghị #1" href="/operations/disputes/1?claimId=1"
-        link="Đọc trạng thái claim cụ thể">
-        <p>Đọc claim ID trực tiếp, không coi đó là danh sách tranh chấp đầy đủ.</p>
-      </OverviewCard>}
+      {page !== 'disputes' && knownOperations.map(known =>
+        <OverviewCard key={known.id.toString()} title={known.label}
+          href={knownPortalPaths(known.id)!.operations} link="Kiểm toán sổ cái từ Vault">
+          <p>Đọc trực tiếp Agreement #{known.id.toString()} trên Fuji ở một block được ghim.
+            Không suy ra số dư hiện tại từ lịch sử giao dịch.</p>
+        </OverviewCard>)}
+      {page !== 'agreements' && knownOperations.map(known =>
+        <OverviewCard key={'claim-' + known.id} title={'Claim theo ID · Agreement #' + known.id}
+          href={knownPortalPaths(known.id)!.claim} link="Thử đọc claim ID #1">
+          <p>Claim #1 chỉ là ID cần kiểm tra; không khẳng định claim tồn tại, bị phản đối
+            hay có quyền giải ngân. Không suy ra lịch sử đã quét đầy đủ.</p>
+        </OverviewCard>)}
     </div>
+    <Section>
+      <h2>Cùng Vault · ba portal</h2>
+      <p className="caption">Điều hướng tới cùng Agreement ID trên Customer, Gym và Operations.
+        Đây là liên kết đối chiếu, KHÔNG phải bằng chứng đã đăng nhập đủ ba ví.</p>
+      {knownOperations.map(known => <p key={'cross-' + known.id.toString()}>
+        <strong>{known.label}</strong>{' · '}
+        <a className="inline-link" href={knownPortalPaths(known.id)!.customer}>Customer</a>{' · '}
+        <a className="inline-link" href={knownPortalPaths(known.id)!.gym}>Gym</a>{' · '}
+        <a className="inline-link" href={knownPortalPaths(known.id)!.operations}>Operations</a>
+      </p>)}
+    </Section>
     <Section>
       <p className="caption">{fixtureLabel}</p>
       <a className="inline-link" href="/operations/agreements/OR-024">Xem sổ cái mẫu</a>
@@ -99,7 +117,7 @@ function useLiveData(route: LiveRoute) {
       if (accounts.length === 0 || !sameAddress(accounts[0], session.account) || chainId !== 43113) {
         throw new Error('Ví hoặc mạng đã thay đổi trong khi đọc. Hãy kết nối lại.')
       }
-      if (current === revision.current) setValue({ session, data, claim, claimError })
+      if (current === revision.current) setValue({ session, data, claim, claimError, routeKey })
     } catch (error) {
       if (current === revision.current) setMessage(errorMessage(error))
     } finally {
@@ -128,7 +146,7 @@ function useLiveData(route: LiveRoute) {
     }
   }, [routeKey])
 
-  return { value, loading, message, refresh }
+  return { value: value?.routeKey === routeKey ? value : undefined, loading, message, refresh }
 }
 
 function EvidencePanel({ agreementId, claimId, hash }: { agreementId: bigint; claimId: bigint; hash: string }) {
@@ -167,27 +185,78 @@ function EvidencePanel({ agreementId, claimId, hash }: { agreementId: bigint; cl
 
 function Ledger({ data }: { data: Shared }) {
   const a = data.ledger
-  const invariant = a.deposited === a.gymWithdrawn + a.buyerRefunded + a.remainingLocked
+  const audited = auditKnownOperationsSnapshot(data)
   return <Section>
     <h2>Số dư tài chính · Vault</h2>
     <p className="caption customer-wrap">VAULT_READ_CONTRACT · Fuji chain {data.chainId} · Agreement #{data.agreementId.toString()}
       {' · '}Block {data.blockNumber.toString()} · {data.vault}</p>
-    <dl className="money-list">
-      {([
-        ['Đã nạp', a.deposited], ['Đã chốt earned', a.earnedFinalized],
-        ['Gym đã rút', a.gymWithdrawn], ['Gym có thể rút', a.withdrawable],
-        ['Buyer đã nhận hoàn', a.buyerRefunded], ['Được duyệt hoàn, chưa nhận', a.refundable],
-        ['Vault còn khóa', a.remainingLocked], ['Đang khóa vì tranh chấp', a.disputedLocked],
-        ['Chưa phân bổ', a.unallocated],
-      ] as const).map(([label, amount]) => <div key={label}><dt>{label}</dt>
-        <dd className="customer-wrap">{base(amount)}</dd></div>)}
-    </dl>
-    <p className="caption">{invariant ? 'I1 LOCAL CHECK PASS' : 'I1 MISMATCH — KHÔNG NGHIỆM THU'}
-      {' · '}deposited = gymWithdrawn + buyerRefunded + remainingLocked.</p>
-    <p className="caption">Đang khóa không đồng nghĩa được hoàn; disputedLocked không phải withdrawable.</p>
-    <p>Buyer: <span className="customer-wrap">{data.agreement.buyer}</span></p>
-    <p>Merchant: <span className="customer-wrap">{data.agreement.merchant}</span></p>
-    <p>Policy: {data.agreement.policy === 0 ? 'PER_SESSION' : 'TIME_ACCESS'} · Terms: {data.agreement.termsHash}</p>
+    {audited.status !== 'IDENTITY_AND_LEDGER_MATCHED' ? <>
+      <ErrorState>NOT_VERIFIED · {audited.reason} — Không hiển thị tiền hoặc suy ra quyền lợi
+        khi danh tính agreement, terms hoặc I1/getter không khớp.</ErrorState>
+    </> : <>
+      <p className="caption">SHARED_VAULT_IDENTITY_AND_GETTERS_MATCHED · Kiểm tra một
+        pinned Vault snapshot dùng chung ở cấp mã nguồn, CHƯA xác minh ba phiên ví trình duyệt.</p>
+      <dl className="money-list">
+        {([
+          ['Đã nạp (deposited)', a.deposited], ['Đã chốt (earnedFinalized)', a.earnedFinalized],
+          ['Gym đã thực rút (gymWithdrawn)', a.gymWithdrawn],
+          ['Gym có thể rút (withdrawable)', a.withdrawable],
+          ['Buyer đã nhận hoàn (buyerRefunded)', a.buyerRefunded],
+          ['Đã duyệt hoàn (refundAuthorized)', a.refundAuthorized],
+          ['Được duyệt hoàn, chưa nhận (refundable)', a.refundable],
+          ['Vault còn giữ (remainingLocked)', a.remainingLocked],
+          ['Đang khóa vì tranh chấp (disputedLocked)', a.disputedLocked],
+          ['Chưa phân bổ (unallocated)', a.unallocated],
+        ] as const).map(([label, amount]) => <div key={label}><dt>{label}</dt>
+          <dd className="customer-wrap">{base(amount)}</dd></div>)}
+      </dl>
+      <p className="caption">I1 + DERIVED GETTERS PASS · deposited = gymWithdrawn + buyerRefunded
+        + remainingLocked; withdrawable = earnedFinalized - gymWithdrawn;
+        refundable = refundAuthorized - buyerRefunded.</p>
+      <p className="caption">Đang khóa không đồng nghĩa được hoàn. Đã chốt không đồng nghĩa đã rút.
+        disputedLocked không phải withdrawable; tiền chỉ được duyệt hoàn khi refundable từ Vault {'>'} 0.</p>
+      <p>Buyer: <span className="customer-wrap">{data.agreement.buyer}</span></p>
+      <p>Merchant: <span className="customer-wrap">{data.agreement.merchant}</span></p>
+      <p>Policy: {data.agreement.policy === 0 ? 'PER_SESSION' : 'TIME_ACCESS'}
+        {' · '}Terms: <span className="customer-wrap">{data.agreement.termsHash}</span></p>
+    </>}
+  </Section>
+}
+
+function KnownDeposit({ data }: { data: Shared }) {
+  if (data.agreementId !== reviewedTimeTx1.agreementId) return null
+  const audited = auditKnownOperationsSnapshot(data)
+  return <Section>
+    <h2>TIME_ACCESS #2 · Biên nhận nạp được báo cáo</h2>
+    {audited.status !== 'IDENTITY_AND_LEDGER_MATCHED' ? <ErrorState>
+      TIME_TX1_IDENTITY_NOT_VERIFIED · Không gắn hồ sơ TX1 với Agreement #2 khi metadata
+      hoặc nguồn Vault không khớp.</ErrorState> : <>
+      <p className="caption customer-wrap">{reviewedTimeTx1.provenance}
+        {' · '}CHỈ TX1 DEPOSIT · Không phải Worker 4 mới truy vấn receipt.</p>
+      <p>Giao dịch mở Agreement #2 tại block {reviewedTimeTx1.blockNumber.toString()},
+        số tiền nạp lịch sử {base(reviewedTimeTx1.deposited)}.</p>
+      <p>TIME_ACCESS: {reviewedTimeTx1.startAt.toString()} đến {reviewedTimeTx1.endAt.toString()}
+        {' · '}challenge {reviewedTimeTx1.challengeWindow.toString()} giây.</p>
+      <p><a className="inline-link" target="_blank" rel="noopener noreferrer"
+        href={'https://build.avax.network/explorer/fuji/c-chain/tx/' + reviewedTimeTx1.hash}>
+        Xem biên nhận TX1 trên Fuji</a></p>
+      <p className="caption">TX1 chỉ chứng minh nguồn báo cáo nạp; không chứng minh TX2,
+        chốt claim, earned withdrawal hoặc hoàn tiền. Owner ONE_TX_GO của candidate
+        thay đổi đang được CTO/Wallet 2 đối chiếu riêng.</p>
+    </>}
+  </Section>
+}
+
+function OtherPortalLinks({ id }: { id: bigint }) {
+  const paths = knownPortalPaths(id)
+  if (!paths) return null
+  return <Section>
+    <h2>Đối chiếu cùng Agreement #{id.toString()}</h2>
+    <p className="caption">Các portal dùng cùng Vault và shared read helper; phải đăng nhập
+      từng vai thực tế để so sánh cùng block. Các liên kết không chứng minh phiên ví đã xác minh.</p>
+    <p><a className="inline-link" href={paths.customer}>Customer · #{id.toString()}</a>
+      {' · '}<a className="inline-link" href={paths.gym}>Gym · #{id.toString()}</a>
+      {' · '}<a className="inline-link" href={paths.operations}>Operations · #{id.toString()}</a></p>
   </Section>
 }
 
@@ -217,6 +286,8 @@ function Live({ route }: { route: LiveRoute }) {
   const state = useLiveData(route)
   const snap = state.value
   const id = route.id.toString()
+  const audited = snap ? auditKnownOperationsSnapshot(snap.data) : undefined
+  const accepted = audited?.status === 'IDENTITY_AND_LEDGER_MATCHED'
   const role = snap ? snap.data.role : 'unverified'
   const resolver = snap ? isVerifiedResolver(snap.session, role) : false
   return <PortalPage breadcrumb="Vận hành / Fuji / Read-only" title={
@@ -238,7 +309,11 @@ function Live({ route }: { route: LiveRoute }) {
     </Section>
     {snap && <>
       <Ledger data={snap.data} />
-      {route.page === 'claim' && <Section>
+      <OtherPortalLinks id={route.id} />
+      <KnownDeposit data={snap.data} />
+      {!accepted && <ErrorState>NOT_VERIFIED · Claim, Indexer và số dư không được
+        suy ra từ agreement có metadata/getter không khớp.</ErrorState>}
+      {accepted && route.page === 'claim' && <Section>
         <h2>Trạng thái tranh chấp / claim</h2>
         <p>Vault disputedLocked tại block: {base(snap.data.ledger.disputedLocked)}</p>
         {route.claimId ? <>
@@ -254,7 +329,7 @@ function Live({ route }: { route: LiveRoute }) {
           href={'/operations/disputes/' + id + '?claimId=1'}>đề nghị #1</a>.
           Chưa xác minh danh sách claim đầy đủ.</p>}
       </Section>}
-      <Activity data={snap.data} />
+      {accepted && <Activity data={snap.data} />}
       <Section>
         <h2>Ranh giới quyền Resolver</h2>
         <p>{resolver ? 'Địa chỉ ví đang kết nối trùng resolver của Vault.' :
