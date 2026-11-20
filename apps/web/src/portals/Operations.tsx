@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
-import type { Claim } from '@openreserve/contracts-sdk'
 import { AgreementReceipt } from '../design-system/receipt'
 import { agreement as fixture } from '../demo/agreement'
 import {
@@ -15,7 +14,9 @@ import {
 
 type LiveRoute = Extract<OperationsRoute, { page: 'detail' | 'claim' }>
 type Shared = Awaited<ReturnType<typeof readSharedAgreement>>
-type OpsValue = { session: Session; data: Shared; claim?: Claim; claimError?: string }
+type OpsClaim = { state: number; evidenceHash: string; amount: bigint; awardedToBuyer: bigint;
+  awardedToGym: bigint; challengeEndsAt: bigint }
+type OpsValue = { session: Session; data: Shared; claim?: OpsClaim; claimError?: string }
 const base = (amount: bigint) => amount.toLocaleString('vi-VN') + ' đơn vị nhỏ nhất MRES (không phải VNĐ)'
 const claimStates = ['Không có', 'Đã đề xuất', 'Đã xác nhận', 'Đang phản đối', 'Đã chốt', 'Đã phân xử', 'Đã hủy']
 const fixtureLabel = 'MINH HỌA · DEMO_FIXTURE · KHÔNG PHẢI DỮ LIỆU FUJI'
@@ -82,7 +83,7 @@ function useLiveData(route: LiveRoute) {
       const session = await walletSession(connect)
       if (session.chain.id !== 43113) throw new Error('NOT_VERIFIED · Operations chỉ đọc Fuji 43113.')
       const data = await readSharedAgreement(session, route.id)
-      let claim: Claim | undefined
+      let claim: OpsClaim | undefined
       let claimError: string | undefined
       if (route.page === 'claim' && route.claimId) {
         try {
