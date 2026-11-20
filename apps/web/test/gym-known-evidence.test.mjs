@@ -36,7 +36,7 @@ test('PT #1 reported snapshot is not financial authority; only getter values qua
   assert.equal(pt.remainingLocked, 903n)
   assert.equal(pt.refundable, 0n)
   assert.equal(wallet1PtReport.length, 4)
-  assert.equal(gymKnownEvidence[1].reportedTx[3].method, 'claimEarned')
+  assert.equal(wallet1PtReport[3].method, 'claimEarned')
 
   // A later valid claim/authorization legitimately changes the live ledger,
   // without invalidating historic Wallet1 receipts or restoring old numbers.
