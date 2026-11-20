@@ -442,9 +442,14 @@ function Payouts({ entries, session, onlyId }: { entries: NonNullable<GymSnapsho
     {selected.map(({ id, data }) => <div key={short(id)}>
       <Card><h2>Hợp đồng #{short(id)}</h2><VaultLabel item={data} />
         <p><strong>Có thể rút: {baseUnits(data.ledger.withdrawable)}</strong></p>
-        <p>Đã chốt: {baseUnits(data.ledger.earnedFinalized)} · Đang tranh chấp: {baseUnits(data.ledger.disputedLocked)}</p>
+        <p>Đã chốt: {baseUnits(data.ledger.earnedFinalized)} · Đã thực rút: {baseUnits(data.ledger.gymWithdrawn)}</p>
+        <p>Đang tranh chấp (vẫn khóa): {baseUnits(data.ledger.disputedLocked)}
+          {' · '}Buyer được duyệt hoàn chưa nhận: {baseUnits(data.ledger.refundable)}</p>
+        {!assessGymLedger(id, data.agreement.policy, data.ledger).valid &&
+          <ErrorState>VAULT_LEDGER_MISMATCH · Không mô phỏng giải ngân khi số dư không nhất quán.</ErrorState>}
         <Simulate session={session} title="Rút khoản earned"
-          intent={data.ledger.withdrawable > 0n ? { type: 'claimEarned', agreementId: id } : undefined} />
+          intent={assessGymLedger(id, data.agreement.policy, data.ledger).merchantMayClaimEarned
+            ? { type: 'claimEarned', agreementId: id } : undefined} />
         <GymLink id={id}>Mở hợp đồng #{short(id)}</GymLink>
       </Card>
     </div>)}
@@ -493,6 +498,7 @@ function LiveGym({ route }: { route: GymRoute }) {
                 {' · '}<a className="inline-link" href={'/gym/payouts?agreementId=' + short(target.id)}>Giải ngân</a></p>
             </Card>
             <Ledger item={target.data} />
+            <KnownReceiptEvidence item={target.data} />
             {route.page === 'claim' && <ClaimForm id={target.id} item={target.data} session={snap.session} />}
             <ClaimHistory id={target.id} item={target.data} session={snap.session} />
           </PortalPage>
