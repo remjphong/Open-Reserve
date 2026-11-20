@@ -603,6 +603,35 @@ Next: OWNER_AND_REVIEWER_2_DOCUMENTATION_REVIEW.
 PlanB: none
 ```
 
+
+```text
+[2026-11-20 ICT] TASK=D18-04 STATUS=TECHNICALLY_COMPLETED_PER_WALLET1
+Owner: Owner-operated Fuji signing; Wallet 1 reported review of four successful receipts; CTO 2 inherited report, not an independent fresh RPC proof.
+Chain: Avalanche Fuji 43113; PT Agreement #1; Token and Vault unchanged.
+TX1: proposeSession 0x9dcca6c5feda36ef151fa5a7ad5cc9d3e59785432260a2182814989f18eeb01b block 61373562 status 1.
+TX2: confirmSession 0xf90b5d3c9e24827600e3102e1afc36ed1b55889f45ce106ffbeb8eab179f106f block 61374892 status 1.
+TX3: finalizeClaim 0xd84107f90027f7e90e3c61bdc74dceb9bc018625c8c291ec7a6973b807488ac5 block 61375443 status 1.
+TX4: claimEarned 0x4b3f87cb99bc297fb8a57779fbc50c6c3e1f32fc7d0a6a5dc71dae5c84392273 block 61376149 status 1.
+Result per Wallet 1 receipts: earnedFinalized=100, gymWithdrawn=100, vault balance=903 token base units after first PT payout. Token has 18 decimals; base units are not MRES whole tokens or VND.
+Evidence provenance: WALLET_1_REPORTED_RECEIPTS_VERIFIED; CTO 2 did NOT re-broadcast, sign or independently re-query Fuji. Reviewer 2 earlier D18-04 HOLD snapshot predates these transactions. Evidence hash is owner demo attestation, not independently verified gym attendance.
+Limitations: Owner's separate formal State Log acceptance is not claimed; D18-05 TIME_ACCESS and D18-06 authorized refund remain NOT_VERIFIED. Four PT receipts are not four D18-GATE transaction groups.
+Next: Wallet 2 D18-05 then D18-06, exact Owner ONE_TX_GO per transaction; no PT retry.
+PlanB: none
+```
+
+```text
+[2026-11-20 ICT] TASK=D18-11 STATUS=TECHNICALLY_ACCEPTED_WITH_LIMITATIONS
+Owner: CTO 2 direct exact-HEAD PR review and controlled merge within Owner-delegated authority; no wallet action.
+PR: https://github.com/remjphong/Open-Reserve/pull/26
+Reviewed candidate HEAD: cceccb3b6e206e05bee12fe7bb60d62d052eaeb9
+Merge: bff2ff53bb7e1d858a0a77411f0fdcfbca9d2e45
+CI: https://github.com/remjphong/Open-Reserve/actions/runs/44722505570 SUCCESS workspaces, contracts and real Docker Compose (3/3 jobs); inspected run logs.
+Proof: source patch 10 paths; 6 SPA routes HTTP 200; Catalog/Economics/Indexer process liveness; DB role cross-connect denial; Economics isolated restart; Indexer stopped/fail-closed/restarted; real proxy schema and error checks.
+Limitations: no Fuji RPC configured in Compose CI; Indexer /ready=503 is correct degraded state; full historical sync NOT_VERIFIED; browser-signed 3-role E2E and real desktop/mobile rendered QA NOT_VERIFIED; one npm HIGH advisory reported in CI remains to triage before D20 freeze.
+Next: Worker 4 D18-09 Operations then D19/D20; Wallet 2 D18-05/D18-06 independent lane.
+PlanB: none
+```
+
 ---
 
 ## I. NON-NEGOTIABLE SAFETY / QUALITY
