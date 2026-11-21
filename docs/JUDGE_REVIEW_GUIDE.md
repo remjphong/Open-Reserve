@@ -10,6 +10,8 @@
 4. **Check reproducibility:** [CI run 44848508341](https://github.com/remjphong/Open-Reserve/actions/runs/44848508341) — `workspaces`, `contracts` and `compose` jobs success at PR #37 candidate `d1f865b9cf15ac6343cb4c285ab5e3cf6c9bd780`; [independent source review](https://github.com/remjphong/Open-Reserve/issues/35#issuecomment-7055181219) is **PASS_WITH_LIMITATIONS**, not a security audit.
 5. **Check on-chain/release report:** [Wallet2 refund receipts](https://github.com/remjphong/Open-Reserve/issues/27#issuecomment-7053821341) and [CTO six-screen bounded acceptance](https://github.com/remjphong/Open-Reserve/issues/27#issuecomment-7055805314). Raw latest Owner screenshots are **not uploaded** to repo.
 
+6. **Review the future scope without confusing it with shipped code:** [Cross-industry vision & evidence-gated scaling roadmap](PRODUCT_VISION_AND_SCALE_ROADMAP.md) distinguishes the gym PT10 prototype from boutique ten-class product discovery, uniform nonmedical wellness experiments and policies not built. It explicitly documents the merchant-silent termination limitation, TIME_ACCESS offline-availability evidence gap and provider day-0 cash gap; do not count roadmap items as existing smart-contract capabilities.
+
 > **First-click caveat:** at PR creation the GitHub default branch was `main` with a one-line README. Implemented code lives on `unihack-final`. Worker4 **has not** changed default branch or rewritten `main`; Owner must approve the setting after independent docs review.
 
 ## 2. Official evaluation axes → exact evidence (no invented weights)
