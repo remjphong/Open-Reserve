@@ -355,6 +355,13 @@ function Ledger({ item }: { item: SharedData }) {
   </Card>
 }
 
+const ptReceiptLabels = {
+  proposeSession: { title: 'Phòng tập đề xuất buổi PT', icon: 'storefront' },
+  confirmSession: { title: 'Khách xác nhận buổi PT', icon: 'person' },
+  finalizeClaim: { title: 'Chốt khoản cho phòng tập', icon: 'record' },
+  claimEarned: { title: 'Phòng tập đã rút tiền', icon: 'wallet' },
+} as const
+
 function KnownReceiptEvidence({ item }: { item: SharedData }) {
   const check = assessGymLedger(item.agreementId, item.agreement.policy, item.ledger)
   if (check.source.status !== 'KNOWN') return null
@@ -365,29 +372,34 @@ function KnownReceiptEvidence({ item }: { item: SharedData }) {
       hồ sơ nguồn.</ErrorState></Card>
   }
   const source = check.source.evidence
+  const isPt = item.agreementId === 1n
+  const receipts = isPt ? wallet1PtReport.map(tx => ({ ...tx, ...ptReceiptLabels[tx.method] })) :
+    [{ ...wallet2TimeDepositReport, title: 'Nạp tiền mở hợp đồng', icon: 'wallet' }] as const
   return <Card>
-    <h2>Biên nhận tham chiếu · Agreement #{short(item.agreementId)}</h2>
-    <p className="caption customer-wrap">PROVENANCE: {source.provenance}
-      {' · '}Hồ sơ được báo cáo, không phải bằng chứng RPC vừa đọc tại trình duyệt Gym.</p>
-    <ol>{(item.agreementId === 1n ? wallet1PtReport : [{
-        step: 'Nạp TIME_ACCESS', hash: wallet2TimeDepositReport.hash,
-        block: wallet2TimeDepositReport.block,
-      }]).map(tx =>
-      <li key={tx.hash} className="customer-wrap">
-      {tx.step} · block {tx.block.toString()}
-      {' · '}<a className="inline-link" href={'https://build.avax.network/explorer/fuji/c-chain/tx/' + tx.hash}
-        target="_blank" rel="noopener noreferrer">Mở biên nhận trên Fuji</a>
-    </li>)}</ol>
-    {item.agreementId === wallet2TimeDepositReport.agreementId && <p className="caption">
-      Wallet 2 đã báo cáo TX1 nạp 900 đơn vị nhỏ nhất MRES cho TIME_ACCESS #2;
-      KHÔNG có biên nhận riêng về earned/finalize/withdraw/refund trong hồ sơ này.
-      Số dư hiện tại chỉ lấy từ Vault ở phần trên, không lấy từ giá trị nạp lịch sử.</p>}
-    {item.agreementId === 1n && <p className="caption">
-      Bốn TX PT do Wallet 1 báo cáo. Các trường earnedFinalized/gymWithdrawn hiện tại
-      chỉ được xác nhận bởi Vault; biên nhận tham chiếu không xác minh buổi tập thực tế.</p>}
-    {item.activity.status !== 'FRESH' && <p className="caption">
-      INDEXER_ACTIVITY={item.activity.status}. Không suy ra lịch sử đã quét đầy đủ hoặc đã trống.
-      Các số tiền từ Vault không phụ thuộc trạng thái này.</p>}
+    <h2>Biên nhận tham chiếu · Hợp đồng #{short(item.agreementId)}</h2>
+    <p className="caption">{isPt ? 'Theo hồ sơ Wallet 1.' : 'Theo hồ sơ Wallet 2, chỉ có giao dịch nạp.'}
+      {' '}Số dư hiện tại được đọc riêng từ Vault.</p>
+    <ol className="d22-receipt-list" role="list">
+      {receipts.map(tx => <li className="d22-receipt-row" key={tx.hash}>
+        <span className="d22-receipt-icon"><Icon name={tx.icon} /></span>
+        <div><strong>{tx.title}</strong><small>Block {tx.block.toString()}</small></div>
+        <a className="or-action or-icon-action" href={'https://build.avax.network/explorer/fuji/c-chain/tx/' + tx.hash}
+          target="_blank" rel="noopener noreferrer" aria-label={'Mở biên nhận trên Fuji: ' + tx.title}
+          title={'Mở biên nhận trên Fuji: ' + tx.title}><Icon name="receipt" /></a>
+      </li>)}
+    </ol>
+    <details className="d22-receipt-source">
+      <summary>Nguồn và phạm vi biên nhận</summary>
+      <p className="caption customer-wrap"><code>{source.provenance}</code></p>
+      <p className="caption">Đây là hồ sơ báo cáo, chưa tra cứu lại biên nhận bằng RPC tại trang này.
+        {isPt ? ' Biên nhận không xác minh buổi tập thực tế.' :
+          ' Hồ sơ nạp không có biên nhận riêng về chốt, rút hoặc hoàn tiền.'}</p>
+    </details>
+    {item.activity.status !== 'FRESH' && <div className="d22-receipt-note">
+      <Icon name="info" />
+      <span><strong>Nhật ký Indexer: {indexerStatusLabels[item.activity.status]}.</strong>{' '}
+        Lịch sử có thể thiếu; số dư vẫn lấy từ Vault.</span>
+    </div>}
   </Card>
 }
 

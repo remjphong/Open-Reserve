@@ -252,26 +252,35 @@ function Ledger({ data }: { data: Shared }) {
   </Section>
 }
 
+const receiptTime = new Intl.DateTimeFormat('vi-VN', {
+  dateStyle: 'short', timeStyle: 'medium', timeZone: 'Asia/Ho_Chi_Minh',
+})
+
 function KnownDeposit({ data }: { data: Shared }) {
   if (data.agreementId !== reviewedTimeTx1.agreementId) return null
   const audited = auditKnownOperationsSnapshot(data)
   return <Section>
-    <h2>TIME_ACCESS #2 · Biên nhận nạp được báo cáo</h2>
+    <h2>Biên nhận nạp · Hợp đồng #2</h2>
     {audited.status !== 'IDENTITY_AND_LEDGER_MATCHED' ? <ErrorState>
       TIME_TX1_IDENTITY_NOT_VERIFIED · Không gắn hồ sơ TX1 với Agreement #2 khi metadata
       hoặc nguồn Vault không khớp.</ErrorState> : <>
-      <p className="caption customer-wrap">{reviewedTimeTx1.provenance}
-        {' · '}CHỈ TX1 DEPOSIT · Không phải Worker 4 mới truy vấn receipt.</p>
-      <p>Giao dịch mở Agreement #2 tại block {reviewedTimeTx1.blockNumber.toString()},
-        số tiền nạp lịch sử {base(reviewedTimeTx1.deposited)}.</p>
-      <p>TIME_ACCESS: {reviewedTimeTx1.startAt.toString()} đến {reviewedTimeTx1.endAt.toString()}
-        {' · '}challenge {reviewedTimeTx1.challengeWindow.toString()} giây.</p>
-      <p><a className="inline-link" target="_blank" rel="noopener noreferrer"
+      <p className="caption">Giao dịch mở gói theo thời gian, theo hồ sơ Wallet 2.</p>
+      <MetadataList label="Giao dịch nạp được báo cáo" fields={[
+        { label: 'Số tiền đã nạp', icon: 'wallet', value: base(reviewedTimeTx1.deposited) },
+        { label: 'Block ghi nhận', icon: 'layers', value: reviewedTimeTx1.blockNumber.toString() },
+        { label: 'Bắt đầu (UTC+7)', icon: 'clock', value: receiptTime.format(Number(reviewedTimeTx1.startAt) * 1000) },
+        { label: 'Kết thúc (UTC+7)', icon: 'clock', value: receiptTime.format(Number(reviewedTimeTx1.endAt) * 1000) },
+        { label: 'Thời gian phản đối', icon: 'scale', value: reviewedTimeTx1.challengeWindow.toString() + ' giây' },
+      ]} />
+      <a className="or-action" target="_blank" rel="noopener noreferrer"
         href={'https://build.avax.network/explorer/fuji/c-chain/tx/' + reviewedTimeTx1.hash}>
-        Xem biên nhận TX1 trên Fuji</a></p>
-      <p className="caption">TX1 chỉ chứng minh nguồn báo cáo nạp; không chứng minh TX2,
-        chốt claim, earned withdrawal hoặc hoàn tiền. Owner ONE_TX_GO của candidate
-        thay đổi đang được CTO/Wallet 2 đối chiếu riêng.</p>
+        <Icon name="receipt" />Xem biên nhận nạp trên Fuji</a>
+      <details className="d22-receipt-source">
+        <summary>Nguồn và phạm vi biên nhận</summary>
+        <p className="caption customer-wrap"><code>{reviewedTimeTx1.provenance}</code></p>
+        <p className="caption">Trang dùng biên nhận đã báo cáo, chưa tra cứu lại bằng RPC.
+          Hồ sơ này chỉ ghi nhận giao dịch nạp, chưa chứng minh việc chốt đề nghị, rút tiền hay hoàn tiền.</p>
+      </details>
     </>}
   </Section>
 }
