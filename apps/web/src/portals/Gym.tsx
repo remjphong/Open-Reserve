@@ -1,3 +1,4 @@
+import './gym-ops-d22.css'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { agreement as fixtureAgreement } from '../demo/agreement'
 import { DisabledAction, EmptyState, ErrorState, LoadingSkeleton, MoneyFigure, PortalPage } from '../design-system/portal'
@@ -275,6 +276,28 @@ function WalletPanel({ state }: { state: GymControl }) {
   </Card>
 }
 
+function AgreementSummary({ item }: { item: SharedData }) {
+  const { agreement, ledger } = item
+  const check = assessGymLedger(item.agreementId, agreement.policy, ledger)
+  return <section className="gym-d22-summary">
+    <p>Phòng tập · Hợp đồng #{short(item.agreementId)}</p>
+    <h1>{agreement.policy === 0 ? 'Gói 10 buổi tập PT' : 'Gói tập theo thời gian'}</h1>
+    <p>{agreement.policy === 0 ? 'Giá trị được ghi nhận theo từng buổi đã chốt.' :
+      'Mô phỏng Fuji · Giá trị được ghi nhận theo thời gian đủ điều kiện. Việc cơ sở mở cửa cần chứng cứ riêng.'}</p>
+    {check.valid ? <>
+      <small>Đơn vị cơ sở của mock MRES</small>
+      <dl className="gym-d22-amounts">{([
+        ['Đã chốt cho phòng tập', ledger.earnedFinalized],
+        ['Phòng tập đã rút', ledger.gymWithdrawn],
+        ['Còn có thể rút', ledger.withdrawable],
+      ] as const).map(([label, amount]) => <div key={label}><dt>{label}</dt>
+        <dd>{amount.toLocaleString('vi-VN')}</dd></div>)}</dl>
+      <a href="#gym-reconciliation">Đối chiếu sổ cái và biên nhận</a>
+    </> : <ErrorState>VAULT_LEDGER_MISMATCH · Chưa thể xác minh số tiền.</ErrorState>}
+    <small>Vault · Fuji · Block {short(item.blockNumber)}</small>
+  </section>
+}
+
 function Ledger({ item }: { item: SharedData }) {
   const check = assessGymLedger(item.agreementId, item.agreement.policy, item.ledger)
   const rows = [
@@ -489,6 +512,11 @@ function LiveGym({ route }: { route: GymRoute }) {
   const target = snap && route.id ? (snap.direct?.id === route.id ? snap.direct
     : snap.agreements?.find(entry => entry.id === route.id)) : undefined
   return <>
+    {!snap && <div className="gym-d22-summary"><p>Phòng tập · Fuji</p>
+      <h1>{route.id ? 'Hợp đồng #' + short(route.id) : 'Hợp đồng phòng tập'}</h1>
+      <p>{state.loading ? 'Đang đọc Vault…' : 'Chưa xác minh được số dư của ví phòng tập.'}</p>
+    </div>}
+    {route.page === 'detail' && target && <AgreementSummary item={target.data} />}
     <WalletPanel state={state} />
     {!snap && <Card><p className="caption">READ_STATUS: {state.loading ? 'LOADING' : state.verifiedIdentity ? 'MERCHANT_HISTORY_NOT_VERIFIED' : 'NOT_VERIFIED'} · Không sử dụng số dư demo thay cho dữ liệu RPC.</p></Card>}
     {snap?.direct && <Card><ErrorState>INCOMPLETE_LOG_READ · Danh sách hợp đồng merchant chưa được quét đầy đủ.
@@ -503,17 +531,20 @@ function LiveGym({ route }: { route: GymRoute }) {
       : route.page === 'payouts' ? <Payouts entries={snap.agreements ?? (snap.direct ? [snap.direct] : [])}
           session={snap.session} onlyId={route.id} />
         : route.page === 'detail' || route.page === 'claim' ? target
-          ? <PortalPage breadcrumb="Phòng gym / Hợp đồng" title={'Hợp đồng #' + short(target.id)}>
+          ? <>
+            {route.page === 'claim' && <h1>Đề nghị · Hợp đồng #{short(target.id)}</h1>}
             <Card><p>Loại: {target.data.agreement.policy === 0 ? 'PT 10 buổi' : 'TIME_ACCESS'} · Trạng thái: {target.data.agreement.state}</p>
               <p className="caption customer-wrap">Buyer: {target.data.agreement.buyer} · Merchant: {target.data.agreement.merchant}</p>
               <p><a className="inline-link" href={'/gym/claims/new?agreementId=' + short(target.id)}>Tạo đề nghị</a>
                 {' · '}<a className="inline-link" href={'/gym/payouts?agreementId=' + short(target.id)}>Giải ngân</a></p>
             </Card>
-            <Ledger item={target.data} />
+            <details className="gym-d22-details" id="gym-reconciliation"><summary>Đối chiếu sổ cái</summary>
+              <Ledger item={target.data} />
+            </details>
             <KnownReceiptEvidence item={target.data} />
             {route.page === 'claim' && <ClaimForm id={target.id} item={target.data} session={snap.session} />}
             <ClaimHistory id={target.id} item={target.data} session={snap.session} />
-          </PortalPage>
+          </>
           : <Card><ErrorState>Không tìm thấy hợp đồng merchant #{route.id?.toString() ?? '?'}. Không thể xem hoặc gửi thao tác.</ErrorState></Card>
           : <Card><ErrorState>{route.reason ?? 'Không tìm thấy đường dẫn.'}</ErrorState></Card>)}
     {route.page === 'claim' && !route.id && <Card><ErrorState>{route.reason ?? 'Thiếu mã hợp đồng.'}</ErrorState>

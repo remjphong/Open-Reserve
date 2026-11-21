@@ -1,3 +1,4 @@
+import './gym-ops-d22.css'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { AgreementReceipt } from '../design-system/receipt'
 import { agreement as fixture } from '../demo/agreement'
@@ -267,7 +268,7 @@ function Activity({ data }: { data: Shared }) {
     <h2>Nhật ký giao dịch · Chain Indexer</h2>
     <p className="caption">INDEXER_ACTIVITY={activity.status} · LAST_INDEXED_BLOCK=
       {activity.lastIndexedBlock?.toString() ?? 'NOT_VERIFIED'} · VAULT_HEAD={data.blockNumber.toString()}</p>
-    {activity.status !== 'FRESH' && <ErrorState>{activity.reason ??
+    {activity.status !== 'FRESH' && <ErrorState>Lịch sử hoạt động chưa tải đầy đủ. {activity.reason ??
       'Indexer có thể thiếu lịch sử hoặc chậm; không kết luận danh sách rỗng hay đồng bộ đầy đủ.'}</ErrorState>}
     {canShow && activity.items.length > 0 && <ul>
       {activity.items.map(event => <li key={event.txHash + ':' + event.logIndex} className="customer-wrap">
@@ -293,6 +294,30 @@ function Live({ route }: { route: LiveRoute }) {
   return <PortalPage breadcrumb="Vận hành / Fuji / Read-only" title={
     route.page === 'detail' ? 'Sổ cái Agreement #' + id : 'Hồ sơ claim · Agreement #' + id
   }>
+    {route.page === 'claim' && <section className="ops-d22-case">
+      <p>Hợp đồng #{id}{route.claimId && ' · Hồ sơ #' + route.claimId.toString()}</p>
+      <h2>{accepted && snap ? snap.data.agreement.policy === 0 ? 'Ghi nhận buổi PT' :
+        'Ghi nhận quyền tập theo thời gian' : 'Xác minh hồ sơ'}</h2>
+      {accepted && snap && route.claimId && snap.claim ? <>
+        <p><strong>{snap.claim.state === 4 ? 'Đã chốt theo quy tắc · FINALIZED' :
+          claimStates[snap.claim.state] ?? 'Trạng thái chưa xác định'}</strong></p>
+        <small>Phân bổ của hồ sơ · đơn vị cơ sở của mock MRES</small>
+        <dl className="ops-d22-amounts">
+          <div><dt>Cho phòng tập</dt><dd>{snap.claim.awardedToGym.toLocaleString('vi-VN')}</dd></div>
+          <div><dt>Cho người mua</dt><dd>{snap.claim.awardedToBuyer.toLocaleString('vi-VN')}</dd></div>
+        </dl>
+        {snap.data.agreement.policy === 0 && snap.data.ledger.buyerRefunded > 0n && <p>
+          Người mua đã nhận hoàn {base(snap.data.ledger.buyerRefunded)} trên toàn hợp đồng.
+          Khoản hoàn khi kết thúc hợp đồng được đối soát riêng với phân bổ của hồ sơ này.</p>}
+        <small>Đọc từ Vault tại block {snap.data.blockNumber.toString()} · Chỉ đọc</small>
+        <details><summary>Chứng cứ và điều khoản của hồ sơ</summary>
+          <p>Giá trị đề nghị: {base(snap.claim.amount)} · Hết hạn phản đối (Unix): {snap.claim.challengeEndsAt.toString()}</p>
+          <p>Hash ghi nhận cam kết về tài liệu. Việc tập luyện hoặc mở cửa cần chứng cứ thực tế.</p>
+          <EvidencePanel key={snap.claim.evidenceHash} agreementId={route.id} claimId={route.claimId} hash={snap.claim.evidenceHash} />
+        </details>
+      </> : <p>{state.loading ? 'Đang đọc Vault…' : snap?.claimError ?? 'Chưa xác minh được hồ sơ tại Vault.'}
+        {!route.claimId && <a href={'/operations/disputes/' + id + '?claimId=1'}>Kiểm tra hồ sơ #1</a>}</p>}
+    </section>}
     <Section>
       <h2>Đối chiếu Vault theo Agreement ID</h2>
       <p className="caption">Đọc trực tiếp ID, không phụ thuộc danh sách Indexer và không xác nhận full historical sync.</p>
@@ -308,28 +333,13 @@ function Live({ route }: { route: LiveRoute }) {
       {!snap && <p className="caption">NOT_VERIFIED · Không hiển thị tiền minh họa khi ví hoặc Vault không đọc được.</p>}
     </Section>
     {snap && <>
+      {accepted && <Activity data={snap.data} />}
       <Ledger data={snap.data} />
       <OtherPortalLinks id={route.id} />
       <KnownDeposit data={snap.data} />
       {!accepted && <ErrorState>NOT_VERIFIED · Claim, Indexer và số dư không được
         suy ra từ agreement có metadata/getter không khớp.</ErrorState>}
-      {accepted && route.page === 'claim' && <Section>
-        <h2>Trạng thái tranh chấp / claim</h2>
-        <p>Vault disputedLocked tại block: {base(snap.data.ledger.disputedLocked)}</p>
-        {route.claimId ? <>
-          <p>Claim ID được yêu cầu: #{route.claimId.toString()}</p>
-          {snap.claim ? <>
-            <p>Trạng thái claim: {claimStates[snap.claim.state] ?? 'UNKNOWN'} ({snap.claim.state})</p>
-            <p>Số tiền claim: {base(snap.claim.amount)} · awardedToBuyer: {base(snap.claim.awardedToBuyer)}
-              {' · '}awardedToGym: {base(snap.claim.awardedToGym)}</p>
-            <p>Challenge window end: {snap.claim.challengeEndsAt.toString()} (Unix seconds)</p>
-            <EvidencePanel agreementId={route.id} claimId={route.claimId} hash={snap.claim.evidenceHash} />
-          </> : <ErrorState>{snap.claimError ?? 'CLAIM_NOT_VERIFIED'}</ErrorState>}
-        </> : <p>Chọn claim ID cụ thể, ví dụ <a className="inline-link"
-          href={'/operations/disputes/' + id + '?claimId=1'}>đề nghị #1</a>.
-          Chưa xác minh danh sách claim đầy đủ.</p>}
-      </Section>}
-      {accepted && <Activity data={snap.data} />}
+
       <Section>
         <h2>Ranh giới quyền Resolver</h2>
         <p>{resolver ? 'Địa chỉ ví đang kết nối trùng resolver của Vault.' :
