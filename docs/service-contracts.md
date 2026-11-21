@@ -1,5 +1,7 @@
 # OpenReserve service contracts · D16-09
 
+> **HISTORICAL CHECKPOINT — D16-09 ONLY.** The `AWAITING_REVIEW` status and HTTP 501 baseline below document the original D16 service-boundary freeze, **not** the current D18–D20 implementation or Owner demo runtime. For current source, status and verified limits consult [Judge review guide](JUDGE_REVIEW_GUIDE.md), [release evidence index](../proofs/RELEASE_EVIDENCE_INDEX.md) and [current code](../services). Keep this checkpoint unchanged for provenance.
+
 Status: `AWAITING_REVIEW`. Scope: the v1 HTTP boundary and operational probes. The API contract is defined by the strict Zod schemas and derived TypeScript DTOs in [packages/api-contracts](../packages/api-contracts/src/index.ts). Agreement IDs are positive decimal strings scoped to one configured Vault on one chain. uint256 values and block heights travel as decimal strings to preserve precision. Token quantities are smallest units, and chain timestamps are Unix seconds.
 
 | Service | Port | Ownership and authority |
