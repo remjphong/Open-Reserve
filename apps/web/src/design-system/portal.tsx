@@ -11,7 +11,7 @@ export type NavItem = { href: string; label: string; icon: keyof typeof iconPath
 
 export function Icon({ name }: { name: keyof typeof iconPaths }) {
   return <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-    strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"
+    strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"
     dangerouslySetInnerHTML={{ __html: iconPaths[name] }} />
 }
 
@@ -45,9 +45,9 @@ export function RoleNavigation({ items, path, label, style }: {
   </nav>
 }
 
-function Brand({ home, mobile = false }: { home: string; mobile?: boolean }) {
-  return <a className={`brand ${mobile ? 'mobile-brand' : ''}`} href={home}>
-    <span className="brand-mark"><Icon name="shield-check" /></span>OpenReserve
+function Brand({ home }: { home: string }) {
+  return <a className="brand" href={home}>
+    <img width="32" height="32" alt="" src={new URL('../openreserve-ui/assets/brand.svg', import.meta.url).href} />OpenReserve
   </a>
 }
 
@@ -59,12 +59,12 @@ export function AppShell({ role, path, items, children }: {
   const nav = (style: string) => <RoleNavigation items={items} path={path} label={label} style={style} />
   const content = <>
     <header className="header">
-      <Brand home={home} mobile={role !== 'customer'} />
+      <Brand home={home} />
       {role === 'customer' ? nav('top-nav') : <strong className="role-name">{label}</strong>}
       {role !== 'customer' && <WalletIdentity role={role} />}
     </header>
     {nav('mobile-nav')}
-    <main id="main" className="container" tabIndex={-1}>
+    <main id="main" className={'container or-' + role} tabIndex={-1}>
       {role === 'operations' && <div className="notice"><Icon name="info" /><span>
         <strong>FUJI READ ONLY — ĐỐI CHIẾU TẠI TỪNG TRANG</strong>
         Số dư chỉ được hiển thị sau khi trang xác minh Vault; hồ sơ OR-024 và PT-04 là DEMO_FIXTURE riêng.
@@ -77,7 +77,7 @@ export function AppShell({ role, path, items, children }: {
   return <>
     <a className="skip" href="#main">Đi tới nội dung</a>
     {role === 'customer' ? content : <div className="workspace"><aside className="sidebar">
-      <Brand home={home} /><div><p className="sidebar-title">{label}</p>{nav('sidebar-nav')}</div>
+      <div><p className="sidebar-title">{label}</p>{nav('sidebar-nav')}</div>
       <p className="sidebar-footer caption">Môi trường thử nghiệm · Avalanche Fuji</p>
     </aside><div>{content}</div></div>}
   </>

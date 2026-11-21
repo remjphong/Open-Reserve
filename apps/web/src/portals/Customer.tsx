@@ -3,7 +3,7 @@ import { zeroHash } from 'viem'
 import { approvedTermsHash } from '@openreserve/contracts-sdk'
 import { ClaimEvidenceReview } from './ClaimEvidenceReview'
 import { CustomerPreview } from './CustomerPreview'
-import { EmptyState, ErrorState, LoadingSkeleton, OverviewCard, PortalPage } from '../design-system/portal'
+import { EmptyState, ErrorState, Icon, LoadingSkeleton, OverviewCard, PortalPage } from '../design-system/portal'
 import { readSharedAgreement } from '../lib/shared-ledger'
 import {
   classifyPtBalances, ptAgreementId, verifyWallet1PtReport, wallet1PtReport,
@@ -302,25 +302,47 @@ function Pass({ agreementId, dispute }: { agreementId: string; dispute: boolean 
       return 'Đã xác nhận · ' + receipt.transactionHash
     })
   }
-  return <Page title={dispute ? 'Phản đối đề nghị' : 'Gói của tôi · #' + id}>
+  const mismatch = data && 'ledger' in data && !classifyPtBalances(data.ledger).valid
+  const source = (
     <Card><WalletControls {...walletControls(state)} busy={transaction.busy} />
       {data && 'activity' in data && <div className="customer-wrap">
         <p className="caption">Nguồn số tiền: VAULT_READ_CONTRACT · Fuji 43113 · block {data.blockNumber.toString()}
           {' · '}Indexer: {data.activity.status}
           {data.activity.reason && <> · {data.activity.reason}</>}</p>
-        <p className="caption">Indexer chỉ cung cấp lịch sử tham khảo; không được coi dữ liệu thiếu là danh sách trống đã xác minh.</p>
+        <p className="caption">{data.activity.status !== 'FRESH' && 'Lịch sử hoạt động chưa tải đầy đủ. '}Indexer chỉ cung cấp lịch sử tham khảo; không được coi dữ liệu thiếu là danh sách trống đã xác minh.</p>
       </div>}
       <p><a className="inline-link" href={dispute ? passRoot + '/' + id : passRoot}>{dispute ? 'Về chi tiết gói' : 'Về danh sách gói'}</a></p>
-      {!isBuyer && data && <p>Chỉ ví người mua của hợp đồng có quyền ký các thao tác dưới đây.</p>}
-      {transaction.feedback}
+      {!isBuyer && data && <p>Hãy chọn ví người mua của gói này rồi làm mới để xem quyền lợi.</p>}
     </Card>
-    {data && session && <div className="grid customer-grid customer-pass-grid">
-      <div className="customer-pass-main">
-        <div className="customer-pass-entitlement">
+  )
+  return <Page title={dispute ? 'Phản đối đề nghị' : 'Gói của tôi · #' + id}>
+    {mismatch && <ErrorState>LEDGER_MISMATCH · Sổ cái chưa khớp. Hãy làm mới dữ liệu Vault.</ErrorState>}
+    {data && session && isBuyer && !mismatch && <div className="customer-pass-grid">
+      {'ledger' in data && <section className="or-receipt">
+        <h2>{data.agreement.policy === 0 ? '10 buổi tập cùng huấn luyện viên' : 'Gói tập theo thời gian'}</h2>
+        {data.agreement.policy === 0
+          ? <figure><img alt="" src={new URL('../openreserve-ui/assets/gym.webp', import.meta.url).href} /><figcaption>Ảnh minh họa phòng tập</figcaption></figure>
+          : <p>Mô phỏng Fuji 270 giây. Giá trị được ghi nhận theo thời gian đủ điều kiện.</p>}
+        <p>{data.agreement.policy === 0 ? 'Bạn đã nhận lại' : 'Đã chốt cho phòng tập'}
+          <strong className="or-result">{(data.agreement.policy === 0 ? data.ledger.buyerRefunded : data.ledger.earnedFinalized).toLocaleString('vi-VN')}</strong>
+          đơn vị cơ sở của mock MRES (18 chữ số thập phân)</p>
+        {id === ptAgreementId && data.agreement.policy === 0 && data.blockNumber >= 61401275n && data.ledger.buyerRefunded > 0n &&
+          <p>Theo biên nhận lịch sử, bạn đề nghị kết thúc gói và phòng tập đã đồng ý.
+            {' '}<a className="inline-link" href="https://testnet.snowtrace.io/tx/0xc378c67bd40cb1795dda3b4049c78d7ff0ce3645a3bef2c90c6878f342cc6b3c"><Icon name="receipt" />Biên nhận hoàn khi kết thúc gói ↗</a>
+          </p>}
+        <dl className="money-list">{([
+          ['Bạn đã nạp', data.ledger.deposited],
+          ['Phòng tập đã nhận', data.ledger.gymWithdrawn],
+          ['Còn có thể nhận hoàn', data.ledger.refundable],
+        ] as const).map(([label, amount]) => <div key={label}><dt>{label}</dt><dd>{amount.toLocaleString('vi-VN')}</dd></div>)}</dl>
+        {id === ptAgreementId && data.agreement.policy === 0 &&
+          <a className="inline-link" href="#pt-receipts"><Icon name="receipt" />Xem biên nhận buổi PT</a>}
+        <p className="caption">Vault · Fuji thử nghiệm · block {String(data.blockNumber)}. Việc cung cấp dịch vụ ngoài đời chưa được xác minh.</p>
+      </section>}
       <Card>
         <h2>{data.agreement.policy === 0 ? 'PT 10 buổi' : 'Tập không giới hạn'}</h2>
         {data.agreement.policy === 0
-          ? <p>{data.agreement.sessionsFinalized} buổi đã chốt · {data.agreement.positiveRefundSlots} suất đã hoàn · {data.agreement.liveClaims.toString()} đề nghị đang mở</p>
+          ? <p>{data.agreement.sessionsFinalized} buổi đã chốt · {data.agreement.positiveRefundSlots} suất đã dùng để hoàn theo buổi (tách riêng khoản hoàn khi kết thúc gói) · {data.agreement.liveClaims.toString()} đề nghị đang mở</p>
           : <p>Thời gian trên chuỗi {new Date(Number(data.agreement.startAt) * 1000).toLocaleString('vi-VN')} – {new Date(Number(data.agreement.endAt) * 1000).toLocaleString('vi-VN')}</p>}
         <h3>Đề nghị ghi nhận</h3>
         {!data.claims && <ErrorState>Chưa đọc được nhật ký đề nghị từ RPC.</ErrorState>}
@@ -347,16 +369,9 @@ function Pass({ agreementId, dispute }: { agreementId: string; dispute: boolean 
         })}
         {!dispute && <a className="inline-link" href={passRoot + '/' + id + '/dispute'}>Xem tùy chọn phản đối</a>}
       </Card>
-        </div>
-        {id === ptAgreementId && session.chain.id === 43113 && 'ledger' in data &&
-          <div className="customer-pass-proof">
-            <PtProofPanel key={session.account + ':' + session.head.hash}
-              session={session} buyer={data.agreement.buyer} merchant={data.agreement.merchant} />
-          </div>}
-      </div>
       <div className="customer-pass-financial">
       <Card><h2>Số dư theo Vault</h2><dl className="money-list">
-        {['Đang được Vault giữ', 'Gym có thể rút', 'Đã được duyệt hoàn', 'Đang tranh chấp'].map((label, index) =>
+        {['Đang được Vault giữ', 'Gym có thể rút', 'Còn có thể nhận hoàn', 'Đang tranh chấp'].map((label, index) =>
           <div key={label}><dt>{label}</dt><dd className="money">{token(data.balances[index])}</dd></div>)}
       </dl>
         {data && 'ledger' in data && <CustomerFinancialLedger ledger={data.ledger} />}
@@ -367,7 +382,14 @@ function Pass({ agreementId, dispute }: { agreementId: string; dispute: boolean 
           onClick={() => void act({ type: 'claimRefund', id })}>Nhận token được duyệt hoàn</Button>}
       </Card>
       </div>
+        {id === ptAgreementId && session.chain.id === 43113 && 'ledger' in data &&
+          <div id="pt-receipts" className="customer-pass-proof">
+            <PtProofPanel key={session.account + ':' + session.head.hash}
+              session={session} buyer={data.agreement.buyer} merchant={data.agreement.merchant} />
+          </div>}
     </div>}
+    {transaction.feedback}
+    {isBuyer && !mismatch ? <details className="or-source"><summary>Nguồn dữ liệu và đối chiếu ví</summary>{source}</details> : source}
   </Page>
 }
 
@@ -392,7 +414,7 @@ export function Customer({ path }: { path: string }) {
   if (section === 'packages' && pack) return <PackageDetail pack={pack} />
   if (section === 'checkout' && pack) return <Checkout pack={pack} />
   const id = parseId(entity)
-  return id ? <Pass agreementId={entity} dispute={action === 'dispute'} /> : <Page title="Mã hợp đồng không hợp lệ">
+  return id ? <Pass key={entity} agreementId={entity} dispute={action === 'dispute'} /> : <Page title="Mã hợp đồng không hợp lệ">
     <a className="inline-link" href={passRoot}>Về danh sách gói</a>
   </Page>
 }

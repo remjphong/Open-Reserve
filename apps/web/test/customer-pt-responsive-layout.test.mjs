@@ -1,31 +1,29 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
+import ts from 'typescript'
 
-const customer = readFileSync(new URL('../src/portals/Customer.tsx', import.meta.url), 'utf8')
-const css = readFileSync(new URL('../src/style.css', import.meta.url), 'utf8')
-
-test('D20 PT receipt is grouped under entitlement, not third child of two-column grid', () => {
-  const start = customer.indexOf('className="grid customer-grid customer-pass-grid"')
-  const end = customer.indexOf('</Page>', start)
-  assert.ok(start > 0)
-  const layout = customer.slice(start, end < 0 ? undefined : end)
-  assert.match(layout, /className="customer-pass-main"/)
-  assert.match(layout, /className="customer-pass-entitlement"/)
-  assert.match(layout, /className="customer-pass-financial"/)
-  assert.match(layout, /className="customer-pass-proof"/)
-  assert.ok(layout.indexOf('<PtProofPanel') > layout.indexOf('className="customer-pass-entitlement"'))
-  assert.ok(layout.indexOf('<PtProofPanel') < layout.indexOf('className="customer-pass-financial"'))
-  assert.equal((layout.match(/<PtProofPanel/g) ?? []).length, 1)
-  assert.match(layout, /id === ptAgreementId && session\.chain\.id === 43113/)
+const read = path => readFileSync(new URL(path, import.meta.url), 'utf8')
+const source = ts.createSourceFile('Customer.tsx', read('../src/portals/Customer.tsx'), ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX)
+const pass = source.statements.find(node => node.name?.text === 'Pass')
+const render = pass.body.statements.find(ts.isReturnStatement)
+const sections = []
+function visit(node) {
+  if (ts.isJsxOpeningElement(node) || ts.isJsxSelfClosingElement(node)) {
+    const attr = node.attributes.properties.find(prop => prop.name?.text === 'className')
+    sections.push(attr?.initializer?.text ?? node.tagName.getText(source))
+  }
+  ts.forEachChild(node, visit)
+}
+visit(render)
+test('receipt, claim review, accounting, PT evidence and source follow DOM order', () => {
+  const sequence = ['or-receipt', 'ClaimEvidenceReview', 'customer-pass-financial', 'PtProofPanel', 'or-source']
+  assert.deepEqual(sections.filter(name => sequence.includes(name)), sequence)
+  assert.match(render.getText(source), /isBuyer && !mismatch &&/)
+  assert.match(render.getText(source), /id === ptAgreementId && session.chain.id === 43113/)
 })
-
-test('D20 scoped CSS preserves desktop columns and mobile entitlement -> ledger -> proof order', () => {
-  assert.match(css, /\.customer-pass-main\s*\{[^}]*display:\s*grid/s)
-  assert.match(css, /\.customer-pass-main\s*\{[^}]*align-content:\s*start/s)
-  assert.match(css, /@media\s*\(max-width:\s*820px\)\s*\{[\s\S]*?\.customer-pass-grid\s*\{[^}]*display:\s*flex/s)
-  assert.match(css, /\.customer-pass-main\s*\{\s*display:\s*contents;\s*\}/)
-  assert.match(css, /\.customer-pass-entitlement\s*\{\s*order:\s*0;/)
-  assert.match(css, /\.customer-pass-financial\s*\{\s*order:\s*1;/)
-  assert.match(css, /\.customer-pass-proof\s*\{\s*order:\s*2;/)
+test('responsive pass uses native reading order at every breakpoint', () => {
+  const css = read('../src/style.css')
+  assert.match(css, /\.customer-pass-grid\s*\{[^}]*grid-template-columns:\s*minmax\(0, 1fr\)/)
+  assert.doesNotMatch(css, /(?:^|[;{])\s*order\s*:|flex-direction:\s*(?:row|column)-reverse/)
 })
