@@ -2,7 +2,7 @@
 
 > **Prototype trên Avalanche Fuji · Không phải dịch vụ tài chính/thanh toán VNĐ hoặc bản phát hành thương mại.** Repo triển khai ở nhánh `unihack-final`; tại thời điểm tạo bản tài liệu này, **default branch `main` vẫn là README placeholder**. Việc chuyển default branch cần Owner phê duyệt riêng.
 
-**Bắt đầu trong 60 giây:** [Hướng dẫn giám khảo / mã nguồn / demo an toàn](docs/JUDGE_REVIEW_GUIDE.md) · [Chỉ mục bằng chứng & giới hạn xác minh](proofs/RELEASE_EVIDENCE_INDEX.md) · [ReserveVault.sol](contracts/src/ReserveVault.sol) · [CI Compose / workspaces / contracts](https://github.com/remjphong/Open-Reserve/actions/runs/44848508341).
+**Bắt đầu trong 60 giây:** [Hướng dẫn giám khảo / mã nguồn / demo an toàn](docs/JUDGE_REVIEW_GUIDE.md) · [Chỉ mục bằng chứng & giới hạn xác minh](proofs/RELEASE_EVIDENCE_INDEX.md) · [Tầm nhìn đa ngành & lộ trình scale có bằng chứng](docs/PRODUCT_VISION_AND_SCALE_ROADMAP.md) · [ReserveVault.sol](contracts/src/ReserveVault.sol) · [CI Compose / workspaces / contracts](https://github.com/remjphong/Open-Reserve/actions/runs/44848508341).
 
 ### OpenReserve giải quyết vấn đề gì?
 
@@ -13,6 +13,12 @@ Prototype thử nghiệm hai chính sách: **PER_SESSION / PT 10 buổi** phân 
 Theo chứng cứ RPC do Owner cung cấp, Wallet reviewer và CTO đã chấp nhận **có giới hạn**, PT Agreement #1 nạp **1003** đơn vị nhỏ nhất mock MRES: gym đã chốt/rút **100**, Buyer đã được duyệt và nhận hoàn **903** sau quy trình đề nghị–chấp thuận–nhận hoàn; `refundable=0` sau TX3. TIME_ACCESS Agreement #2 nạp/đã chốt/đã rút **900** đơn vị nhỏ nhất. Đây là **18-decimal ERC-20 base units, không phải 1003 hay 900 MRES nguyên token, không phải VNĐ**. Chưa có pilot gym được ký, bảo đảm lợi nhuận bên cung cấp, xác nhận pháp lý lưu ký VNĐ, bảo hiểm, PMF hoặc kiểm toán bảo mật chính thức.
 
 **EN:** OpenReserve is a bounded **Avalanche Fuji testnet prototype** for auditable prepaid-service accounting. A React/TypeScript application hosts Customer, Gym and Operations role portals; three separately executable Fastify backends support catalog/evidence, chain indexing and economic scenarios. `PER_SESSION` credits eligible sessions and `TIME_ACCESS` credits eligible elapsed access. Owner-provided, reviewer-accepted testnet records demonstrate conditional PT refunds and time-based gym payouts in mock ERC-20 **base units**. No public production deployment, legal fiat custody, signed gym pilot or provider profit neutrality is claimed.
+
+### Tầm nhìn sau gym — nghiên cứu đa ngành, không phải tính năng đã triển khai
+
+**[GIẢ THUYẾT CHIẾN LƯỢC]** Gym PT10 là trường hợp thử nghiệm đầu tiên của OpenReserve, không phải toàn bộ phạm vi dài hạn. Nhóm ưu tiên **(1) gym PT chuẩn hóa để chứng minh cơ chế**, **(2) yoga/Pilates và lớp thể thao 10 buổi đồng giá để kiểm chứng nhu cầu**, **(3) spa/wellness phi y tế theo buổi đồng nhất để nghiên cứu khả năng đa ngành**. Các gói có hạn sử dụng/hủy lịch, gói hỗn hợp và điều khoản theo mốc **chưa được v1 thực thi đầy đủ**. Đây là thứ tự ưu tiên *nghiên cứu*, không phải đã ký đối tác, có TAM, doanh thu hoặc product-market fit.
+
+**Ranh giới đặc biệt quan trọng:** Khoản hoàn trên Fuji đã minh họa trường hợp **Merchant hợp tác chấp thuận**; v1 **chưa có tự động xử lý đề nghị chấm dứt khi Merchant biến mất và im lặng**. TIME_ACCESS ghi nhận giá trị theo thời gian hợp lệ, **không tự xác minh phòng gym thực sự mở cửa**. Mô hình giữ tiền còn tạo **cash gap và rủi ro contribution margin** cho doanh nghiệp; chưa có nguồn tài trợ hay xác nhận pháp lý VNĐ. Xem [roadmap có bảng nguồn và điều kiện loại trừ](docs/PRODUCT_VISION_AND_SCALE_ROADMAP.md), [CTO phản biện Round B](https://github.com/remjphong/Open-Reserve/issues/40#issuecomment-7057230725) và [unit economics giả định](research/unit-economics.md).
 
 ### Ba vai trò và lý do cần Avalanche
 
