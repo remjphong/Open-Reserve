@@ -155,7 +155,52 @@ html:has(.or-customer) { background: var(--or-paper); }
   overflow-wrap: anywhere;
 }
 .customer-pass-grid :is(li, p, a, dd) { overflow-wrap: anywhere; }
-.customer-pt-receipts { padding-inline-start: 1.25rem; }
+.customer-buyer-note {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  margin-block: var(--space-3);
+  padding: var(--space-3);
+  border: 1px solid var(--or-line);
+  border-radius: var(--radius);
+  background: var(--or-sage);
+  color: var(--or-ink);
+  font-size: .875rem;
+}
+.customer-buyer-note .icon, .customer-buyer-disclosure .icon { flex: none; color: var(--or-petrol); }
+.customer-buyer-disclosure {
+  margin-block: var(--space-3);
+  padding-inline: var(--space-3);
+  border: 1px solid var(--or-line);
+  border-radius: var(--radius);
+}
+.customer-buyer-disclosure summary {
+  min-height: 44px;
+  color: var(--or-petrol);
+  font-weight: 600;
+  cursor: pointer;
+}
+.customer-buyer-disclosure summary .icon { display: inline-block; margin-inline: var(--space-1) var(--space-2); vertical-align: middle; }
+.customer-pt-receipts { display: grid; gap: var(--space-2); list-style: none; padding: 0; }
+.customer-pt-receipt {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--or-line);
+  border-radius: var(--radius);
+}
+.customer-pt-receipt small { display: block; color: var(--secondary); }
+.customer-pt-receipt-icon {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius);
+  background: var(--or-sage);
+  color: var(--or-petrol);
+}
 .workspace .wallet { color: var(--ink); }
 
 .or-actions, .or-title-row { display: flex; align-items: center; flex-wrap: wrap; gap: var(--space-2); }

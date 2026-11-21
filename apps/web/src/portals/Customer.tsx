@@ -23,6 +23,12 @@ const passRoot = '/customer/passes'
 const claimStates = ['Chưa có', 'Chờ xử lý', 'Đã xác nhận', 'Đã phản đối', 'Đã chốt', 'Đã phân xử', 'Đã hủy']
 const token = (amount: bigint) => amount.toLocaleString('vi-VN') + ' đơn vị nhỏ nhất của MRES'
 const fixture = 'MINH HỌA · DEMO_FIXTURE'
+const ptReceiptPresentation = {
+  proposeSession: { icon: 'storefront', title: 'Phòng tập đề xuất buổi PT' },
+  confirmSession: { icon: 'person', title: 'Khách xác nhận buổi PT' },
+  finalizeClaim: { icon: 'record', title: 'Chốt khoản cho phòng tập' },
+  claimEarned: { icon: 'wallet', title: 'Phòng tập đã rút tiền' },
+} as const
 const termsUrl = 'https://github.com/remjphong/Open-Reserve/blob/0f3dadac5bef8814433843b4356af026181eb0b7/docs/product-and-terms-v1.0.1-proposed.md'
 type Package = typeof packages[number]
 
@@ -203,25 +209,22 @@ function Passes() {
 
 function CustomerFinancialLedger({ ledger }: { ledger: FinancialView }) {
   const result = classifyPtBalances(ledger)
-  return <div className="customer-claim">
-    <h3>Phân tách dòng tiền (đơn vị nhỏ nhất MRES)</h3>
+  if (!result.valid) return <ErrorState>LEDGER_MISMATCH · Đọc lại block trước khi xác định quyền hoàn.</ErrorState>
+  return <details className="customer-buyer-disclosure">
+    <summary><Icon name="record" />Chi tiết sổ cái</summary>
+    <p className="caption">Đơn vị nhỏ nhất của MRES. Các khoản dưới đây có thể chồng lắp, không cộng thành tổng mới.</p>
     <dl className="money-list">
       {([
         ['Tổng đã nạp', ledger.deposited],
-        ['Gym đã hưởng (earnedFinalized)', ledger.earnedFinalized],
-        ['Gym đã thực rút (gymWithdrawn)', ledger.gymWithdrawn],
-        ['Buyer đã nhận hoàn', ledger.buyerRefunded],
-        ['Khoản còn chưa phân bổ', ledger.unallocated],
+        ['Đã chốt cho phòng tập', ledger.earnedFinalized],
+        ['Phòng tập đã rút', ledger.gymWithdrawn],
+        ['Bạn đã nhận hoàn', ledger.buyerRefunded],
+        ['Còn chưa phân bổ', ledger.unallocated],
       ] as const).map(([label, value]) => <div key={label}>
-        <dt>{label}</dt><dd className="customer-wrap">{token(value)}</dd>
+        <dt>{label}</dt><dd>{value.toLocaleString('vi-VN')}</dd>
       </div>)}
     </dl>
-    <p className="caption">{result.valid
-      ? 'VAULT_LEDGER_CONSISTENT · Không cộng chồng earned, withdrawn, withdrawable và locked.'
-      : 'LEDGER_MISMATCH · Đọc lại block và không suy ra quyền hoàn.'}</p>
-    <p className="caption">Phân biệt: earned là giá trị đã chốt; withdrawn là số Gym đã nhận;
-      withdrawable là số Gym có thể nhận tiếp; refundable chỉ là khoản Buyer đã được duyệt và chưa nhận.</p>
-  </div>
+  </details>
 }
 
 function PtProofPanel({ session, buyer, merchant }: {
@@ -262,23 +265,41 @@ function PtProofPanel({ session, buyer, merchant }: {
     }
   }
   return <Card>
-    <h2>Bốn giao dịch PT #1 · theo hồ sơ Wallet 1</h2>
-    <p className="caption">WALLET1_REPORTED_RECEIPTS_VERIFIED · Đây là báo cáo lịch sử từ Wallet 1,
-      chưa phải kiểm chứng RPC mới của trình duyệt này. Không xác nhận buổi tập thực tế.</p>
+    <h2>Biên nhận PT #1</h2>
+    <div className="customer-buyer-note">
+      <Icon name="history" />
+      <span>Hồ sơ lịch sử từ Wallet 1. Bấm đối chiếu để kiểm tra biên nhận trên Fuji. Biên nhận không xác nhận buổi tập thực tế.</span>
+    </div>
     <ol className="customer-pt-receipts">
-      {wallet1PtReport.map(item => <li key={item.hash} className="customer-wrap">
-        <strong>{item.step}</strong> · block {item.block.toString()}
-        <p className="caption"><a className="inline-link" href={'https://testnet.snowtrace.io/tx/' + item.hash}
-          target="_blank" rel="noopener noreferrer">{item.hash}</a></p>
-      </li>)}
+      {wallet1PtReport.map(item => {
+        const { icon, title } = ptReceiptPresentation[item.method]
+        return <li key={item.hash} className="customer-pt-receipt">
+          <span className="customer-pt-receipt-icon"><Icon name={icon} /></span>
+          <div><strong>{title}</strong><small>Block {item.block.toString()}</small></div>
+          <a className="or-action or-icon-action" href={'https://testnet.snowtrace.io/tx/' + item.hash}
+            target="_blank" rel="noopener noreferrer" aria-label={'Xem biên nhận: ' + title}
+            title={'Xem biên nhận: ' + title}><Icon name="receipt" /></a>
+        </li>
+      })}
     </ol>
+    <details className="customer-buyer-disclosure">
+      <summary><Icon name="file-text" />Hash giao dịch và nguồn</summary>
+      <p className="caption customer-wrap"><code>WALLET1_REPORTED_RECEIPTS_VERIFIED</code></p>
+      <MetadataList label="Hash của bốn giao dịch PT" fields={wallet1PtReport.map(item => ({
+        label: ptReceiptPresentation[item.method].title, value: <code>{item.hash}</code>,
+      }))} />
+    </details>
     <button type="button" className="button" disabled={checking} onClick={() => void check()}>
-      {checking ? 'Đang đọc receipt, transaction và block…' : 'Đối chiếu 4 receipt trực tiếp qua RPC (chỉ đọc)'}
+      <Icon name="record" />{checking ? 'Đang đối chiếu…' : 'Đối chiếu trên Fuji'}
     </button>
-    {proof && <p role="status" className="customer-wrap">{proof.status} · {proof.checked}/4 receipt
-      {proof.reason ? ' · ' + proof.reason :
-        ' · Đúng Vault/Buyer/Merchant/calldata và block theo RPC tại snapshot; không chứng minh buổi tập đã xảy ra.'}
-    </p>}
+    <div role="status">
+      {proof && <div className="customer-buyer-note customer-wrap">
+        <Icon name={proof.status === 'RPC_RECEIPTS_MATCHED' ? 'check' : 'circle-alert'} />
+        <div><strong>{proof.status === 'RPC_RECEIPTS_MATCHED' ? 'Đã đối chiếu trên Fuji' : 'Chưa xác minh đủ biên nhận'}</strong>
+          <div>{proof.checked}/4 biên nhận{proof.reason ? ' · ' + proof.reason : ''}</div>
+        </div>
+      </div>}
+    </div>
   </Card>
 }
 
@@ -381,8 +402,9 @@ function Pass({ agreementId, dispute }: { agreementId: string; dispute: boolean 
           <div key={label}><dt>{label}</dt><dd className="money">{token(data.balances[index])}</dd></div>)}
       </dl>
         {data && 'ledger' in data && <CustomerFinancialLedger ledger={data.ledger} />}
-        <p className="caption">Số dư còn trong Vault KHÔNG tự động là tiền được duyệt hoàn;
-          chỉ trường refundable khác 0 từ Vault mới mở quyền nhận hoàn.</p>
+        <div className="customer-buyer-note"><Icon name="info" />
+          <span>Bạn chỉ có thể nhận số tiền ở dòng <strong>Còn có thể nhận hoàn</strong>.</span>
+        </div>
         {data.balances[2] > 0n && <Button disabled={!isBuyer || transaction.busy ||
             ('ledger' in data && !classifyPtBalances(data.ledger).canClaimRefund)}
           onClick={() => void act({ type: 'claimRefund', id })}>Nhận token được duyệt hoàn</Button>}
