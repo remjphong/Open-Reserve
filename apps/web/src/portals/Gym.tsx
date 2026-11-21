@@ -277,8 +277,8 @@ function WalletPanel({ state }: { state: GymControl }) {
       <h2><Icon name="receipt" />Tra hợp đồng từ Vault</h2>
       <p className="caption">Đọc theo ID, độc lập với việc quét lịch sử.</p>
       <ul>
-        <li><a className="inline-link" href="/gym/agreements/1">Agreement #1 · Gói PT <Icon name="arrow-right" /></a></li>
-        <li><a className="inline-link" href="/gym/agreements/2">Agreement #2 · TIME_ACCESS <Icon name="arrow-right" /></a></li>
+        <li><a className="inline-link" href="/gym/agreements/1">PT #1 <Icon name="arrow-right" /></a></li>
+        <li><a className="inline-link" href="/gym/agreements/2">Theo thời gian #2 <Icon name="arrow-right" /></a></li>
       </ul>
       <p className="caption">Wallet 2 báo cáo biên nhận cho giao dịch mở Agreement #2.</p>
       <a className="inline-link" href={fLink}>Xem hợp đồng minh họa <Icon name="arrow-right" /></a>
@@ -545,8 +545,9 @@ function LiveGym({ route }: { route: GymRoute }) {
             {route.page === 'claim' && <h1>Đề nghị · Hợp đồng #{short(target.id)}</h1>}
             <Card><p>Loại: {target.data.agreement.policy === 0 ? 'PT 10 buổi' : 'TIME_ACCESS'} · Trạng thái: {target.data.agreement.state}</p>
               <p className="caption customer-wrap">Buyer: {target.data.agreement.buyer} · Merchant: {target.data.agreement.merchant}</p>
-              <p><a className="inline-link" href={'/gym/claims/new?agreementId=' + short(target.id)}>Tạo đề nghị</a>
-                {' · '}<a className="inline-link" href={'/gym/payouts?agreementId=' + short(target.id)}>Giải ngân</a></p>
+              <nav className="gym-d22-actions" aria-label="Thao tác hợp đồng"><a className="inline-link" href={'/gym/claims/new?agreementId=' + short(target.id)}><Icon name="file-text" />Tạo đề nghị</a>
+                <a className="inline-link" href={'/gym/payouts?agreementId=' + short(target.id)}><Icon name="wallet" />Giải ngân</a>
+                <a className="inline-link" href="/gym/agreements"><Icon name="clipboard-list" />Danh sách hợp đồng</a></nav>
             </Card>
             <details className="gym-d22-details" id="gym-reconciliation"><summary>Đối chiếu sổ cái</summary>
               <Ledger item={target.data} />

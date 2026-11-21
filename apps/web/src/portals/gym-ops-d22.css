@@ -129,3 +129,17 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+
+.gym-d22-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.gym-d22-actions a, .ops-d22-links a { padding-inline: 10px; min-height: 44px; }
+:is(.gym-d22-actions, .gym-d22-direct, .ops-d22-links, .ops-d22-register) a:is(:hover, :focus-visible) {
+  background: var(--or-sage);
+}
+:is(.gym-d22-actions, .gym-d22-direct, .ops-d22-links, .ops-d22-register) a:active {
+  background: var(--or-canvas);
+}
+@media (prefers-reduced-motion: no-preference) {
+  :is(.gym-d22-actions, .gym-d22-direct, .ops-d22-links, .ops-d22-register) a {
+    transition: background-color 140ms ease;
+  }
+}
