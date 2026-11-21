@@ -31,3 +31,23 @@
 .customer-evidence-review { display: flex; flex-wrap: wrap; align-items: flex-start; gap: .65rem; }
 .customer-evidence-panel { width: 100%; min-width: 0; border: 1px solid #dde5de; border-radius: 8px; padding: 1rem; }
 .customer-evidence-panel h4 { margin: 0; }
+
+/* D20 PT receipt layout: independent desktop columns, original mobile reading order. */
+.customer-pass-main {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-content: start;
+  gap: 16px;
+  min-width: 0;
+}
+.customer-pass-entitlement, .customer-pass-proof, .customer-pass-financial { min-width: 0; }
+.customer-pass-entitlement > .customer-flow-card,
+.customer-pass-proof > .customer-flow-card,
+.customer-pass-financial > .customer-flow-card { margin-bottom: 0; }
+@media (max-width: 820px) {
+  .customer-pass-grid { display: flex; flex-direction: column; align-items: stretch; gap: 12px; }
+  .customer-pass-main { display: contents; }
+  .customer-pass-entitlement { order: 0; }
+  .customer-pass-financial { order: 1; }
+  .customer-pass-proof { order: 2; }
+}
