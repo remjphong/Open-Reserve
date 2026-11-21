@@ -314,7 +314,9 @@ function Pass({ agreementId, dispute }: { agreementId: string; dispute: boolean 
       {!isBuyer && data && <p>Chỉ ví người mua của hợp đồng có quyền ký các thao tác dưới đây.</p>}
       {transaction.feedback}
     </Card>
-    {data && session && <div className="grid customer-grid">
+    {data && session && <div className="grid customer-grid customer-pass-grid">
+      <div className="customer-pass-main">
+        <div className="customer-pass-entitlement">
       <Card>
         <h2>{data.agreement.policy === 0 ? 'PT 10 buổi' : 'Tập không giới hạn'}</h2>
         {data.agreement.policy === 0
@@ -345,6 +347,14 @@ function Pass({ agreementId, dispute }: { agreementId: string; dispute: boolean 
         })}
         {!dispute && <a className="inline-link" href={passRoot + '/' + id + '/dispute'}>Xem tùy chọn phản đối</a>}
       </Card>
+        </div>
+        {id === ptAgreementId && session.chain.id === 43113 && 'ledger' in data &&
+          <div className="customer-pass-proof">
+            <PtProofPanel key={session.account + ':' + session.head.hash}
+              session={session} buyer={data.agreement.buyer} merchant={data.agreement.merchant} />
+          </div>}
+      </div>
+      <div className="customer-pass-financial">
       <Card><h2>Số dư theo Vault</h2><dl className="money-list">
         {['Đang được Vault giữ', 'Gym có thể rút', 'Đã được duyệt hoàn', 'Đang tranh chấp'].map((label, index) =>
           <div key={label}><dt>{label}</dt><dd className="money">{token(data.balances[index])}</dd></div>)}
@@ -356,9 +366,7 @@ function Pass({ agreementId, dispute }: { agreementId: string; dispute: boolean 
             ('ledger' in data && !classifyPtBalances(data.ledger).canClaimRefund)}
           onClick={() => void act({ type: 'claimRefund', id })}>Nhận token được duyệt hoàn</Button>}
       </Card>
-      {id === ptAgreementId && session.chain.id === 43113 && 'ledger' in data &&
-        <PtProofPanel key={session.account + ':' + session.head.hash}
-          session={session} buyer={data.agreement.buyer} merchant={data.agreement.merchant} />}
+      </div>
     </div>}
   </Page>
 }
