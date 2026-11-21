@@ -2,6 +2,7 @@ import './gym-ops-d22.css'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { agreement as fixtureAgreement } from '../demo/agreement'
 import { DisabledAction, EmptyState, ErrorState, Icon, LoadingSkeleton, MoneyFigure, PortalPage } from '../design-system/portal'
+import { agreementParties, indexerStatusLabels, MetadataList } from '../design-system/metadata'
 import { deployment, errorMessage, provider, sameAddress, walletSession, type Session } from '../lib/customer-chain'
 import { readSharedAgreement } from '../lib/shared-ledger'
 import { wallet1PtReport } from '../lib/customer-pt-proof'
@@ -243,23 +244,34 @@ function GymLink({ id, children }: { id: bigint; children: ReactNode }) {
   return <a className="inline-link customer-wrap" href={'/gym/agreements/' + id}>{children}</a>
 }
 function VaultLabel({ item }: { item: SharedData }) {
-  return <p className="caption customer-wrap">NGUỒN TIỀN: VAULT_READ_CONTRACT · Fuji block {short(item.blockNumber)}
-    {' · '}Indexer activity: {item.activity.status}{item.activity.reason && ' · ' + item.activity.reason}
-  </p>
+  return <>
+    <MetadataList label="Nguồn số dư" fields={[
+      { label: 'Nguồn số tiền', icon: 'record', value: 'Vault trên Avalanche Fuji', code: 'VAULT_READ_CONTRACT' },
+      { label: 'Block đọc dữ liệu', icon: 'layers', value: short(item.blockNumber) },
+      { label: 'Nhật ký Indexer', icon: 'history', value: indexerStatusLabels[item.activity.status], code: item.activity.status },
+    ]} />
+    {item.activity.reason && <p className="caption customer-wrap">{item.activity.reason}</p>}
+  </>
 }
 function WalletPanel({ state }: { state: GymControl }) {
-  const session = state.snapshot?.session
+  const snapshot = state.snapshot
+  const session = snapshot?.session
+  const connected = session ?? state.verifiedIdentity?.session
   return <div className="gym-d22-wallet-layout">
     <section className="card card-pad gym-d22-wallet">
       <h2><Icon name="wallet" />Ví chủ gym · Fuji</h2>
-      {session ? <p className="caption customer-wrap">Đã đọc ví {session.account} · chain {session.chain.id} · block {short(state.snapshot!.headBlock)}
-        {' · '}Hash {session.head.hash ?? 'NOT_VERIFIED'}
-        {state.snapshot?.direct ? ' · VERIFIED_DIRECT_ID_ONLY' : ' · VERIFIED_FULL_DISCOVERY'}</p>
-        : <p className="caption">Danh sách hợp đồng được xác minh khi đọc đủ nhật ký của ví merchant.</p>}
-      {!session && state.verifiedIdentity && <p className="caption customer-wrap">
-        Đã đọc địa chỉ ví {state.verifiedIdentity.session.account} · chain {state.verifiedIdentity.session.chain.id}
-        {' · '}VAULT_VERIFIED · MERCHANT_HISTORY_NOT_VERIFIED.
-        Chưa xác minh danh sách hợp đồng, quyền merchant theo từng agreement hoặc số tiền tổng hợp.
+      {connected ? <MetadataList label="Phiên đọc Vault của phòng tập" fields={[
+        { label: 'Ví đang kết nối', icon: 'wallet', value: <code>{connected.account}</code> },
+        { label: 'Mạng', value: connected.chain.name, code: String(connected.chain.id) },
+        { label: 'Phạm vi xác minh', icon: 'record', ...(snapshot?.direct
+          ? { value: 'Đã xác minh riêng hợp đồng này', code: 'VERIFIED_DIRECT_ID_ONLY' }
+          : snapshot ? { value: 'Đã đọc đủ nhật ký hợp đồng của ví', code: 'VERIFIED_FULL_DISCOVERY' }
+            : { value: 'Vault đã xác minh, lịch sử ví chưa xác minh', code: 'MERCHANT_HISTORY_NOT_VERIFIED' }) },
+        { label: 'Block đọc dữ liệu', icon: 'layers', value: short(snapshot?.headBlock ?? connected.head.number) },
+        { label: 'Hash block', value: connected.head.hash ? <code>{connected.head.hash}</code> : 'Chưa xác minh' },
+      ]} /> : <p className="caption">Danh sách hợp đồng được xác minh khi đọc đủ nhật ký của ví merchant.</p>}
+      {!session && state.verifiedIdentity && <p className="caption">
+        Chưa xác minh danh sách hợp đồng, quyền merchant theo từng hợp đồng hoặc số tiền tổng hợp.
       </p>}
       {state.loading && <LoadingSkeleton />}
       {state.error && <ErrorState>{state.error} — Không hiển thị danh sách rỗng đã xác minh khi đọc lỗi.</ErrorState>}
@@ -543,8 +555,12 @@ function LiveGym({ route }: { route: GymRoute }) {
         : route.page === 'detail' || route.page === 'claim' ? target
           ? <>
             {route.page === 'claim' && <h1>Đề nghị · Hợp đồng #{short(target.id)}</h1>}
-            <Card><p>Loại: {target.data.agreement.policy === 0 ? 'PT 10 buổi' : 'TIME_ACCESS'} · Trạng thái: {target.data.agreement.state}</p>
-              <p className="caption customer-wrap">Buyer: {target.data.agreement.buyer} · Merchant: {target.data.agreement.merchant}</p>
+            <Card>
+              <MetadataList label="Các bên và thông tin hợp đồng" fields={[
+                ...agreementParties(target.data.agreement),
+                { label: 'Loại gói', value: target.data.agreement.policy === 0 ? 'PT 10 buổi' : 'Theo thời gian' },
+                { label: 'Trạng thái hợp đồng', value: target.data.agreement.state },
+              ]} />
               <nav className="gym-d22-actions" aria-label="Thao tác hợp đồng"><a className="inline-link" href={'/gym/claims/new?agreementId=' + short(target.id)}><Icon name="file-text" />Tạo đề nghị</a>
                 <a className="inline-link" href={'/gym/payouts?agreementId=' + short(target.id)}><Icon name="wallet" />Giải ngân</a>
                 <a className="inline-link" href="/gym/agreements"><Icon name="clipboard-list" />Danh sách hợp đồng</a></nav>

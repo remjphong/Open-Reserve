@@ -178,6 +178,32 @@ html:has(.or-customer) { background: var(--or-paper); }
 .or-title-row { flex-wrap: nowrap; }
 .or-title-row h1 { min-width: 0; }
 .or-title-row .or-back { flex: none; }
+.or-metadata {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
+  gap: var(--space-2);
+  margin: var(--space-3) 0;
+}
+.or-metadata-field {
+  min-width: 0;
+  padding: var(--space-3);
+  border: 1px solid var(--or-line);
+  border-radius: var(--radius);
+  background: var(--or-paper);
+  color: var(--or-ink);
+}
+.or-metadata dt {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--or-petrol);
+  font-size: .875rem;
+  font-weight: 600;
+}
+.or-metadata dt .icon { flex: none; }
+.or-metadata dd { margin: var(--space-1) 0 0; overflow-wrap: anywhere; }
+.or-metadata code { display: block; font: .8rem/1.5 ui-monospace, monospace; user-select: all; }
+.or-metadata dd > code:not(:first-child) { margin-top: var(--space-1); color: var(--secondary); }
 .or-action:focus-visible, .customer-check:focus-within {
   outline: 2px solid var(--or-petrol);
   outline-offset: 3px;

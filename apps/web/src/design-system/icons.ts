@@ -1,5 +1,7 @@
 // Lucide Static 1.73.0 icon paths. See lucide-LICENSE.txt.
 export const iconPaths = {
+  person: '<circle cx="12" cy="8" r="4"/><path d="M4 21v-2a5 5 0 0 1 5-5h6a5 5 0 0 1 5 5v2"/>',
+  storefront: '<path d="M4 10v11h16V10M3 10l2-6h14l2 6M3 10a3 3 0 0 0 6 0 3 3 0 0 0 6 0 3 3 0 0 0 6 0M10 21v-5h4v5"/>',
   record: '<path d="M12 20H4V3h11l4 4v4M14 3v5h5M7 11h4"/><circle cx="16" cy="16" r="3.5"/><path d="m19 19 3 3"/>',
   receipt: '<path d="M5 3h14v18l-2.3-2-2.3 2-2.4-2-2.4 2-2.3-2L5 21zM8 8h8m-8 4h6"/>',
   "wallet": "<path d=\"M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1\" />\n  <path d=\"M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4\" />",

@@ -153,7 +153,7 @@ test('Operations has both known routes, indexer degrades, resolver stays read-on
   assert.match(shared, /blockNumber: session\.head\.number/)
   assert.match(ops, /SHARED_VAULT_IDENTITY_AND_GETTERS_MATCHED/)
   assert.match(ops, /TIME_TX1_IDENTITY_NOT_VERIFIED/)
-  assert.match(ops, /INDEXER_ACTIVITY=/)
+  assert.match(ops, /label: 'Nhật ký Indexer',[^\n]+value: indexerStatusLabels\[activity\.status\], code: activity\.status/)
   assert.match(ops, /'STALE'/)
   assert.match(ops, /CATALOG_UNAVAILABLE/)
   assert.match(ops, /I1 \+ DERIVED GETTERS PASS/)

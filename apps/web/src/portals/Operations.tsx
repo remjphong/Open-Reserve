@@ -1,6 +1,7 @@
 import './gym-ops-d22.css'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { AgreementReceipt } from '../design-system/receipt'
+import { agreementParties, indexerStatusLabels, MetadataList } from '../design-system/metadata'
 import { agreement as fixture } from '../demo/agreement'
 import {
   DisabledAction, EmptyState, ErrorState, Icon, LoadingSkeleton, MoneyBreakdown, PortalPage,
@@ -23,9 +24,18 @@ type OpsValue = { session: Session; data: Shared; claim?: OpsClaim; claimError?:
 const base = (amount: bigint) => amount.toLocaleString('vi-VN') + ' đơn vị nhỏ nhất MRES (không phải VNĐ)'
 const claimStates = ['Không có', 'Đã đề xuất', 'Đã xác nhận', 'Đang phản đối', 'Đã chốt', 'Đã phân xử', 'Đã hủy']
 const fixtureLabel = 'MINH HỌA · DEMO_FIXTURE · KHÔNG PHẢI DỮ LIỆU FUJI'
+const actorLabels = { buyer: 'Người mua', merchant: 'Phòng tập', resolver: 'Bên phân xử', observer: 'Người quan sát' } as const
 
 function Section({ children }: { children: ReactNode }) {
   return <section className="card card-pad customer-flow-card">{children}</section>
+}
+
+function AgreementPortalLinks({ id, paths }: { id: string; paths: NonNullable<ReturnType<typeof knownPortalPaths>> }) {
+  return <nav className="or-actions ops-d22-portal-actions" aria-label={'Đối chiếu hợp đồng #' + id}>
+    <a className="or-action" href={paths.customer}><Icon name="person" />Khách hàng</a>
+    <a className="or-action" href={paths.gym}><Icon name="storefront" />Phòng tập</a>
+    <a className="or-action" href={paths.operations}><Icon name="scale" />Vận hành</a>
+  </nav>
 }
 
 function Fixture({ dispute }: { dispute: boolean }) {
@@ -82,11 +92,7 @@ function Browse({ page }: { page: 'overview' | 'agreements' | 'disputes' }) {
         Đây là liên kết đối chiếu, KHÔNG phải bằng chứng đã đăng nhập đủ ba ví.</p>
       {knownOperations.map(known => <div className="ops-d22-cross-row" key={'cross-' + known.id.toString()}>
         <strong>{known.label}</strong>
-        <div className="ops-d22-links">
-          <a className="inline-link" href={knownPortalPaths(known.id)!.customer}>Customer</a>
-          <a className="inline-link" href={knownPortalPaths(known.id)!.gym}>Gym</a>
-          <a className="inline-link" href={knownPortalPaths(known.id)!.operations}>Operations</a>
-        </div>
+        <AgreementPortalLinks id={known.id.toString()} paths={knownPortalPaths(known.id)!} />
       </div>)}
     </Section>
     <Section>
@@ -181,7 +187,9 @@ function EvidencePanel({ agreementId, claimId, hash }: { agreementId: bigint; cl
   }
   return <Section>
     <h3>Đối chiếu evidenceHash với Catalog</h3>
-    <p className="caption customer-wrap">Hash tham chiếu trên Vault: {hash}</p>
+    <MetadataList label="Tham chiếu bằng chứng" fields={[
+      { label: 'Hash bằng chứng trên Vault', icon: 'record', value: <code>{hash}</code> },
+    ]} />
     <button type="button" className="button" disabled={loading} onClick={() => void check()}>
       {loading ? 'Đang đọc Catalog…' : 'Kiểm tra bằng chứng · chỉ đọc'}
     </button>
@@ -202,8 +210,13 @@ function Ledger({ data }: { data: Shared }) {
   const audited = auditKnownOperationsSnapshot(data)
   return <Section>
     <h2>Số dư tài chính · Vault</h2>
-    <p className="caption customer-wrap">VAULT_READ_CONTRACT · Fuji chain {data.chainId} · Agreement #{data.agreementId.toString()}
-      {' · '}Block {data.blockNumber.toString()} · {data.vault}</p>
+    <MetadataList label="Nguồn sổ cái" fields={[
+      { label: 'Nguồn số dư', icon: 'record', value: 'Vault trên Avalanche Fuji', code: 'VAULT_READ_CONTRACT' },
+      { label: 'Hợp đồng', icon: 'file-text', value: '#' + data.agreementId.toString() },
+      { label: 'Mã mạng', value: data.chainId },
+      { label: 'Block đọc dữ liệu', icon: 'layers', value: data.blockNumber.toString() },
+      { label: 'Địa chỉ Vault', value: <code>{data.vault}</code> },
+    ]} />
     {audited.status !== 'IDENTITY_AND_LEDGER_MATCHED' ? <>
       <ErrorState>NOT_VERIFIED · {audited.reason} — Không hiển thị tiền hoặc suy ra quyền lợi
         khi danh tính agreement, terms hoặc I1/getter không khớp.</ErrorState>
@@ -229,10 +242,12 @@ function Ledger({ data }: { data: Shared }) {
         refundable = refundAuthorized - buyerRefunded.</p>
       <p className="caption">Đang khóa không đồng nghĩa được hoàn. Đã chốt không đồng nghĩa đã rút.
         disputedLocked không phải withdrawable; tiền chỉ được duyệt hoàn khi refundable từ Vault {'>'} 0.</p>
-      <p>Buyer: <span className="customer-wrap">{data.agreement.buyer}</span></p>
-      <p>Merchant: <span className="customer-wrap">{data.agreement.merchant}</span></p>
-      <p>Policy: {data.agreement.policy === 0 ? 'PER_SESSION' : 'TIME_ACCESS'}
-        {' · '}Terms: <span className="customer-wrap">{data.agreement.termsHash}</span></p>
+      <MetadataList label="Các bên và điều khoản" fields={[
+        ...agreementParties(data.agreement),
+        { label: 'Chính sách', icon: 'file-text', value: data.agreement.policy === 0 ? 'Theo buổi tập' : 'Theo thời gian',
+          code: data.agreement.policy === 0 ? 'PER_SESSION' : 'TIME_ACCESS' },
+        { label: 'Hash điều khoản', value: <code>{data.agreement.termsHash}</code> },
+      ]} />
     </>}
   </Section>
 }
@@ -265,14 +280,9 @@ function OtherPortalLinks({ id }: { id: bigint }) {
   const paths = knownPortalPaths(id)
   if (!paths) return null
   return <Section>
-    <h2>Đối chiếu cùng Agreement #{id.toString()}</h2>
-    <p className="caption">Các portal dùng cùng Vault và shared read helper; phải đăng nhập
-      từng vai thực tế để so sánh cùng block. Các liên kết không chứng minh phiên ví đã xác minh.</p>
-    <div className="ops-d22-links">
-      <a className="inline-link" href={paths.customer}>Customer · #{id.toString()}</a>
-      <a className="inline-link" href={paths.gym}>Gym · #{id.toString()}</a>
-      <a className="inline-link" href={paths.operations}>Operations · #{id.toString()}</a>
-    </div>
+    <h2>Đối chiếu hợp đồng #{id.toString()}</h2>
+    <p className="caption">Để so sánh tại cùng block, kết nối đúng ví ở từng portal.</p>
+    <AgreementPortalLinks id={id.toString()} paths={paths} />
   </Section>
 }
 
@@ -281,8 +291,11 @@ function Activity({ data }: { data: Shared }) {
   const canShow = activity.status === 'FRESH' || activity.status === 'STALE'
   return <Section>
     <h2>Nhật ký giao dịch · Chain Indexer</h2>
-    <p className="caption">INDEXER_ACTIVITY={activity.status} · LAST_INDEXED_BLOCK=
-      {activity.lastIndexedBlock?.toString() ?? 'NOT_VERIFIED'} · VAULT_HEAD={data.blockNumber.toString()}</p>
+    <MetadataList label="Trạng thái nhật ký" fields={[
+      { label: 'Nhật ký Indexer', icon: 'history', value: indexerStatusLabels[activity.status], code: activity.status },
+      { label: 'Block Indexer gần nhất', value: activity.lastIndexedBlock?.toString() ?? 'Chưa xác minh' },
+      { label: 'Block Vault đọc dữ liệu', icon: 'layers', value: data.blockNumber.toString() },
+    ]} />
     {activity.status !== 'FRESH' && <ErrorState>Lịch sử hoạt động chưa tải đầy đủ. {activity.reason ??
       'Indexer có thể thiếu lịch sử hoặc chậm; không kết luận danh sách rỗng hay đồng bộ đầy đủ.'}</ErrorState>}
     {canShow && activity.items.length > 0 && <ul>
@@ -338,9 +351,14 @@ function Live({ route }: { route: LiveRoute }) {
       <p className="caption">Đọc trực tiếp ID, không phụ thuộc danh sách Indexer và không xác nhận full historical sync.</p>
       {state.loading && <LoadingSkeleton />}
       {state.message && <ErrorState>{state.message}</ErrorState>}
-      {snap && <p className="caption customer-wrap">CONNECTED_ACCOUNT={snap.session.account}
-        {' · '}ROLE={role} · {resolver ? 'RESOLVER_ADDRESS_MATCHED · READ_ONLY' : 'READ_ONLY_VIEWER'}
-        {' · '}Block hash {snap.session.head.hash ?? 'NOT_VERIFIED'}</p>}
+      {snap && <MetadataList label="Ví và quyền truy cập" fields={[
+        { label: 'Ví đang kết nối', icon: 'wallet', value: <code>{snap.session.account}</code> },
+        { label: 'Vai trò trên Vault', value: actorLabels[snap.data.role] },
+        { label: 'Đối chiếu ví phân xử', icon: 'scale', value: resolver ? 'Trùng địa chỉ phân xử' : 'Chưa xác minh vai trò phân xử',
+          code: resolver ? 'RESOLVER_ADDRESS_MATCHED' : 'READ_ONLY_VIEWER' },
+        { label: 'Quyền truy cập', value: 'Chỉ đọc', code: 'READ_ONLY' },
+        { label: 'Hash block', icon: 'layers', value: snap.session.head.hash ? <code>{snap.session.head.hash}</code> : 'Chưa xác minh' },
+      ]} />}
       <button type="button" className="button button-primary" disabled={state.loading}
         onClick={() => void state.refresh(!snap)}>
         {snap ? 'Làm mới xác minh' : 'Kết nối ví / đọc lại Vault'}
