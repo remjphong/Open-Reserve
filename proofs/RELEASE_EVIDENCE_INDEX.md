@@ -106,7 +106,7 @@ Independent discussion provenance: [CTO D21 Round A](https://github.com/remjphon
 | Raw WSL / RPC logs for three refund TX | **OWNER_REPORTED** through Issue/Wallet review; not all raw original evidence included in release index. |
 | Public sanitized screenshots | **NOT_UPLOADED**; require original bytes, privacy inspection, checksum and explicit Owner consent before publishing. |
 | Timed continuous six-screen Core role-switched rehearsal | **NOT_VERIFIED**; previously six separate route content checks. |
-| Playable local demo video / recording export and playback | **NOT_VERIFIED**; [W6 storyboard/voiceover](https://github.com/remjphong/Open-Reserve/issues/36#issuecomment-7054404022) is **SCRIPT ONLY**. |
+| Demo video | [Open Reserve - Video Demo](https://youtu.be/ilOEBXjRdaw) · **3:51**, unlisted on YouTube. YouTube metadata and the published description were checked without signing in. The description focuses on the PT #1 deposit, session settlement, gym withdrawal and refund after agreed termination. See the transaction chronology above for receipt evidence. The earlier [W6 storyboard/voiceover](https://github.com/remjphong/Open-Reserve/issues/36#issuecomment-7054404022) is a separate planning document. |
 | Pitch slides file or accessible URL | **NOT_VERIFIED**. |
 | Full local 3-services readiness and Fuji historical Indexer sync | **NOT_VERIFIED / currently local services DOWN** (see actual preflight). |
 | Full wrong-wallet/chain, rejected permission, disconnect/reconnect, stale event negative runtime QA; physical-device mobile accessibility | **NOT_RUN**; source-level mobile keyboard vs CSS order P2 [W5 review](https://github.com/remjphong/Open-Reserve/issues/35#issuecomment-7055181219). |

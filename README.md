@@ -2,6 +2,10 @@
 
 OpenReserve là bản mẫu quản lý khoản trả trước cho phòng tập. Hợp đồng thông minh `ReserveVault` trên Avalanche Fuji giữ token thử nghiệm và kiểm tra quyền rút của phòng tập, quyền nhận hoàn của khách. Khách, phòng tập và bên phân xử có thể đối chiếu cùng một hợp đồng và các biên nhận giao dịch.
 
+## Video demo
+
+[Xem Open Reserve - Video Demo (3 phút 51 giây)](https://youtu.be/ilOEBXjRdaw). Video tập trung vào gói PT #1 trên Avalanche Fuji: khách nạp **1.003**, phòng tập rút **100** sau khi buổi đầu tiên được chốt, và khách nhận lại **903** sau khi hai bên đồng ý kết thúc gói. Các số liệu dùng đơn vị nhỏ nhất của token thử nghiệm MRES. [Đối chiếu biên nhận giao dịch](proofs/RELEASE_EVIDENCE_INDEX.md#avalanche-fuji-transaction-chronology-and-scope).
+
 ## Chạy demo trên máy
 
 Cần Git, Node.js 24.x và npm 11.x. Các lệnh dưới đây dùng Bash (Linux, macOS hoặc WSL). Luồng xem demo này chạy bằng frontend và đọc Vault trực tiếp trên Fuji, nên có thể bắt đầu mà chưa cần Docker hay PostgreSQL.
