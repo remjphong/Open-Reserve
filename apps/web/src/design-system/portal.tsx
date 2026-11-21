@@ -55,10 +55,12 @@ export function AppShell({ role, path, items, children }: {
   role: Role; path: string; items: NavItem[]; children: ReactNode
 }) {
   const { label } = roles[role]
+  const entry = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming | undefined
+  const internalArrival = entry?.type !== 'reload' && document.referrer.startsWith(location.origin + '/')
   const home = '/' + role
   const nav = (style: string) => <RoleNavigation items={items} path={path} label={label} style={style} />
   const content = <>
-    <header className="header">
+    <header className={internalArrival ? 'header or-page-arrival' : 'header'}>
       <Brand home={home} />
       {role === 'customer' ? nav('top-nav') : <strong className="role-name">{label}</strong>}
       {role !== 'customer' && <WalletIdentity role={role} />}
@@ -112,11 +114,13 @@ export function SampleStates() {
   </div></details>
 }
 
-export function PortalPage({ breadcrumb, title, children }: {
-  breadcrumb: string; title: string; children: ReactNode
+export function PortalPage({ breadcrumb, title, children, back }: {
+  breadcrumb: string; title: string; children: ReactNode; back?: { href: string; label: string }
 }) {
   return <>
-    <div className="section-title"><div className="breadcrumb">{breadcrumb}</div><h1>{title}</h1></div>
+    <div className="section-title"><div className="breadcrumb">{breadcrumb}</div><div className="or-title-row">
+      {back && <a className="or-action or-icon-action or-back" href={back.href} aria-label={back.label} title={back.label}><Icon name="arrow-right" /></a>}
+      <h1>{title}</h1></div></div>
     {children}
   </>
 }

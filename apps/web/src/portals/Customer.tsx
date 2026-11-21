@@ -31,8 +31,8 @@ export function isCustomerRoute(path: string) {
     /^\/customer\/passes\/(?:OR-024(?:\/evidence)?|[0-9]+(?:\/dispute)?)$/.test(path)
 }
 
-function Page({ title, children }: { title: string; children: ReactNode }) {
-  return <PortalPage title={title} breadcrumb="Khách hàng">{children}</PortalPage>
+function Page({ title, children, back }: { title: string; children: ReactNode; back?: { href: string; label: string } }) {
+  return <PortalPage title={title} breadcrumb="Khách hàng" back={back}>{children}</PortalPage>
 }
 
 function Card({ children, className = '' }: { children: ReactNode; className?: string }) {
@@ -165,7 +165,7 @@ function Checkout({ pack }: { pack: Package }) {
       <p>{pack.description}</p><p className="money">{token(BigInt(pack.price))}</p>
       {pack.policy === 1 && <p>Quyền sử dụng dự kiến 90 ngày. Fuji chạy 270 giây. Gói bắt đầu khoảng 2 phút sau block dùng để chuẩn bị giao dịch.</p>}
       <p className="caption customer-wrap"><a href={termsUrl} className="inline-link" target="_blank" rel="noreferrer">Đọc điều khoản 1.0.1</a><br />{approvedTermsHash}</p>
-      <label className="customer-check"><input type="checkbox" checked={terms} onChange={event => setTerms(event.target.checked)} />
+      <label className="customer-check"><input type="checkbox" required checked={terms} onChange={event => setTerms(event.target.checked)} />
         Tôi đồng ý điều khoản 1.0.1 và sử dụng MRES thử nghiệm.</label>
     </Card>
     <Card><h2>Ví và giao dịch</h2><WalletControls {...walletControls(state)} busy={transaction.busy} />
@@ -175,8 +175,8 @@ function Checkout({ pack }: { pack: Package }) {
         {balance.gas === 0n && <p>Thiếu token mạng để trả phí gas.</p>}
         {balance.balance < BigInt(pack.price) && <p>Ví chưa đủ MRES để mua gói.</p>}
         {balance.allowance < BigInt(pack.price)
-          ? <Button disabled={disabled} onClick={() => void pay('approve')}>Cấp hạn mức MRES</Button>
-          : <Button disabled={disabled} onClick={() => void pay('deposit')}>Nạp vào Vault</Button>}
+          ? <Button disabled={disabled} onClick={() => void pay('approve')}>{transaction.busy ? 'Đang xử lý…' : 'Cấp hạn mức MRES'}</Button>
+          : <Button disabled={disabled} onClick={() => void pay('deposit')}>{transaction.busy ? 'Đang xử lý…' : 'Nạp vào Vault'}</Button>}
       </>}
       {transaction.feedback}
       <a className="inline-link" href={pass ? passRoot + '/' + pass : passRoot}>{pass ? 'Mở gói vừa mua' : 'Xem các gói của tôi'}</a>
@@ -188,8 +188,8 @@ function Passes() {
   const state = useWallet(listPasses)
   return <Page title="Các gói của tôi"><Card>
     <WalletControls {...walletControls(state)} />
-    <p className="caption">Lịch sử theo ví dùng quét AgreementOpened; nếu RPC giới hạn log, không được kết luận không có hợp đồng.</p>
-    <a className="inline-link" href="/customer/passes/1">Đọc trực tiếp Agreement #1 PT trên Fuji (không cần quét lịch sử)</a>
+    <p className="caption">Danh sách theo ví có thể thiếu gói nếu RPC giới hạn lịch sử.</p>
+    <a className="or-action" href="/customer/passes/1"><Icon name="layers" />Xem gói PT #1</a>
     {state.value && (state.value.data.length
       ? <ul>{state.value.data.map(log => <li key={String(log.args.agreementId)}><a className="inline-link" href={passRoot + '/' + log.args.agreementId}>
         Hợp đồng #{String(log.args.agreementId)} · {log.args.policy === 0 ? 'PT 10 buổi' : 'Tập không giới hạn'}
@@ -311,11 +311,11 @@ function Pass({ agreementId, dispute }: { agreementId: string; dispute: boolean 
           {data.activity.reason && <> · {data.activity.reason}</>}</p>
         <p className="caption">{data.activity.status !== 'FRESH' && 'Lịch sử hoạt động chưa tải đầy đủ. '}Indexer chỉ cung cấp lịch sử tham khảo; không được coi dữ liệu thiếu là danh sách trống đã xác minh.</p>
       </div>}
-      <a className="inline-link" href={dispute ? passRoot + '/' + id : passRoot}>{dispute ? 'Về chi tiết gói' : 'Về danh sách gói'}</a>
       {!isBuyer && data && <p>Hãy chọn ví người mua của gói này rồi làm mới để xem quyền lợi.</p>}
     </Card>
   )
-  return <Page title={dispute ? 'Phản đối đề nghị' : 'Gói của tôi · #' + id}>
+  return <Page title={dispute ? 'Phản đối đề nghị' : 'Gói của tôi · #' + id}
+    back={{ href: dispute ? passRoot + '/' + id : passRoot, label: dispute ? 'Về chi tiết gói' : 'Về danh sách gói' }}>
     {mismatch && <ErrorState>LEDGER_MISMATCH · Sổ cái chưa khớp. Hãy làm mới dữ liệu Vault.</ErrorState>}
     {data && session && isBuyer && !mismatch && <div className="customer-pass-grid">
       {'ledger' in data && <section className="or-receipt">
@@ -327,16 +327,19 @@ function Pass({ agreementId, dispute }: { agreementId: string; dispute: boolean 
           <strong className="or-result">{(data.agreement.policy === 0 ? data.ledger.buyerRefunded : data.ledger.earnedFinalized).toLocaleString('vi-VN')}</strong>
           đơn vị cơ sở của mock MRES (18 chữ số thập phân)</p>
         {id === ptAgreementId && data.agreement.policy === 0 && data.blockNumber >= 61401275n && data.ledger.buyerRefunded > 0n &&
-          <p>Theo biên nhận lịch sử, bạn đề nghị kết thúc gói và phòng tập đã đồng ý.
-            {' '}<a className="inline-link" href="https://testnet.snowtrace.io/tx/0xc378c67bd40cb1795dda3b4049c78d7ff0ce3645a3bef2c90c6878f342cc6b3c"><Icon name="receipt" />Biên nhận hoàn khi kết thúc gói ↗</a>
-          </p>}
+          <p>Theo biên nhận lịch sử, phòng tập đã đồng ý đề nghị kết thúc gói của bạn.</p>}
         <dl className="money-list">{([
           ['Bạn đã nạp', data.ledger.deposited],
           ['Phòng tập đã nhận', data.ledger.gymWithdrawn],
           ['Còn có thể nhận hoàn', data.ledger.refundable],
         ] as const).map(([label, amount]) => <div key={label}><dt>{label}</dt><dd>{amount.toLocaleString('vi-VN')}</dd></div>)}</dl>
-        {id === ptAgreementId && data.agreement.policy === 0 &&
-          <a className="inline-link" href="#pt-receipts"><Icon name="receipt" />Xem biên nhận buổi PT</a>}
+        <div className="or-actions">
+          {id === ptAgreementId && data.agreement.policy === 0 && data.blockNumber >= 61401275n && data.ledger.buyerRefunded > 0n &&
+            <a className="or-action" href="https://testnet.snowtrace.io/tx/0xc378c67bd40cb1795dda3b4049c78d7ff0ce3645a3bef2c90c6878f342cc6b3c"><Icon name="receipt" />Biên nhận hoàn khi kết thúc gói ↗</a>}
+          {id === ptAgreementId && data.agreement.policy === 0 &&
+            <a className="or-action" href="#pt-receipts"><Icon name="receipt" />Biên nhận buổi PT</a>}
+          <a className="or-action" href="#pass-source"><Icon name="record" />Nguồn dữ liệu</a>
+        </div>
         <p className="caption">Vault · Fuji thử nghiệm · block {String(data.blockNumber)}. Việc cung cấp dịch vụ ngoài đời chưa được xác minh.</p>
       </section>}
       <Card>
@@ -389,7 +392,7 @@ function Pass({ agreementId, dispute }: { agreementId: string; dispute: boolean 
           </div>}
     </div>}
     {transaction.feedback}
-    {isBuyer && !mismatch ? <details className="or-source"><summary>Nguồn dữ liệu và đối chiếu ví</summary>{source}</details> : source}
+    {isBuyer && !mismatch ? <details className="or-source" id="pass-source"><summary>Nguồn dữ liệu và đối chiếu ví</summary>{source}</details> : source}
   </Page>
 }
 

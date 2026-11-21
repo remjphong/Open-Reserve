@@ -157,3 +157,49 @@ html:has(.or-customer) { background: var(--or-paper); }
 .customer-pass-grid :is(li, p, a, dd) { overflow-wrap: anywhere; }
 .customer-pt-receipts { padding-inline-start: 1.25rem; }
 .workspace .wallet { color: var(--ink); }
+
+.or-actions, .or-title-row { display: flex; align-items: center; flex-wrap: wrap; gap: var(--space-2); }
+.or-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  padding: 6px 12px;
+  border: 1px solid var(--or-line);
+  border-radius: var(--radius);
+  background: var(--or-paper);
+  color: var(--or-petrol);
+  font: 600 14px/1.4 ReserveSans, sans-serif;
+}
+.or-action:hover { background: var(--or-sage); text-decoration: none; }
+.or-icon-action { width: 44px; padding: 0; }
+.or-back .icon { transform: rotate(180deg); }
+.or-title-row { flex-wrap: nowrap; }
+.or-title-row h1 { min-width: 0; }
+.or-title-row .or-back { flex: none; }
+.or-action:focus-visible, .customer-check:focus-within {
+  outline: 2px solid var(--or-petrol);
+  outline-offset: 3px;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .or-action, .button:enabled { transition: background-color 140ms ease, transform 140ms ease; }
+  .or-action:active, .button:enabled:active { transform: translateY(1px); }
+  .or-page-arrival { position: relative; }
+  .or-page-arrival::after {
+    content: '';
+    position: absolute;
+    inset: auto auto 0 0;
+    width: 3.5rem;
+    height: 2px;
+    background: var(--or-petrol);
+    opacity: 0;
+    pointer-events: none;
+    animation: or-arrival 190ms ease-out;
+  }
+  .workspace:has(.or-gym) .or-page-arrival::after { background: var(--or-sage); }
+  @keyframes or-arrival {
+    from { opacity: 1; transform: translateX(1rem); }
+    to { opacity: 0; transform: translateX(4rem); }
+  }
+}
