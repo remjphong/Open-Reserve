@@ -59,7 +59,7 @@ function Browse({ page }: { page: 'overview' | 'agreements' | 'disputes' }) {
         <ul>
           {knownOperations.map(known => <li key={known.id.toString()}>
             <a className="inline-link" href={knownPortalPaths(known.id)!.operations}>
-              Xem sổ cái · {known.label} <Icon name="arrow-right" />
+              {known.label} <Icon name="arrow-right" />
             </a>
           </li>)}
         </ul>
@@ -70,7 +70,7 @@ function Browse({ page }: { page: 'overview' | 'agreements' | 'disputes' }) {
         <ul>
           {knownOperations.map(known => <li key={known.id.toString()}>
             <a className="inline-link" href={knownPortalPaths(known.id)!.claim}>
-              Kiểm tra claim #1 · {known.label} <Icon name="arrow-right" />
+              {known.label} · Claim #1 <Icon name="arrow-right" />
             </a>
           </li>)}
         </ul>
