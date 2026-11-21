@@ -81,6 +81,15 @@ npm run dev --workspace @openreserve/web -- --host 127.0.0.1 --port 5173 --stric
 
 Open `http://127.0.0.1:5173/customer/passes/1` only if your app started. Your Core wallet must provide access to appropriate Fuji account; **opening a local port does not prove you control Owner wallets**. No invitation to sign or broadcast new testnet transactions.
 
+For repeat development runs, save the same four public `VITE_*` values as plain `NAME=value` lines in `apps/web/.env.local` and restart Vite. The file is ignored by Git and needs to be set up separately in a fresh clone or worktree. If you instead use the command above, those values apply only to that invocation.
+
+| Message | What to check |
+| --- | --- |
+| `NOT_VERIFIED · Chưa cấu hình Vault thử nghiệm.` | Vite needs a supported chain ID, a valid Vault address and a numeric deployment block before the app can ask the wallet for accounts. Restart Vite with the values above. |
+| `Chưa phát hiện ví trình duyệt.` | Open the app in the browser profile where your wallet extension is installed and allowed to run. |
+| `Ví chưa kết nối.` | Unlock the wallet, keep using the same URL origin as before (for example `http://localhost:5175`), and use the page's connect control to grant account access if needed. |
+| `Sai mạng.` | Select Avalanche Fuji C-Chain (43113) in the wallet and retry. |
+
 **Optional backend Compose** (only with disposable local credentials and Docker installed) is documented in [existing README](../README.md#docker-compose) and [Compose proof](../proofs/d18-11-compose-integration.md). The CI smoke test without a Fuji RPC intentionally may report Indexer `/health=200`, `/ready=503` — **not** full Fuji historical sync. The [D16-09 service-contracts snapshot](../docs/service-contracts.md) is **historical**, not today's runtime specification.
 
 ## 5. Current status and missing Owner deliverables

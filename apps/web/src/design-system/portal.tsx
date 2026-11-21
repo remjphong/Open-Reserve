@@ -66,10 +66,10 @@ export function AppShell({ role, path, items, children }: {
     {nav('mobile-nav')}
     <main id="main" className={'container or-' + role} tabIndex={-1}>
       {role === 'operations' && <div className="notice"><Icon name="info" /><span>
-        <strong>FUJI READ ONLY — ĐỐI CHIẾU TẠI TỪNG TRANG</strong>
+        <strong>FUJI READ ONLY — ĐỐI CHIẾU TẠI TỪNG TRANG</strong>{' '}
         Số dư chỉ được hiển thị sau khi trang xác minh Vault; hồ sơ OR-024 và PT-04 là DEMO_FIXTURE riêng.
         Không có chức năng ký hoặc gửi giao dịch từ Operations.</span></div>}
-      {role === 'gym' && <div className="notice"><Icon name="info" /><span><strong>FUJI READ ONLY — GỬI GIAO DỊCH ĐANG KHÓA</strong>
+      {role === 'gym' && <div className="notice"><Icon name="info" /><span><strong>FUJI READ ONLY — GỬI GIAO DỊCH ĐANG KHÓA</strong>{' '}
         Số dư thật chỉ có sau khi xác minh Vault và ví merchant. Hợp đồng OR-024 được gắn nhãn DEMO_FIXTURE riêng.</span></div>}
       {children}
     </main>

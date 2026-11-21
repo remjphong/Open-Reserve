@@ -3,8 +3,7 @@ import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { AgreementReceipt } from '../design-system/receipt'
 import { agreement as fixture } from '../demo/agreement'
 import {
-  DisabledAction, EmptyState, ErrorState, LoadingSkeleton, MoneyBreakdown,
-  OverviewCard, PortalPage,
+  DisabledAction, EmptyState, ErrorState, Icon, LoadingSkeleton, MoneyBreakdown, PortalPage,
 } from '../design-system/portal'
 import { errorMessage, provider, sameAddress, walletSession, type Session } from '../lib/customer-chain'
 import { readSharedAgreement } from '../lib/shared-ledger'
@@ -52,20 +51,30 @@ function Browse({ page }: { page: 'overview' | 'agreements' | 'disputes' }) {
   const title = page === 'overview' ? 'Tổng quan vận hành' :
     page === 'agreements' ? 'Sổ cái theo Agreement ID' : 'Theo dõi phản đối'
   return <PortalPage breadcrumb="Vận hành / Fuji — chỉ đọc" title={title}>
-    <p className="caption">Không quét toàn bộ lịch sử, không suy ra số hợp đồng hoặc số tranh chấp từ danh sách đang hiển thị.</p>
-    <div className="grid">
-      {page !== 'disputes' && knownOperations.map(known =>
-        <OverviewCard key={known.id.toString()} title={known.label}
-          href={knownPortalPaths(known.id)!.operations} link="Kiểm toán sổ cái từ Vault">
-          <p>Đọc trực tiếp Agreement #{known.id.toString()} trên Fuji ở một block được ghim.
-            Không suy ra số dư hiện tại từ lịch sử giao dịch.</p>
-        </OverviewCard>)}
-      {page !== 'agreements' && knownOperations.map(known =>
-        <OverviewCard key={'claim-' + known.id} title={'Claim theo ID · Agreement #' + known.id}
-          href={knownPortalPaths(known.id)!.claim} link="Thử đọc claim ID #1">
-          <p>Claim #1 chỉ là ID cần kiểm tra; không khẳng định claim tồn tại, bị phản đối
-            hay có quyền giải ngân. Không suy ra lịch sử đã quét đầy đủ.</p>
-        </OverviewCard>)}
+    <p className="caption ops-d22-browse-note">Các lối vào dưới đây tra theo ID. Danh sách này không đại diện cho toàn bộ lịch sử hợp đồng hoặc phản đối.</p>
+    <div className="ops-d22-registers">
+      {page !== 'disputes' && <section className="ops-d22-register" aria-labelledby="ops-register-ledger">
+        <h2 id="ops-register-ledger"><Icon name="record" />Sổ cái Vault</h2>
+        <p className="caption">Đọc số dư trực tiếp trên Fuji tại một block được ghim.</p>
+        <ul>
+          {knownOperations.map(known => <li key={known.id.toString()}>
+            <a className="inline-link" href={knownPortalPaths(known.id)!.operations}>
+              Xem sổ cái · {known.label} <Icon name="arrow-right" />
+            </a>
+          </li>)}
+        </ul>
+      </section>}
+      {page !== 'agreements' && <section className="ops-d22-register" aria-labelledby="ops-register-claims">
+        <h2 id="ops-register-claims"><Icon name="scale" />Hồ sơ phản đối</h2>
+        <p className="caption">Claim #1 là ID cần đối chiếu. Chưa xác nhận trạng thái hoặc quyền giải ngân.</p>
+        <ul>
+          {knownOperations.map(known => <li key={known.id.toString()}>
+            <a className="inline-link" href={knownPortalPaths(known.id)!.claim}>
+              Kiểm tra claim #1 · {known.label} <Icon name="arrow-right" />
+            </a>
+          </li>)}
+        </ul>
+      </section>}
     </div>
     <Section>
       <h2>Cùng Vault · ba portal</h2>

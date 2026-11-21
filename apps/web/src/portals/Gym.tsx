@@ -1,7 +1,7 @@
 import './gym-ops-d22.css'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { agreement as fixtureAgreement } from '../demo/agreement'
-import { DisabledAction, EmptyState, ErrorState, LoadingSkeleton, MoneyFigure, PortalPage } from '../design-system/portal'
+import { DisabledAction, EmptyState, ErrorState, Icon, LoadingSkeleton, MoneyFigure, PortalPage } from '../design-system/portal'
 import { deployment, errorMessage, provider, sameAddress, walletSession, type Session } from '../lib/customer-chain'
 import { readSharedAgreement } from '../lib/shared-ledger'
 import { wallet1PtReport } from '../lib/customer-pt-proof'
@@ -249,31 +249,41 @@ function VaultLabel({ item }: { item: SharedData }) {
 }
 function WalletPanel({ state }: { state: GymControl }) {
   const session = state.snapshot?.session
-  return <Card>
-    <h2>Ví chủ gym · Fuji</h2>
-    {session ? <p className="caption customer-wrap">Đã đọc ví {session.account} · chain {session.chain.id} · block {short(state.snapshot!.headBlock)}
-      {' · '}Hash {session.head.hash ?? 'NOT_VERIFIED'}
-      {state.snapshot?.direct ? ' · VERIFIED_DIRECT_ID_ONLY' : ' · VERIFIED_FULL_DISCOVERY'}</p>
-      : <p className="caption">Đọc agreement ID trực tiếp không phụ thuộc quét danh sách; danh sách merchant chỉ được xác minh nếu toàn bộ log đã đọc thành công.</p>}
-    {!session && state.verifiedIdentity && <p className="caption customer-wrap">
-      Đã đọc địa chỉ ví {state.verifiedIdentity.session.account} · chain {state.verifiedIdentity.session.chain.id}
-      {' · '}VAULT_VERIFIED · MERCHANT_HISTORY_NOT_VERIFIED.
-      Chưa xác minh danh sách hợp đồng, quyền merchant theo từng agreement hoặc số tiền tổng hợp.
-    </p>}
-    {state.loading && <LoadingSkeleton />}
-    {state.error && <ErrorState>{state.error} — Không hiển thị danh sách rỗng đã xác minh khi đọc lỗi.</ErrorState>}
-    {deployment && <button type="button" className="button button-primary" disabled={state.loading}
-      onClick={() => void state.refresh(!session && !state.verifiedIdentity)}>{session
-        ? (state.snapshot?.direct ? 'Làm mới agreement ID' : 'Làm mới Vault và log')
-        : state.verifiedIdentity ? 'Thử lại quét lịch sử (Vault đã xác minh)' : 'Kết nối ví merchant / thử lại'}</button>}
-    {!deployment && <p className="caption">NOT_VERIFIED · Chưa cấu hình Vault. Không có dữ liệu on-chain.</p>}
-    <p className="caption">Quyền ký phải thuộc địa chỉ merchant trong từng agreement. Nhân viên chỉ xem DEMO_FIXTURE; không có tài khoản nhân viên xác thực.</p>
-    <p><a className="inline-link" href="/gym/agreements/1">Đọc trực tiếp Agreement #1 từ Vault (không quét lịch sử)</a></p>
-    <p><a className="inline-link" href="/gym/agreements/2">Đọc trực tiếp Agreement #2 TIME_ACCESS từ Vault (không quét lịch sử)</a></p>
-    <p className="caption">TX mở Agreement #2 có receipt được Wallet 2 báo cáo, không đồng nghĩa
-      đã chốt/đã rút doanh thu hoặc đã duyệt hoàn.</p>
-    <a className="inline-link" href={fLink}>Xem hợp đồng minh họa tách biệt</a>
-  </Card>
+  return <div className="gym-d22-wallet-layout">
+    <section className="card card-pad gym-d22-wallet">
+      <h2><Icon name="wallet" />Ví chủ gym · Fuji</h2>
+      {session ? <p className="caption customer-wrap">Đã đọc ví {session.account} · chain {session.chain.id} · block {short(state.snapshot!.headBlock)}
+        {' · '}Hash {session.head.hash ?? 'NOT_VERIFIED'}
+        {state.snapshot?.direct ? ' · VERIFIED_DIRECT_ID_ONLY' : ' · VERIFIED_FULL_DISCOVERY'}</p>
+        : <p className="caption">Danh sách hợp đồng được xác minh khi đọc đủ nhật ký của ví merchant.</p>}
+      {!session && state.verifiedIdentity && <p className="caption customer-wrap">
+        Đã đọc địa chỉ ví {state.verifiedIdentity.session.account} · chain {state.verifiedIdentity.session.chain.id}
+        {' · '}VAULT_VERIFIED · MERCHANT_HISTORY_NOT_VERIFIED.
+        Chưa xác minh danh sách hợp đồng, quyền merchant theo từng agreement hoặc số tiền tổng hợp.
+      </p>}
+      {state.loading && <LoadingSkeleton />}
+      {state.error && <ErrorState>{state.error} — Không hiển thị danh sách rỗng đã xác minh khi đọc lỗi.</ErrorState>}
+      {deployment && <button type="button" className="button button-primary" disabled={state.loading}
+        onClick={() => void state.refresh(!session && !state.verifiedIdentity)}>{session
+          ? (state.snapshot?.direct ? 'Làm mới agreement ID' : 'Làm mới Vault và log')
+          : state.verifiedIdentity ? 'Thử lại quét lịch sử (Vault đã xác minh)' : 'Kết nối ví merchant / thử lại'}</button>}
+      {!deployment && <p className="caption">NOT_VERIFIED · Chưa cấu hình Vault. Không có dữ liệu on-chain.</p>}
+      <details className="gym-d22-wallet-scope">
+        <summary>Quyền của ví phòng tập</summary>
+        <p className="caption">Quyền ký thuộc địa chỉ merchant của từng agreement. Nhân viên chỉ xem DEMO_FIXTURE và chưa có tài khoản xác thực.</p>
+      </details>
+    </section>
+    <section className="card card-pad gym-d22-direct">
+      <h2><Icon name="receipt" />Tra hợp đồng từ Vault</h2>
+      <p className="caption">Đọc theo ID, độc lập với việc quét lịch sử.</p>
+      <ul>
+        <li><a className="inline-link" href="/gym/agreements/1">Agreement #1 · Gói PT <Icon name="arrow-right" /></a></li>
+        <li><a className="inline-link" href="/gym/agreements/2">Agreement #2 · TIME_ACCESS <Icon name="arrow-right" /></a></li>
+      </ul>
+      <p className="caption">Wallet 2 báo cáo biên nhận cho giao dịch mở Agreement #2.</p>
+      <a className="inline-link" href={fLink}>Xem hợp đồng minh họa <Icon name="arrow-right" /></a>
+    </section>
+  </div>
 }
 
 function AgreementSummary({ item }: { item: SharedData }) {
@@ -512,7 +522,7 @@ function LiveGym({ route }: { route: GymRoute }) {
   const target = snap && route.id ? (snap.direct?.id === route.id ? snap.direct
     : snap.agreements?.find(entry => entry.id === route.id)) : undefined
   return <>
-    {!snap && <div className="gym-d22-summary"><p>Phòng tập · Fuji</p>
+    {!snap && <div className="gym-d22-summary gym-d22-summary-pending"><p className="breadcrumb">Phòng tập · Fuji</p>
       <h1>{route.id ? 'Hợp đồng #' + short(route.id) : 'Hợp đồng phòng tập'}</h1>
       <p>{state.loading ? 'Đang đọc Vault…' : 'Chưa xác minh được số dư của ví phòng tập.'}</p>
     </div>}
