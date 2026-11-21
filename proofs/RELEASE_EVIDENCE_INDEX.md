@@ -83,6 +83,20 @@ These equations must not be converted to VND/whole MRES. The direct Vault getter
 
 **Do not infer** a hidden runtime service from GitHub Compose CI. HTTP000 local /health and /ready mean no HTTP response, not passing or failing readiness semantics from a live server.
 
+## D21 — Cross-industry vision and scaling claims (RESEARCH, NOT RELEASE)
+
+The [cross-industry vision and evidence-gated roadmap](../docs/PRODUCT_VISION_AND_SCALE_ROADMAP.md) is **CTO-authored research synthesis**, published 21 Nov 2026. It cites public first-party ten-class Pilates terms, Fresha multi-part service packages, reported Vietnam prepaid incidents, current Solidity and the separate Worker 4/5/6 review record. **No independent post-publication Worker5 documentation review is implied by this index.**
+
+| Claim evaluators might infer | Exact evidence class | Verdict / boundary |
+| --- | --- | --- |
+| Gym PT10 prototype proves conditional accounting and a cooperative refund flow | [Vault source](../contracts/src/ReserveVault.sol), [Wallet2/Owner refund receipts](https://github.com/remjphong/Open-Reserve/issues/27#issuecomment-7053821341), [bounded technical acceptance](https://github.com/remjphong/Open-Reserve/issues/27#issuecomment-7053895754) | **SOURCE_VERIFIED / OWNER_REPORTED + WALLET_REVIEWED**; not a guarantee against bankrupt or silent merchant |
+| Merchant silent after buyer requests termination can be escalated automatically | [Vault termination state machine](https://github.com/remjphong/Open-Reserve/blob/unihack-final/contracts/src/ReserveVault.sol#L277-L343) | **NOT_SUPPORTED_IN_V1**: accept/dispute needs other party and Resolver path requires DISPUTED |
+| TIME_ACCESS earned seconds independently prove gym was open | [Merchant proposed TIME](https://github.com/remjphong/Open-Reserve/blob/unihack-final/contracts/src/ReserveVault.sol#L158-L188), [time finalization](https://github.com/remjphong/Open-Reserve/blob/unihack-final/contracts/src/ReserveVault.sol#L487-L499) | **NOT_VERIFIED**; nonzero evidenceHash and eligible interval do not attest physical availability |
+| Boutique 10-class studios and prepaid spa packages exist | [Top Pilates offer A](https://pilates.com.vn/goi-tap/goi-tap-lop-nhom-10-buoi-80.html), [distinct offer B](https://pilates.com.vn/packages), [Fresha products](https://www.fresha.com/help-center/knowledge-base/memberships-packages-and-gift-cards/100670-packages-overview) | **EXTERNAL_FIRST_PARTY** for product terms/existence, **NOT_VERIFIED** OpenReserve adoption, expiry/no-show enforcement or merchant economics |
+| Full cross-industry policies, financed merchant liquidity, fiat payment permissions, revenue/TAM, signed vertical pilots | [Cross-industry roadmap](../docs/PRODUCT_VISION_AND_SCALE_ROADMAP.md), [unit economics](../research/unit-economics.md), [legal status](../research/legal-scope.md) | **HYPOTHESIS / FUTURE / NOT_VERIFIED**, **not a shipped feature or commercial claim** |
+
+Independent discussion provenance: [CTO D21 Round A](https://github.com/remjphong/Open-Reserve/issues/40#issuecomment-7056919857) · [CTO D21 Round B](https://github.com/remjphong/Open-Reserve/issues/40#issuecomment-7057230725) · [W4 Round A](https://github.com/remjphong/Open-Reserve/issues/27#issuecomment-7056947524) · [W5 Round B](https://github.com/remjphong/Open-Reserve/issues/35#issuecomment-7057233329) · [W6 Round B](https://github.com/remjphong/Open-Reserve/issues/36#issuecomment-7057235128). **Worker 4 Round B was paused/not completed; no four-way final consensus claimed.**
+
 ## Not-public artifacts and submission obligations
 
 | Artifact | Public state as of this index |
