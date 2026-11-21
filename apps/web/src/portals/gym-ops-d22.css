@@ -1,0 +1,48 @@
+.gym-d22-summary, .ops-d22-case {
+  padding: clamp(20px, 4vw, 48px);
+  margin-block: 16px;
+  overflow-wrap: anywhere;
+  font: 1rem/1.5 ReserveSans, sans-serif;
+}
+.gym-d22-summary {
+  background: var(--or-petrol, #18564e);
+  color: var(--or-paper, #fbfaf5);
+}
+.ops-d22-case {
+  background: var(--or-sage, #e4eee7);
+  color: var(--or-ink, #172f2b);
+  border: 1px solid var(--or-line, #a4b6ad);
+}
+.gym-d22-summary h1, .ops-d22-case h2 {
+  color: inherit;
+  font: bold clamp(1.65rem, 3.2vw, 2.75rem)/1.19 ReserveSerif, Georgia, serif;
+  margin: 8px 0;
+}
+.gym-d22-summary small, .ops-d22-case small { display: block; font-size: .875rem; }
+.gym-d22-amounts, .ops-d22-amounts { margin: 16px 0; }
+.gym-d22-amounts div, .ops-d22-amounts div {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  align-items: baseline;
+  gap: 12px;
+  padding: 8px 0;
+  border-top: 1px solid var(--or-line, #a4b6ad);
+}
+.gym-d22-amounts dd, .ops-d22-amounts dd {
+  margin: 0;
+  text-align: right;
+  font: bold 1.35rem/1.3 ReserveSerif, Georgia, serif;
+  font-variant-numeric: tabular-nums;
+}
+.gym-d22-summary a, .ops-d22-case a, .gym-d22-details summary, .ops-d22-case summary {
+  color: inherit;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.gym-d22-summary a:focus-visible, .ops-d22-case :focus-visible, .gym-d22-details summary:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 3px;
+}
