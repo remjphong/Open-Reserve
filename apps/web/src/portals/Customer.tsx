@@ -35,8 +35,8 @@ function Page({ title, children }: { title: string; children: ReactNode }) {
   return <PortalPage title={title} breadcrumb="Khách hàng">{children}</PortalPage>
 }
 
-function Card({ children }: { children: ReactNode }) {
-  return <section className="card card-pad customer-flow-card">{children}</section>
+function Card({ children, className = '' }: { children: ReactNode; className?: string }) {
+  return <section className={`card card-pad customer-flow-card ${className}`}>{children}</section>
 }
 
 function Button({ children, disabled, onClick }: { children: ReactNode; disabled?: boolean; onClick: () => void }) {
@@ -304,14 +304,14 @@ function Pass({ agreementId, dispute }: { agreementId: string; dispute: boolean 
   }
   const mismatch = data && 'ledger' in data && !classifyPtBalances(data.ledger).valid
   const source = (
-    <Card><WalletControls {...walletControls(state)} busy={transaction.busy} />
+    <Card className="customer-pass-source"><WalletControls {...walletControls(state)} busy={transaction.busy} />
       {data && 'activity' in data && <div className="customer-wrap">
         <p className="caption">Nguồn số tiền: VAULT_READ_CONTRACT · Fuji 43113 · block {data.blockNumber.toString()}
           {' · '}Indexer: {data.activity.status}
           {data.activity.reason && <> · {data.activity.reason}</>}</p>
         <p className="caption">{data.activity.status !== 'FRESH' && 'Lịch sử hoạt động chưa tải đầy đủ. '}Indexer chỉ cung cấp lịch sử tham khảo; không được coi dữ liệu thiếu là danh sách trống đã xác minh.</p>
       </div>}
-      <p><a className="inline-link" href={dispute ? passRoot + '/' + id : passRoot}>{dispute ? 'Về chi tiết gói' : 'Về danh sách gói'}</a></p>
+      <a className="inline-link" href={dispute ? passRoot + '/' + id : passRoot}>{dispute ? 'Về chi tiết gói' : 'Về danh sách gói'}</a>
       {!isBuyer && data && <p>Hãy chọn ví người mua của gói này rồi làm mới để xem quyền lợi.</p>}
     </Card>
   )
@@ -323,7 +323,7 @@ function Pass({ agreementId, dispute }: { agreementId: string; dispute: boolean 
         {data.agreement.policy === 0
           ? <figure><img alt="" src={new URL('../openreserve-ui/assets/gym.webp', import.meta.url).href} /><figcaption>Ảnh minh họa phòng tập</figcaption></figure>
           : <p>Mô phỏng Fuji 270 giây. Giá trị được ghi nhận theo thời gian đủ điều kiện.</p>}
-        <p>{data.agreement.policy === 0 ? 'Bạn đã nhận lại' : 'Đã chốt cho phòng tập'}
+        <p className="or-receipt-result">{data.agreement.policy === 0 ? 'Bạn đã nhận lại' : 'Đã chốt cho phòng tập'}
           <strong className="or-result">{(data.agreement.policy === 0 ? data.ledger.buyerRefunded : data.ledger.earnedFinalized).toLocaleString('vi-VN')}</strong>
           đơn vị cơ sở của mock MRES (18 chữ số thập phân)</p>
         {id === ptAgreementId && data.agreement.policy === 0 && data.blockNumber >= 61401275n && data.ledger.buyerRefunded > 0n &&
@@ -396,7 +396,7 @@ function Pass({ agreementId, dispute }: { agreementId: string; dispute: boolean 
 export function Customer({ path }: { path: string }) {
   if (path === '/customer') return <Page title="Chọn gói tập">
     <p className="caption customer-catalog-note">{fixture} · Thanh toán bằng token thử nghiệm.</p>
-    <Card><h2>Theo dõi Agreement #1 đã có trên Fuji</h2>
+    <Card className="customer-feature"><h2>Theo dõi Agreement #1 đã có trên Fuji</h2>
       <p>Ví Buyer có thể đọc sổ cái và bốn giao dịch PT do Wallet 1 báo cáo.
         Số dư chỉ được hiển thị sau khi kiểm tra Vault tại block được ghim.</p>
       <p className="caption">WALLET1_REPORTED_VERIFIED · Không tự động xác nhận số dư hiện tại hay quyền hoàn tiền.</p>

@@ -72,24 +72,79 @@ h1, h2, .brand, .or-result { font-family: ReserveSerif, Georgia, serif; font-wei
 .caption, .breadcrumb { font-size: 14px; }
 .inline-link, summary { min-height: 44px; align-content: center; }
 :focus-visible { outline: 3px solid currentColor; outline-offset: 3px; }
-.or-customer { max-width: 60rem; background: var(--or-paper); min-height: calc(100vh - 68px); }
+html:has(.or-customer) { background: var(--or-paper); }
+.or-customer {
+  max-width: 62rem;
+  padding: clamp(20px, 3vw, 36px) clamp(16px, 4vw, 40px) 40px;
+}
+.or-customer .section-title {
+  margin: 0 0 var(--space-5);
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--or-line);
+}
+.or-customer .section-title h1 {
+  font-size: clamp(28px, 3.5vw, 38px);
+  overflow-wrap: anywhere;
+}
+.customer-feature {
+  background: var(--or-sage);
+  border-inline-start: 3px solid var(--or-petrol);
+}
+.customer-feature > p { max-width: 68ch; }
+.customer-package-grid .money { margin-top: var(--space-2); }
+.customer-pass-source {
+  max-width: 43rem;
+  padding: var(--space-4);
+  overflow-wrap: anywhere;
+}
+.customer-pass-source .state-example {
+  border-inline-start: 3px solid currentColor;
+  border-radius: 0 var(--radius) var(--radius) 0;
+}
+.customer-pass-source .state-example p { margin: var(--space-1) 0 0; }
+.customer-pass-source .inline-link { margin-top: var(--space-1); }
 .or-operations { background: var(--or-sage); }
+.notice { align-items: flex-start; }
+.notice .icon { margin-top: 2px; }
+.notice strong { display: block; margin-bottom: var(--space-1); font-weight: 600; }
 .workspace:has(.or-gym) .header { background: var(--or-petrol); color: var(--or-paper); }
 .workspace:has(.or-gym) .header .brand { color: inherit; }
 .workspace:has(.or-gym) .header .brand img { filter: brightness(0) invert(1); }
 .customer-pass-grid { display: grid; gap: var(--space-4); grid-template-columns: minmax(0, 1fr); }
 .or-receipt { overflow-wrap: anywhere; border-bottom: 1px solid var(--or-line); }
-.or-receipt h2 { font-size: clamp(26px, 3vw, 44px); line-height: 1.18; }
-.or-receipt figure { margin: 16px 0; }
-.or-receipt figure img { width: 100%; max-height: 170px; aspect-ratio: 620/174; object-fit: cover; display: block; }
+.or-receipt h2 { font-size: clamp(24px, 3vw, 36px); line-height: 1.2; }
+.or-receipt figure { margin: var(--space-4) 0; }
+.or-receipt figure img {
+  width: 100%;
+  max-height: 192px;
+  aspect-ratio: 4 / 1;
+  object-fit: cover;
+  display: block;
+}
 .or-receipt figcaption { color: var(--secondary); font-size: 14px; }
-.or-result { display: block; font-size: clamp(54px, 6vw, 86px); line-height: 1.15; color: var(--primary); }
+.or-receipt-result {
+  padding: var(--space-4) clamp(16px, 3vw, 24px);
+  background: var(--or-sage);
+  border-inline-start: 3px solid var(--or-petrol);
+}
+.or-result {
+  display: block;
+  font-size: clamp(42px, 6vw, 72px);
+  line-height: 1.12;
+  color: var(--primary);
+}
 .or-receipt dd, .or-result { font-variant-numeric: tabular-nums; }
 .or-receipt dd { text-align: right; font-weight: 600; }
 .or-receipt p, .or-receipt dl { margin-block: 12px; }
 .or-source summary { cursor: pointer; font-weight: 600; }
 @media (max-width: 820px) {
   .header { flex-wrap: wrap; }
+  body:has(.or-customer) .mobile-nav {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-2);
+  }
+  body:has(.or-customer) .mobile-nav a { justify-content: center; }
   .money-list > div { flex-wrap: wrap; }
   .money-list dd { overflow-wrap: anywhere; margin-inline-start: auto; }
 }

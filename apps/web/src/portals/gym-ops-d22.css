@@ -1,5 +1,5 @@
 .gym-d22-summary, .ops-d22-case {
-  padding: clamp(20px, 4vw, 48px);
+  padding: clamp(14px, 2.4vw, 28px);
   margin-block: 16px;
   overflow-wrap: anywhere;
   font: 1rem/1.5 ReserveSans, sans-serif;
@@ -45,4 +45,87 @@
 .gym-d22-summary a:focus-visible, .ops-d22-case :focus-visible, .gym-d22-details summary:focus-visible {
   outline: 2px solid currentColor;
   outline-offset: 3px;
+}
+
+.gym-d22-summary-pending {
+  background: var(--or-paper);
+  color: var(--or-ink);
+  border: 1px solid var(--or-line);
+  border-inline-start: 4px solid var(--or-petrol);
+}
+
+.gym-d22-wallet-layout, .ops-d22-registers {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: clamp(12px, 2vw, 24px);
+  margin-block-end: 16px;
+}
+.gym-d22-wallet h2, .gym-d22-direct h2, .ops-d22-register h2 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-block-end: 6px;
+}
+.gym-d22-wallet h2 .icon, .gym-d22-direct h2 .icon, .ops-d22-register h2 .icon {
+  color: var(--or-petrol);
+}
+.gym-d22-wallet .state-example {
+  margin-block: 12px;
+  padding: 10px 12px;
+  overflow-wrap: anywhere;
+}
+.gym-d22-wallet > .button { margin-block-start: 12px; }
+.gym-d22-wallet-scope summary {
+  cursor: pointer;
+  font-size: .875rem;
+}
+.gym-d22-direct, .ops-d22-register {
+  background: var(--or-paper);
+  border: 1px solid var(--or-line);
+  border-radius: var(--radius);
+}
+.gym-d22-direct { border-block-start: 3px solid var(--or-petrol); }
+.ops-d22-register {
+  min-width: 0;
+  padding: clamp(14px, 2vw, 24px);
+  border-block-start: 3px solid var(--or-petrol);
+}
+.ops-d22-registers > .ops-d22-register:nth-child(2) {
+  border-block-start-color: var(--or-line);
+}
+.ops-d22-browse-note { margin-block: 0 16px; }
+.ops-d22-cross-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: var(--space-5);
+  border-block-start: 1px solid var(--or-line);
+  padding-block-start: var(--space-2);
+}
+.ops-d22-links {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: var(--space-4);
+}
+.gym-d22-direct ul, .ops-d22-register ul {
+  list-style: none;
+  padding: 0;
+  margin-block: 12px 0;
+}
+.gym-d22-direct li, .ops-d22-register li {
+  border-block-start: 1px solid var(--or-line);
+}
+.gym-d22-direct li:last-child { margin-block-end: 8px; }
+.gym-d22-direct li a, .ops-d22-register li a {
+  width: 100%;
+  justify-content: space-between;
+  padding-block: 6px;
+  overflow-wrap: anywhere;
+}
+
+@media (min-width: 58rem) {
+  .gym-d22-wallet-layout { grid-template-columns: minmax(0, 5fr) minmax(0, 4fr); }
+  .ops-d22-registers:has(> :nth-child(2)) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
