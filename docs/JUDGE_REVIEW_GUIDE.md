@@ -101,9 +101,10 @@ For repeat development runs, save the same four public `VITE_*` values as plain 
 | Three Owner local backend services `3001–3003` `/health`, `/ready` | **DOWN HTTP000** |
 | Six role-specific screen contents after cutover | **OWNER_CAPTURED / PASS_WITH_LIMITATIONS**, different pinned blocks |
 | Wrong wallet/network, reject/disconnect/race; fresh 3-role same-block; physical mobile | **NOT_VERIFIED** |
-| Timed continuous rehearsal, playable demo video, slides upload URL, submission receipt | **NOT_VERIFIED** |
+| Demo video | [Open Reserve - Video Demo](https://youtu.be/ilOEBXjRdaw) · **3:51**, unlisted on YouTube. The published description focuses on PT #1 on Avalanche Fuji: 1,003 deposited, 100 withdrawn by the gym, 903 received by the buyer after agreed termination. Amounts are MRES base units. |
+| Timed continuous rehearsal, slides upload URL, submission receipt | **NOT_VERIFIED** |
 | Screenshot ZIP + hash + consent published in repository | **NOT_UPLOADED** |
 | Public deployment, licensed/insured fiat custody, signed gym pilot, formal security audit | **NOT_VERIFIED / NOT CLAIMED** |
 | Judge default branch landing | **main placeholder until Owner changes default branch after reviewed docs merge** |
 
-**Required Owner materials:** actual pitch slides/link, sanitized and consent-approved screenshots (bytes + SHA256), 60–90s playable export with playback check if making a video claim, and official submission confirmation. The **script** at [Worker 6 click sheet](https://github.com/remjphong/Open-Reserve/issues/36#issuecomment-7054529681) is not a video artifact. Owner alone confirms/changes default branch and submits to [official event](https://build.avax.network/events/596c0b2d-63aa-4cf0-a0ad-a7e34ddbfdc0). CTO decides release GO/HOLD; Worker5 independently reviews this docs PR first.
+**Required Owner materials:** actual pitch slides/link, sanitized and consent-approved screenshots (bytes + SHA256), and official submission confirmation. The **script** at [Worker 6 click sheet](https://github.com/remjphong/Open-Reserve/issues/36#issuecomment-7054529681) is not a video artifact. Owner alone confirms/changes default branch and submits to [official event](https://build.avax.network/events/596c0b2d-63aa-4cf0-a0ad-a7e34ddbfdc0). CTO decides release GO/HOLD; Worker5 independently reviews this docs PR first.
