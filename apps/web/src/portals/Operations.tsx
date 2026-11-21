@@ -80,17 +80,21 @@ function Browse({ page }: { page: 'overview' | 'agreements' | 'disputes' }) {
       <h2>Cùng Vault · ba portal</h2>
       <p className="caption">Điều hướng tới cùng Agreement ID trên Customer, Gym và Operations.
         Đây là liên kết đối chiếu, KHÔNG phải bằng chứng đã đăng nhập đủ ba ví.</p>
-      {knownOperations.map(known => <p key={'cross-' + known.id.toString()}>
-        <strong>{known.label}</strong>{' · '}
-        <a className="inline-link" href={knownPortalPaths(known.id)!.customer}>Customer</a>{' · '}
-        <a className="inline-link" href={knownPortalPaths(known.id)!.gym}>Gym</a>{' · '}
-        <a className="inline-link" href={knownPortalPaths(known.id)!.operations}>Operations</a>
-      </p>)}
+      {knownOperations.map(known => <div className="ops-d22-cross-row" key={'cross-' + known.id.toString()}>
+        <strong>{known.label}</strong>
+        <div className="ops-d22-links">
+          <a className="inline-link" href={knownPortalPaths(known.id)!.customer}>Customer</a>
+          <a className="inline-link" href={knownPortalPaths(known.id)!.gym}>Gym</a>
+          <a className="inline-link" href={knownPortalPaths(known.id)!.operations}>Operations</a>
+        </div>
+      </div>)}
     </Section>
     <Section>
       <p className="caption">{fixtureLabel}</p>
-      <a className="inline-link" href="/operations/agreements/OR-024">Xem sổ cái mẫu</a>
-      {' · '}<a className="inline-link" href="/operations/disputes/PT-04">Xem phản đối mẫu</a>
+      <div className="ops-d22-links">
+        <a className="inline-link" href="/operations/agreements/OR-024">Xem sổ cái mẫu</a>
+        <a className="inline-link" href="/operations/disputes/PT-04">Xem phản đối mẫu</a>
+      </div>
     </Section>
   </PortalPage>
 }
@@ -264,9 +268,11 @@ function OtherPortalLinks({ id }: { id: bigint }) {
     <h2>Đối chiếu cùng Agreement #{id.toString()}</h2>
     <p className="caption">Các portal dùng cùng Vault và shared read helper; phải đăng nhập
       từng vai thực tế để so sánh cùng block. Các liên kết không chứng minh phiên ví đã xác minh.</p>
-    <p><a className="inline-link" href={paths.customer}>Customer · #{id.toString()}</a>
-      {' · '}<a className="inline-link" href={paths.gym}>Gym · #{id.toString()}</a>
-      {' · '}<a className="inline-link" href={paths.operations}>Operations · #{id.toString()}</a></p>
+    <div className="ops-d22-links">
+      <a className="inline-link" href={paths.customer}>Customer · #{id.toString()}</a>
+      <a className="inline-link" href={paths.gym}>Gym · #{id.toString()}</a>
+      <a className="inline-link" href={paths.operations}>Operations · #{id.toString()}</a>
+    </div>
   </Section>
 }
 

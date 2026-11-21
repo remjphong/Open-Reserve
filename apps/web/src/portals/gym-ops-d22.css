@@ -94,6 +94,19 @@
   border-block-start-color: var(--or-line);
 }
 .ops-d22-browse-note { margin-block: 0 16px; }
+.ops-d22-cross-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: var(--space-5);
+  border-block-start: 1px solid var(--or-line);
+  padding-block-start: var(--space-2);
+}
+.ops-d22-links {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: var(--space-4);
+}
 .gym-d22-direct ul, .ops-d22-register ul {
   list-style: none;
   padding: 0;

@@ -72,7 +72,7 @@ h1, h2, .brand, .or-result { font-family: ReserveSerif, Georgia, serif; font-wei
 .caption, .breadcrumb { font-size: 14px; }
 .inline-link, summary { min-height: 44px; align-content: center; }
 :focus-visible { outline: 3px solid currentColor; outline-offset: 3px; }
-body:has(.or-customer) { background: var(--or-paper); }
+html:has(.or-customer) { background: var(--or-paper); }
 .or-customer {
   max-width: 62rem;
   padding: clamp(20px, 3vw, 36px) clamp(16px, 4vw, 40px) 40px;
