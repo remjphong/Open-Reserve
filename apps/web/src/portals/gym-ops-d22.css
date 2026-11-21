@@ -107,6 +107,7 @@
   flex-wrap: wrap;
   column-gap: var(--space-4);
 }
+.ops-d22-portal-actions { margin-top: var(--space-2); }
 .gym-d22-direct ul, .ops-d22-register ul {
   list-style: none;
   padding: 0;

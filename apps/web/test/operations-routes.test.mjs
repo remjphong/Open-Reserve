@@ -88,7 +88,7 @@ test('Operations uses pinned Vault authority, Indexer advisory and no chain writ
   const main = readFileSync(new URL('../src/main.tsx', import.meta.url), 'utf8')
   assert.match(ops, /readSharedAgreement\(session, route\.id\)/)
   assert.match(ops, /VAULT_READ_CONTRACT/)
-  assert.match(ops, /INDEXER_ACTIVITY=/)
+  assert.match(ops, /label: 'Nhật ký Indexer',[^\n]+value: indexerStatusLabels\[activity\.status\], code: activity\.status/)
   assert.match(ops, /disputedLocked/)
   assert.match(ops, /readOperationsEvidence/)
   assert.match(ops, /DEMO_FIXTURE/)

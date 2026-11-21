@@ -4,6 +4,7 @@ import { approvedTermsHash } from '@openreserve/contracts-sdk'
 import { ClaimEvidenceReview } from './ClaimEvidenceReview'
 import { CustomerPreview } from './CustomerPreview'
 import { EmptyState, ErrorState, Icon, LoadingSkeleton, OverviewCard, PortalPage } from '../design-system/portal'
+import { indexerStatusLabels, MetadataList } from '../design-system/metadata'
 import { readSharedAgreement } from '../lib/shared-ledger'
 import {
   classifyPtBalances, ptAgreementId, verifyWallet1PtReport, wallet1PtReport,
@@ -87,22 +88,22 @@ function useWallet<T>(load: (session: Session) => Promise<T>) {
 }
 
 function walletControls<T>({ loading, message, refresh, value }: ReturnType<typeof useWallet<T>>) {
-  const session = value?.session
-  return {
-    loading, message, refresh,
-    identity: session ? `Ví ${session.account} · ${session.chain.name} · Block ${session.head.number}` : '',
-  }
+  return { loading, message, refresh, session: value?.session }
 }
 
-function WalletControls({ loading, message, refresh, identity, busy }: {
-  loading: boolean; message: string; refresh: (connect?: boolean) => Promise<void>; identity: string; busy?: boolean
+function WalletControls({ loading, message, refresh, session, busy }: {
+  loading: boolean; message: string; refresh: (connect?: boolean) => Promise<void>; session?: Session; busy?: boolean
 }) {
   return <>
     {loading && <LoadingSkeleton />}
     {message && <ErrorState>{message}</ErrorState>}
-    {identity && <p className="caption customer-wrap">{identity}</p>}
-    {deployment && <Button disabled={loading || busy} onClick={() => void refresh(!identity)}>
-      {identity ? 'Làm mới dữ liệu Vault' : 'Kết nối ví / thử lại'}
+    {session && <MetadataList label="Ví và mạng" fields={[
+      { label: 'Ví đang kết nối', icon: 'wallet', value: <code>{session.account}</code> },
+      { label: 'Mạng', value: session.chain.name },
+      { label: 'Block đọc dữ liệu', icon: 'layers', value: session.head.number.toString() },
+    ]} />}
+    {deployment && <Button disabled={loading || busy} onClick={() => void refresh(!session)}>
+      {session ? 'Làm mới dữ liệu Vault' : 'Kết nối ví / thử lại'}
     </Button>}
   </>
 }
@@ -306,9 +307,11 @@ function Pass({ agreementId, dispute }: { agreementId: string; dispute: boolean 
   const source = (
     <Card className="customer-pass-source"><WalletControls {...walletControls(state)} busy={transaction.busy} />
       {data && 'activity' in data && <div className="customer-wrap">
-        <p className="caption">Nguồn số tiền: VAULT_READ_CONTRACT · Fuji 43113 · block {data.blockNumber.toString()}
-          {' · '}Indexer: {data.activity.status}
-          {data.activity.reason && <> · {data.activity.reason}</>}</p>
+        <MetadataList label="Nguồn dữ liệu hợp đồng" fields={[
+          { label: 'Nguồn số tiền', icon: 'record', value: 'Vault trên Avalanche Fuji', code: 'VAULT_READ_CONTRACT' },
+          { label: 'Nhật ký Indexer', icon: 'history', value: indexerStatusLabels[data.activity.status], code: data.activity.status },
+        ]} />
+        {data.activity.reason && <p className="caption">{data.activity.reason}</p>}
         <p className="caption">{data.activity.status !== 'FRESH' && 'Lịch sử hoạt động chưa tải đầy đủ. '}Indexer chỉ cung cấp lịch sử tham khảo; không được coi dữ liệu thiếu là danh sách trống đã xác minh.</p>
       </div>}
       {!isBuyer && data && <p>Hãy chọn ví người mua của gói này rồi làm mới để xem quyền lợi.</p>}
